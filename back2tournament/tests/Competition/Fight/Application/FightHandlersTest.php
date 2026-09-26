@@ -305,6 +305,7 @@ final class FightHandlersTest extends TestCase
         $this->assertNull($item['player']);
         $this->assertSame('Ravens', $item['opponent']['name']);
         $this->assertSame('team', $item['opponent']['type']);
+        $this->assertSame(2, $item['opponent']['score']);
     }
 
     /**

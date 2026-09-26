@@ -63,10 +63,15 @@ final class FindPendingUserFightResultsHandler
         );
 
         $fights = [];
+        $scores = [];
         if ([] !== $results) {
             $fightIds = array_values(array_unique(array_map(static fn (Result $result): string => $result->getFight()->getValue(), $results)));
             foreach ($this->fightRepository->findBy(['id' => $fightIds]) as $fight) {
                 $fights[$fight->getId()->getValue()] = $fight;
+            }
+            // Both sides' results, so that each item can tell what the other side scored.
+            foreach ($this->resultRepository->findBy(['fight' => $fightIds]) as $sideResult) {
+                $scores[$sideResult->getFight()->getValue()][$sideResult->getCompetitor()->getValue()] = $sideResult->getScore();
             }
         }
 
@@ -94,6 +99,7 @@ final class FindPendingUserFightResultsHandler
             $item['player'] = self::profile($described[$mine->getValue()] ?? null);
             $item['opponent'] = null === $opponent ? null : self::side($opponent->getValue(), $described) + [
                 'player' => self::profile($described[$opponent->getValue()] ?? null),
+                'score' => $scores[$result->getFight()->getValue()][$opponent->getValue()] ?? 0,
             ];
 
             $items[] = $item;

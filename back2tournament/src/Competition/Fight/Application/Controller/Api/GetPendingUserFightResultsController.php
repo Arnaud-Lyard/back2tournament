@@ -88,6 +88,7 @@ use Symfony\Component\Routing\Attribute\Route;
                                     new OA\Property(property: 'type', type: 'string', enum: ['player', 'team'], nullable: true),
                                     new OA\Property(property: 'name', type: 'string', nullable: true, description: 'Battletag or team name'),
                                     new OA\Property(property: 'player', ref: '#/components/schemas/PlayerProfile', nullable: true),
+                                    new OA\Property(property: 'score', type: 'integer', minimum: 0, example: 1, description: 'Points the other side scored, as declared. Zero until a declaration.'),
                                 ],
                                 type: 'object',
                                 nullable: true,
