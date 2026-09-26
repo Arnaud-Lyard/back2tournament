@@ -15,11 +15,15 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { getCurrentUser } from "@/features/auth/server/get-current-user"
+import { activeClanIn } from "@/features/clans/lib/membership"
+import { loadClan, loadMyClans } from "@/features/clans/server/clans"
 import { loadGame } from "@/features/games/server/games"
 import { loadPlayer } from "@/features/players/server/players"
 import { readUuidSegment } from "@/libs/search-params"
 import { cn } from "@/libs/utils"
 import { ChallengeButton } from "./challenge-button"
+import { InviteToClanButton } from "./invite-to-clan-button"
 
 interface PlayerPageProps {
   params: Promise<{ gameId: string; playerId: string }>
@@ -41,11 +45,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const playerId = readUuidSegment(rawPlayerId)
   if (!gameId || !playerId) notFound()
 
-  const [t, format, player, game] = await Promise.all([
+  const [t, format, player, game, user, myClans] = await Promise.all([
     getTranslations("games.player"),
     getFormatter(),
     loadPlayer(playerId),
     loadGame(gameId),
+    getCurrentUser(),
+    loadMyClans(),
   ])
 
   if (!player.ok) {
@@ -65,6 +71,20 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const battletag = player.data.battletag ?? ""
   const roster = `/games/${encodeURIComponent(gameId)}/players`
+
+  // The caller leads a clan in this game, and this player has no place in it yet.
+  const myClan = myClans.ok ? activeClanIn(myClans.data, gameId) : undefined
+  const myClanId =
+    myClan?.membership.role === "leader" ? myClan.clan.id?.value : undefined
+  const clan =
+    myClanId && user?.playersByGame[gameId]?.id !== playerId
+      ? await loadClan(myClanId)
+      : null
+  const canInvite =
+    !!clan?.ok &&
+    !(clan.data.members ?? []).some(
+      (member) => member.player?.id?.value === playerId
+    )
 
   return (
     <PageContainer className="max-w-3xl">
@@ -105,6 +125,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             playerId={playerId}
             battletag={battletag}
           />
+          {canInvite && myClanId && (
+            <InviteToClanButton
+              clanId={myClanId}
+              clanName={myClan?.clan.name ?? ""}
+              playerId={playerId}
+              battletag={battletag}
+            />
+          )}
         </CardContent>
       </Card>
     </PageContainer>

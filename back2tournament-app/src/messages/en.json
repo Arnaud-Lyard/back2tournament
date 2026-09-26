@@ -24,7 +24,10 @@
     "menuDescription": "Browse the sections of the platform.",
     "accountMenu": "Account menu for {username}",
     "blog": "Blog",
-    "challenges": "Challenge requests"
+    "challenges": "Challenge requests",
+    "myClans": "My clans",
+    "organizeTournament": "Organize a tournament",
+    "tournaments": "Tournaments"
   },
   "theme": {
     "toggle": "Toggle theme"
@@ -143,26 +146,125 @@
         "title": "The players could not be loaded",
         "description": "The server did not answer. Try again in a moment."
       }
+    },
+    "invite": {
+      "invite": "Invite into {clan}",
+      "sent": "{battletag} is invited into {clan}.",
+      "error": "Could not invite",
+      "errors": {
+        "alreadyThere": "This player already is a member of the clan, or already invited."
+      }
     }
   },
   "clans": {
     "title": "Clans",
-    "description": "This game's teams.",
+    "description": "The clans of this game: players gathered under a leader, fielding teams in 2v2, 3v3, 5v5…",
     "empty": {
-      "title": "Coming soon",
-      "description": "Clans are on their way: you will be able to group your players and challenge other teams."
+      "title": "No clan",
+      "description": "Found the first clan of this game and invite players into it.",
+      "filtered": "No clan matches your search."
+    },
+    "back": "Back to clans",
+    "found": "Found a clan",
+    "myClan": "My clan: {name}",
+    "searchPlaceholder": "Search a name or a tag…",
+    "searchLabel": "Search a clan",
+    "count": "{count, plural, =0 {No clan} one {# clan} other {# clans}}",
+    "memberCount": "{count, plural, =0 {No member} one {# member} other {# members}}",
+    "view": "View the clan",
+    "summary": "{members, plural, one {# member} other {# members}} · {teams, plural, =0 {no team} one {# team} other {# teams}}",
+    "loadError": {
+      "title": "Could not load the clans",
+      "description": "The server could not answer. Try again in a few moments."
+    },
+    "create": {
+      "title": "Found a clan",
+      "description": "Your profile in this game becomes its leader: you invite the players, and compose the teams.",
+      "noProfile": "Create your profile in this game first.",
+      "createProfile": "Create my profile",
+      "alreadyMember": "You already are a member of {name}.",
+      "alreadyMemberDescription": "A player belongs to one clan per game: leave yours to found another.",
+      "name": "Clan name",
+      "namePlaceholder": "Back to Tournament",
+      "tag": "Tag",
+      "tagDescription": "2 to 5 letters or digits, shown before the name. Unique in this game.",
+      "submit": "Found the clan",
+      "success": "Clan {name} founded",
+      "error": "Could not found the clan",
+      "errors": {
+        "noProfile": "You hold no profile in this game.",
+        "conflict": "This tag is taken, or you already belong to a clan of this game."
+      }
+    },
+    "membership": {
+      "invitedTitle": "You are invited to join this clan",
+      "invitedDescription": "Accept to become a member: the leader can then field you in the clan's teams.",
+      "accept": "Accept the invitation",
+      "decline": "Decline",
+      "leave": "Leave the clan",
+      "joined": "Welcome to the clan!",
+      "declined": "Invitation declined",
+      "left": "You left the clan",
+      "error": "Could not do that",
+      "errors": {
+        "elsewhere": "Leave your current clan in this game first.",
+        "cannotLeave": "You play in a team of the clan: the leader has to disband it first."
+      }
+    },
+    "members": {
+      "title": "Members",
+      "inviteHint": "To invite a player, open their profile from <link>the players list</link>.",
+      "leader": "Leader",
+      "invited": "Invited",
+      "remove": "Remove",
+      "removeLabel": "Remove {battletag} from the clan",
+      "withdraw": "Withdraw",
+      "withdrawLabel": "Withdraw the invitation of {battletag}",
+      "removed": "{battletag} left the clan",
+      "withdrawn": "Invitation of {battletag} withdrawn",
+      "removeError": "Could not do that",
+      "errors": {
+        "inTeam": "This player plays in a team of the clan: disband it first."
+      }
+    },
+    "teams": {
+      "title": "Teams",
+      "description": "The lineups the clan fields, format by format. The captain declares and confirms the team's results.",
+      "emptyTitle": "No team",
+      "emptyDescription": "The clan leader composes the teams from its members.",
+      "noFormat": "This game is only played 1v1: no team to compose.",
+      "formTitle": "Compose a team",
+      "formDescription": "Pick the format, then exactly as many members as it counts.",
+      "name": "Team name",
+      "namePlaceholder": "Falcons",
+      "format": "Format",
+      "lineup": "Players ({count})",
+      "selected": "{count} selected out of {size}",
+      "captain": "Captain",
+      "captainDescription": "They open challenges, register the team in tournaments and declare its results.",
+      "submit": "Create the team",
+      "created": "Team {name} created",
+      "createError": "Could not create the team",
+      "disband": "Disband",
+      "disbandLabel": "Disband the team {name}",
+      "disbanded": "Team {name} disbanded",
+      "disbandError": "Could not disband",
+      "challengeWith": "Challenge with {team}",
+      "challengeSent": "Challenge sent",
+      "challengeSentDescription": "The match against {team} is open: declare its result from your challenges.",
+      "challengeError": "Could not challenge",
+      "errors": {
+        "competed": "This team has already played: it is kept for the record.",
+        "notLeader": "Only the clan leader composes teams.",
+        "cannotFight": "These two teams cannot fight: same format, same game, and no player in common."
+      }
     }
   },
   "challenges": {
     "title": "Challenge requests",
-    "description": "The challenges waiting on you, across every game.",
+    "description": "The matches waiting for a result, whatever the game and format: declare the score, or confirm your opponent's.",
     "unknownPlayer": "Unknown profile",
     "awaitingDeclaration": "No result declared yet.",
-    "claimed": "Declared result: {outcome}, {score} point(s).",
-    "status": {
-      "pending": "Waiting",
-      "reporting": "To confirm"
-    },
     "outcome": {
       "win": "win",
       "loss": "loss",
@@ -170,7 +272,7 @@
     },
     "empty": {
       "title": "No challenge waiting",
-      "description": "When a player challenges you, the match shows up here.",
+      "description": "When you challenge someone, or someone challenges you, the match shows up here.",
       "action": "Browse the games"
     },
     "loadError": {
@@ -178,7 +280,32 @@
       "description": "The server did not answer. Try again in a moment."
     },
     "versus": "vs",
-    "unknownOpponent": "Unknown opponent"
+    "unknownOpponent": "Unknown opponent",
+    "stage": {
+      "declare": "To declare",
+      "awaiting": "Waiting for opponent",
+      "confirm": "To confirm"
+    },
+    "tournament": "Tournament",
+    "declaredByYou": "You declared {score} – {opponentScore}: {opponent} has to confirm.",
+    "declaredByOpponent": "{opponent} declares {score} – {opponentScore}: a {outcome} for you.",
+    "myScore": "My score",
+    "opponentScore": "Opponent score",
+    "declare": "Declare the result",
+    "declared": "Result declared: your opponent has to confirm it.",
+    "declareError": "Could not declare",
+    "correct": "Correct my declaration",
+    "confirm": "Confirm the result",
+    "confirmed": "Result confirmed: the match is over.",
+    "confirmError": "Could not confirm",
+    "disagree": "Disagree? Do not confirm, and contact an administrator.",
+    "errors": {
+      "draw": "This score is refused: a tournament match cannot end in a draw.",
+      "notYours": "You do not play this match, or you do not lead the team.",
+      "alreadyDeclared": "Your opponent already declared this match: confirm their result.",
+      "cannotConfirm": "The side that declared cannot confirm its own result.",
+      "notAwaiting": "This match no longer waits for a confirmation."
+    }
   },
   "pagination": {
     "label": "Pagination",
@@ -311,7 +438,7 @@
       "title": "Games",
       "description": "The games offered on the platform. Every player creates a profile in one to be able to fight.",
       "formTitle": "New game",
-      "formDescription": "The title as players will see it.",
+      "formDescription": "The title as players will see it, and the formats it is played in.",
       "name": "Title",
       "namePlaceholder": "Street Fighter 6",
       "submit": "Create the game",
@@ -324,7 +451,8 @@
       "columns": {
         "name": "Title",
         "id": "Identifier",
-        "createdAt": "Created on"
+        "createdAt": "Created on",
+        "formats": "Formats"
       },
       "copyId": "Copy game identifier",
       "list": {
@@ -332,7 +460,14 @@
         "description": "In alphabetical order.",
         "emptyTitle": "No games",
         "emptyDescription": "The games you create show up here."
-      }
+      },
+      "formats": "Formats",
+      "formatsDescription": "Players per side, separated by commas: \"1\" for 1v1 only, \"1, 2, 3\" for 1v1, 2v2 and 3v3. Up to 64.",
+      "editFormats": "Edit the formats of {title}",
+      "saveFormats": "Save the formats",
+      "cancelFormats": "Cancel",
+      "formatsSaved": "Formats of \"{title}\" saved",
+      "formatsError": "Could not save the formats"
     },
     "categories": {
       "title": "Categories",
@@ -437,7 +572,16 @@
     "passwordSpecial": "At least one special character.",
     "passwordSpaces": "No spaces.",
     "passwordsMismatch": "The passwords do not match.",
-    "messageTooLong": "2000 characters maximum."
+    "messageTooLong": "2000 characters maximum.",
+    "invalidScore": "A whole number, zero or more, is expected.",
+    "tooLong50": "50 characters at most.",
+    "tooLong100": "100 characters at most.",
+    "invalidClanTag": "2 to 5 letters or digits, no accent or space.",
+    "lineupSize": "Select exactly as many players as the format counts.",
+    "leaderInLineup": "The captain must play in the team.",
+    "invalidCapacity": "Between 2 and 128 participants.",
+    "invalidDate": "Pick a date and time to come.",
+    "invalidTeamSizes": "Players per side between 1 and 64, separated by commas: 1, 2, 5."
   },
   "apiErrors": {
     "invalid": "The server rejected this data.",
@@ -456,5 +600,119 @@
     "forbiddenTitle": "403",
     "forbiddenDescription": "You do not have permission to access this page.",
     "backHome": "Back to home"
+  },
+  "myClans": {
+    "title": "My clans",
+    "description": "Your clans, game by game, and the invitations waiting for your answer.",
+    "invited": "Invitation",
+    "leader": "Leader",
+    "as": "{battletag} · {game}",
+    "unknownGame": "Unknown game",
+    "answer": "Answer",
+    "open": "Open",
+    "empty": {
+      "title": "No clan",
+      "description": "Found a clan from the Clans page of a game, or wait for a leader to invite you.",
+      "action": "Browse the games"
+    },
+    "loadError": {
+      "title": "Could not load your clans",
+      "description": "The server could not answer. Try again in a few moments."
+    }
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "description": "Single-elimination tournaments, 1v1 or in teams. Register, then declare your matches like any challenge: the winner moves on in the bracket.",
+    "organize": "Organize a tournament",
+    "back": "Back to tournaments",
+    "all": "All",
+    "filterLabel": "Filter by state",
+    "unknownGame": "Unknown game",
+    "seats": "{count} / {capacity} registered",
+    "youOrganize": "You organize",
+    "winner": "Winner: {name}",
+    "status": {
+      "upcoming": "Registrations open",
+      "ongoing": "Under way",
+      "finished": "Finished",
+      "cancelled": "Cancelled"
+    },
+    "empty": {
+      "title": "No tournament",
+      "description": "No tournament matches this filter yet."
+    },
+    "loadError": {
+      "title": "Could not load the tournaments",
+      "description": "The server could not answer. Try again in a few moments."
+    },
+    "create": {
+      "title": "Organize a tournament",
+      "description": "You will be its organizer: you start it once registrations are in, or cancel it.",
+      "name": "Tournament name",
+      "namePlaceholder": "Autumn Cup",
+      "game": "Game",
+      "gamePlaceholder": "Pick a game",
+      "format": "Format",
+      "formatPlayers": "Players register with their profile.",
+      "formatTeams": "Captains register a team of this format.",
+      "capacity": "Seats",
+      "capacityDescription": "Between 2 and 128. The bracket is filled with byes for the top seeds.",
+      "startsAt": "Planned start",
+      "submit": "Create the tournament",
+      "success": "Tournament {name} created",
+      "error": "Could not create the tournament",
+      "errors": {
+        "invalid": "Check the format (played in this game?), the seats and the date."
+      }
+    },
+    "registration": {
+      "open": "Registrations are open.",
+      "full": "The tournament is full.",
+      "done": "You are registered.",
+      "noProfile": "Create your profile in this game to register.",
+      "noTeam": "Lead a {format} team of your clan to register it.",
+      "chooseTeam": "Team to register",
+      "register": "Register the team",
+      "registerAs": "Register as {name}",
+      "registered": "{name} is registered",
+      "error": "Could not register",
+      "withdraw": "Withdraw",
+      "withdrawLabel": "Withdraw {name}",
+      "withdrawn": "{name} is withdrawn",
+      "withdrawError": "Could not withdraw",
+      "errors": {
+        "notYours": "You register only your own profile, or a team you captain.",
+        "closed": "Registrations are closed, the tournament is full, or you are already registered.",
+        "started": "The tournament has already started."
+      }
+    },
+    "organizer": {
+      "start": "Start the tournament",
+      "started": "Tournament started: the first round matches are open.",
+      "startError": "Could not start",
+      "cancel": "Cancel the tournament",
+      "cancelled": "Tournament cancelled",
+      "cancelError": "Could not cancel",
+      "errors": {
+        "cannotStart": "It takes at least two registered, and a tournament not started yet."
+      }
+    },
+    "participants": {
+      "title": "Registered",
+      "description": "In registration order: that is their seed.",
+      "empty": "Nobody registered yet."
+    },
+    "bracket": {
+      "title": "Bracket",
+      "description": "The winner of each match moves on as soon as its result is confirmed.",
+      "notDrawn": "The bracket is drawn when the tournament starts.",
+      "final": "Final",
+      "semiFinals": "Semi-finals",
+      "quarterFinals": "Quarter-finals",
+      "roundOf": "Round of {count}",
+      "bye": "Bye",
+      "toBeDecided": "To be decided",
+      "underWay": "Match under way"
+    }
   }
 }

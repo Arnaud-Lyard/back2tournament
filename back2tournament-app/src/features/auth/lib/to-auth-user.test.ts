@@ -38,6 +38,7 @@ describe("toAuthUser", () => {
   it("maps the Symfony roles like the JWT does", () => {
     const user = toAuthUser(me())
 
+    expect(user.id).toBe("00000000-0000-4000-8000-000000000000")
     expect(user.username).toBe("demo")
     expect(user.role).toBe("editor")
     expect(user.permissions).toContain("backoffice:access")
