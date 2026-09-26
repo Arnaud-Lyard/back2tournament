@@ -1,0 +1,10 @@
+lexik_jwt_authentication:
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+    pass_phrase: '%env(JWT_PASSPHRASE)%'
+
+    # Enables server-side revocation: every issued token gets a "jti" claim, and
+    # POST /api/logout stores that jti so the token is rejected from then on.
+    blocklist_token:
+        enabled: true
+        cache: jwt_blocklist.cache

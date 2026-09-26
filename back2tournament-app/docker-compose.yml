@@ -1,0 +1,16 @@
+# Local container-parity testing only. Coolify builds and runs the image
+# directly from the Dockerfile — this compose file is not the deployment
+# mechanism.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped

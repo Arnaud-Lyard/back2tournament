@@ -1,0 +1,30 @@
+{
+  "appName": "Back2Tournament",
+  "title": "Back2Tournament",
+  "description": "Suivi de tournois, combats et resultats.",
+  "url": "https://back2tournament.example.com",
+  "languages": {
+    "supported": ["fr", "en"],
+    "default": "fr"
+  },
+  "theme": {
+    "light": "#ffffff",
+    "dark": "#09090b"
+  },
+  "images": {
+    "og": "/og.png",
+    "logo": "/logo.svg",
+    "ogWidth": 1200,
+    "ogHeight": 630
+  },
+  "icons": {
+    "favicon": "/favicon.ico",
+    "icon": "/icon.svg",
+    "appleTouchIcon": "/logo.svg"
+  },
+  "organization": {
+    "name": "Back2Tournament",
+    "logo": "/logo.svg"
+  },
+  "social": {}
+}

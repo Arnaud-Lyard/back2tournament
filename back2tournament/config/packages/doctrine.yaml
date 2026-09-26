@@ -1,0 +1,91 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '16'
+
+        profiling_collect_backtrace: '%kernel.debug%'
+    orm:
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        identity_generation_preferences:
+            Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
+        auto_mapping: false
+        mappings:
+            Article:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Blog/Article/Infrastructure/DoctrineMapping'
+                prefix: 'App\Blog\Article\Domain\Entity'
+                alias: Article
+            Category:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Blog/Category/Infrastructure/DoctrineMapping'
+                prefix: 'App\Blog\Category\Domain\Entity'
+                alias: Category
+            User:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Authentication/User/Infrastructure/DoctrineMapping'
+                prefix: 'App\Authentication\User\Domain\Entity'
+                alias: User
+            Game:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Competition/Profile/Game/Infrastructure/DoctrineMapping'
+                prefix: 'App\Competition\Profile\Game\Domain\Entity'
+                alias: Game
+            Player:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Competition/Profile/Player/Infrastructure/DoctrineMapping'
+                prefix: 'App\Competition\Profile\Player\Domain\Entity'
+                alias: Player
+            Team:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Competition/Profile/Team/Infrastructure/DoctrineMapping'
+                prefix: 'App\Competition\Profile\Team\Domain\Entity'
+                alias: Team
+            Competitor:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Competition/Competitor/Infrastructure/DoctrineMapping'
+                prefix: 'App\Competition\Competitor\Domain\Entity'
+                alias: Competitor
+            Fight:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Competition/Fight/Infrastructure/DoctrineMapping'
+                prefix: 'App\Competition\Fight\Domain\Entity'
+                alias: Fight
+
+        controller_resolver:
+            auto_mapping: false
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

@@ -1,0 +1,460 @@
+{
+  "common": {
+    "appName": "Back2Tournament",
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "copied": "Copied!",
+    "copyId": "Copy identifier"
+  },
+  "nav": {
+    "home": "Home",
+    "teams": "Teams",
+    "players": "Players",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Sign up",
+    "playerProfile": "Player profile",
+    "backoffice": "Backoffice",
+    "mainLabel": "Main navigation",
+    "openMenu": "Open menu",
+    "menuDescription": "Browse the sections of the platform.",
+    "accountMenu": "Account menu for {username}",
+    "blog": "Blog",
+    "challenges": "Challenge requests"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  },
+  "locale": {
+    "change": "Change language"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "editor": "Editor",
+    "user": "Player"
+  },
+  "footer": {
+    "tagline": "Challenge players, report your scores and have your opponents confirm them.",
+    "platform": "Platform",
+    "account": "Account",
+    "rights": "All rights reserved.",
+    "themeHint": "Switch between light and dark themes with the key"
+  },
+  "home": {
+    "title": "Pick your game",
+    "description": "Enter a game to see its players, its clans and its matches, then start challenging.",
+    "enter": "Enter the game",
+    "empty": {
+      "title": "No game yet",
+      "description": "The games the team adds will show up here."
+    },
+    "loadError": {
+      "title": "Games could not be loaded",
+      "description": "The server did not answer. Try again in a moment."
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "News about the platform, the tournaments and the players.",
+    "readMore": "Read more",
+    "back": "Back to the blog",
+    "searchPlaceholder": "Search articles…",
+    "searchLabel": "Search the articles",
+    "filterLabel": "Filter by category",
+    "allCategories": "All",
+    "count": "{count, plural, =0 {No article} one {# article} other {# articles}}",
+    "empty": {
+      "title": "No article",
+      "description": "Published articles will show up here.",
+      "filtered": "No article matches your search."
+    },
+    "loadError": {
+      "title": "Articles could not be loaded",
+      "description": "The server did not answer. Try again in a moment.",
+      "unknownCategory": "This category does not exist any more."
+    },
+    "comments": {
+      "title": "{count, plural, =0 {Comments} one {# comment} other {# comments}}",
+      "label": "Your comment",
+      "placeholder": "Share your thoughts…",
+      "submit": "Post",
+      "posted": "Comment posted",
+      "postError": "Comment could not be posted",
+      "signInPrompt": "Sign in to comment on this article.",
+      "signIn": "Sign in",
+      "errors": {
+        "signedOut": "Your session has expired: sign in again to comment.",
+        "gone": "This article no longer exists."
+      }
+    }
+  },
+  "games": {
+    "nav": {
+      "label": "Sections of {title}",
+      "players": "Players",
+      "clans": "Clans"
+    },
+    "loadError": {
+      "title": "This game could not be loaded",
+      "description": "The server did not answer. Try again in a moment."
+    },
+    "player": {
+      "back": "Back to the players",
+      "since": "Registered since {date}",
+      "unknownGame": "Unknown game",
+      "loadError": {
+        "title": "This profile could not be loaded",
+        "description": "The server did not answer. Try again in a moment."
+      }
+    },
+    "challenge": {
+      "challenge": "Challenge {battletag}",
+      "signInPrompt": "Sign in to challenge this player.",
+      "signIn": "Sign in",
+      "noProfile": "Create your profile in this game to challenge its players.",
+      "createProfile": "Create my profile",
+      "itIsYou": "This is your own profile in this game.",
+      "sent": "Challenge sent",
+      "sentDescription": "The match against {battletag} is open: declare its result once played.",
+      "error": "Challenge could not be sent",
+      "errors": {
+        "alreadyOpen": "This challenge could not be opened: check that it is not already running.",
+        "notYours": "You can only challenge from your own profile.",
+        "gone": "This profile no longer exists."
+      }
+    },
+    "players": {
+      "title": "Players",
+      "description": "The players registered in this game. Open a profile to challenge it.",
+      "view": "View profile",
+      "searchPlaceholder": "Search a battletag…",
+      "searchLabel": "Search a player",
+      "count": "{count, plural, =0 {No player} one {# player} other {# players}}",
+      "empty": {
+        "title": "No player",
+        "description": "Be the first to create your profile in this game.",
+        "filtered": "No player matches your search."
+      },
+      "loadError": {
+        "title": "The players could not be loaded",
+        "description": "The server did not answer. Try again in a moment."
+      }
+    }
+  },
+  "clans": {
+    "title": "Clans",
+    "description": "This game's teams.",
+    "empty": {
+      "title": "Coming soon",
+      "description": "Clans are on their way: you will be able to group your players and challenge other teams."
+    }
+  },
+  "challenges": {
+    "title": "Challenge requests",
+    "description": "The challenges waiting on you, across every game.",
+    "unknownPlayer": "Unknown profile",
+    "awaitingDeclaration": "No result declared yet.",
+    "claimed": "Declared result: {outcome}, {score} point(s).",
+    "status": {
+      "pending": "Waiting",
+      "reporting": "To confirm"
+    },
+    "outcome": {
+      "win": "win",
+      "loss": "loss",
+      "draw": "draw"
+    },
+    "empty": {
+      "title": "No challenge waiting",
+      "description": "When a player challenges you, the match shows up here.",
+      "action": "Browse the games"
+    },
+    "loadError": {
+      "title": "Your challenges could not be loaded",
+      "description": "The server did not answer. Try again in a moment."
+    },
+    "versus": "vs",
+    "unknownOpponent": "Unknown opponent"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page",
+    "goToPage": "Page {page}",
+    "status": "Page {page} of {pages}"
+  },
+  "search": {
+    "submit": "Search",
+    "clear": "Clear the search"
+  },
+  "share": {
+    "label": "Share",
+    "on": "Share on {network}",
+    "facebook": "Facebook",
+    "twitter": "X",
+    "linkedin": "LinkedIn"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "loginDescription": "Get back to your fights and report your results.",
+    "usernameLabel": "Username",
+    "passwordLabel": "Password",
+    "emailLabel": "Email",
+    "confirmPasswordLabel": "Confirm password",
+    "submitLogin": "Login",
+    "submitRegister": "Create account",
+    "invalidCredentials": "Invalid credentials.",
+    "registerTitle": "Create an account",
+    "registerDescription": "Join the platform to challenge other players.",
+    "verifyEmailSentTitle": "Check your inbox",
+    "verifyEmailSent": "Check your inbox to confirm your account.",
+    "verifyEmailTitle": "Email verification",
+    "verifyEmailSuccess": "Your email has been verified, you can now log in.",
+    "verifyEmailError": "This verification link is invalid or has expired.",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "passwordHint": "At least 8 characters, with an uppercase letter, a lowercase letter, a digit and a special character, and no spaces.",
+    "errors": {
+      "emailTaken": "This email address is already in use.",
+      "usernameTaken": "This username is already taken.",
+      "emailNotVerified": "Confirm your email address first: the link was sent to you when you signed up."
+    }
+  },
+  "players": {
+    "title": "Player profile",
+    "description": "Create your profile in a game: it is what lets you challenge other players.",
+    "formTitle": "New player profile",
+    "formDescription": "One profile per game and per account.",
+    "game": "Game",
+    "gamePlaceholder": "Pick a game",
+    "gameDescription": "The games offered on the platform.",
+    "alreadyRegistered": "{title} (existing profile: {battletag})",
+    "battletag": "Battletag",
+    "battletagPlaceholder": "PlayerOne#1234",
+    "battletagDescription": "The name your opponents know you by in the game.",
+    "submit": "Create the profile",
+    "success": "Profile created",
+    "successDescription": "{battletag} can now challenge the players of this game.",
+    "error": "The profile could not be created",
+    "errors": {
+      "gameNotFound": "This game does not exist.",
+      "alreadyExists": "You already have a player profile in this game."
+    },
+    "help": {
+      "title": "What is a player profile for?",
+      "description": "It is your competitor identity in a given game.",
+      "onePerGame": "You create one per game you play.",
+      "listed": "Once the profile is created, you show up in this game's list of opponents."
+    },
+    "loadError": {
+      "title": "The games could not be loaded",
+      "description": "The server did not answer. Try again in a moment."
+    },
+    "profiles": {
+      "title": "My player profiles",
+      "description": "One profile per game: change your battletag, or delete a profile you no longer use.",
+      "create": "New profile",
+      "listTitle": "Your profiles",
+      "listDescription": "By game, in alphabetical order.",
+      "emptyTitle": "No player profile",
+      "emptyDescription": "Create one to challenge the players of a game.",
+      "columns": {
+        "game": "Game",
+        "battletag": "Battletag",
+        "actions": "Actions"
+      },
+      "battletagPlaceholder": "PlayerOne#1234",
+      "rename": "Edit",
+      "renamed": "Battletag updated",
+      "renamedDescription": "Your opponents will now see you as {battletag}.",
+      "renameError": "The profile could not be updated",
+      "confirmDelete": "Delete this profile?",
+      "deleted": "Profile deleted",
+      "deletedDescription": "{battletag} is no longer listed among this game's players.",
+      "deleteError": "The profile could not be deleted",
+      "errors": {
+        "notYours": "This profile belongs to another account.",
+        "gone": "This profile no longer exists.",
+        "fighting": "This profile takes part in fights: it can no longer be deleted."
+      }
+    },
+    "back": "Back to my profiles"
+  },
+  "backoffice": {
+    "nav": {
+      "title": "Backoffice",
+      "general": "General",
+      "competition": "Competition",
+      "content": "Content",
+      "dashboard": "Dashboard",
+      "games": "Games",
+      "articles": "Articles",
+      "categories": "Categories",
+      "backToSite": "Back to the site",
+      "toggleSidebar": "Show or hide the menu"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Welcome {username}. Here are the sections open to your role.",
+      "open": "Open",
+      "sections": {
+        "games": "Add the games players create their profile in.",
+        "articles": "Write and publish the site's articles.",
+        "categories": "Create the categories articles are filed under."
+      }
+    },
+    "games": {
+      "title": "Games",
+      "description": "The games offered on the platform. Every player creates a profile in one to be able to fight.",
+      "formTitle": "New game",
+      "formDescription": "The title as players will see it.",
+      "name": "Title",
+      "namePlaceholder": "Street Fighter 6",
+      "submit": "Create the game",
+      "success": "Game created",
+      "successDescription": "“{title}” is available.",
+      "error": "The game could not be created",
+      "errors": {
+        "forbidden": "Only administrators can create a game."
+      },
+      "columns": {
+        "name": "Title",
+        "id": "Identifier",
+        "createdAt": "Created on"
+      },
+      "copyId": "Copy game identifier",
+      "list": {
+        "title": "All games",
+        "description": "In alphabetical order.",
+        "emptyTitle": "No games",
+        "emptyDescription": "The games you create show up here."
+      }
+    },
+    "categories": {
+      "title": "Categories",
+      "description": "The categories the site's articles are organised in.",
+      "formTitle": "New category",
+      "formDescription": "The slug is how an article is filed under its category.",
+      "name": "Name",
+      "namePlaceholder": "News",
+      "slug": "Slug",
+      "slugPlaceholder": "news",
+      "slugDescription": "Lowercase letters, digits and dashes. Derived from the name until you edit it.",
+      "submit": "Create the category",
+      "success": "Category created",
+      "successDescription": "Slug: {slug}",
+      "error": "The category could not be created",
+      "errors": {
+        "forbidden": "Only administrators can create a category."
+      },
+      "columns": {
+        "name": "Name",
+        "slug": "Slug",
+        "id": "Identifier"
+      },
+      "copyId": "Copy category identifier",
+      "list": {
+        "title": "All categories",
+        "description": "In alphabetical order.",
+        "emptyTitle": "No categories",
+        "emptyDescription": "The categories you create show up here."
+      }
+    },
+    "articles": {
+      "title": "Articles",
+      "description": "Write the site's articles and read them back with their comments.",
+      "formTitle": "New article",
+      "formDescription": "The article is published under your name.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Spring tournament results",
+      "category": "Category",
+      "categoryPlaceholder": "Pick a category",
+      "categoryDescription": "Categories are managed from the Categories section.",
+      "body": "Content",
+      "bodyPlaceholder": "Write your article…",
+      "submit": "Publish the article",
+      "success": "Article published",
+      "successDescription": "It is visible on the site.",
+      "error": "The article could not be published",
+      "errors": {
+        "forbidden": "Publishing articles is reserved to editors.",
+        "categoryNotFound": "This category no longer exists."
+      },
+      "view": "View the article",
+      "writeAnother": "Write another article",
+      "preview": {
+        "publishedAt": "Published on {date}",
+        "category": "Category",
+        "author": "Author",
+        "comments": "{count, plural, =0 {No comments} one {# comment} other {# comments}}",
+        "notFound": {
+          "title": "Article not found",
+          "description": "No article has this identifier."
+        },
+        "loadError": {
+          "title": "The article could not be loaded",
+          "description": "The server did not answer. Try again in a moment."
+        },
+        "commentsError": "The comments could not be loaded."
+      },
+      "noCategories": "No categories: create one first",
+      "list": {
+        "title": "All articles",
+        "description": "Newest first.",
+        "emptyTitle": "No articles",
+        "emptyDescription": "Published articles show up here.",
+        "view": "View",
+        "columns": {
+          "title": "Title",
+          "category": "Category",
+          "publishedAt": "Published on",
+          "actions": "Actions"
+        }
+      }
+    },
+    "loadError": {
+      "title": "The list could not be loaded",
+      "description": "The server did not answer. Try again in a moment."
+    }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "tooLong": "255 characters at most.",
+    "invalidUuid": "Invalid identifier: a UUID is expected.",
+    "invalidSlug": "Lowercase letters, digits and dashes only.",
+    "invalidEmail": "Enter a valid email address.",
+    "usernameTooShort": "3 characters at least.",
+    "usernameTooLong": "30 characters at most.",
+    "usernameCharacters": "Unaccented letters, digits, dashes and underscores only.",
+    "passwordTooShort": "8 characters at least.",
+    "passwordDigit": "At least one digit.",
+    "passwordUppercase": "At least one uppercase letter.",
+    "passwordLowercase": "At least one lowercase letter.",
+    "passwordSpecial": "At least one special character.",
+    "passwordSpaces": "No spaces.",
+    "passwordsMismatch": "The passwords do not match.",
+    "messageTooLong": "2000 characters maximum."
+  },
+  "apiErrors": {
+    "invalid": "The server rejected this data.",
+    "sessionExpired": "Your session has expired: please log in again.",
+    "forbidden": "You do not have the required permissions.",
+    "notFound": "The requested resource could not be found.",
+    "unavailable": "The server is unavailable. Try again in a moment.",
+    "unknown": "An unexpected error occurred.",
+    "conflict": "This already exists."
+  },
+  "metadata": {
+    "defaultTitle": "Back2Tournament",
+    "defaultDescription": "Track tournaments, fights and results."
+  },
+  "errors": {
+    "forbiddenTitle": "403",
+    "forbiddenDescription": "You do not have permission to access this page.",
+    "backHome": "Back to home"
+  }
+}

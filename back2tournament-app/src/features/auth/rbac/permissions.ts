@@ -1,0 +1,16 @@
+export type UserRole = "admin" | "editor" | "user"
+
+export type AuthPermission =
+  | "article:create"
+  | "article:edit"
+  | "article:delete"
+  | "article:publish"
+  | "category:manage"
+  | "comment:moderate"
+  | "game:manage"
+  | "team:manage"
+  | "player:manage"
+  | "fight:manage"
+  | "fight:record-result"
+  | "backoffice:access"
+  | "admin:access"

@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Blog\Article\Application\Controller\Api;
+
+use App\Blog\Article\Application\Event\OnPublicationRequestedEvent;
+use OpenApi\Attributes as OA;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+
+ #[Route('/api/articles/', name: 'api_article_post', methods: ['POST'])]
+#[OA\Tag(name: 'Article')]
+#[OA\RequestBody(
+    required: true,
+    content: new OA\JsonContent(
+        required: ['title', 'body', 'categorySlug'],
+        properties: [
+            new OA\Property(property: 'title', type: 'string', example: 'My article'),
+            new OA\Property(property: 'body', type: 'string', example: 'Article content...'),
+            new OA\Property(property: 'categorySlug', type: 'string', description: 'Slug of an existing category', example: 'news'),
+        ],
+    ),
+)]
+#[OA\Response(
+    response: 200,
+    description: 'Article created',
+    content: new OA\JsonContent(
+        description: 'Identifiers are serialized as a `{value: string}` object (Value Object)',
+        properties: [
+            new OA\Property(property: 'category', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')], description: 'Category ID (resolved from categorySlug)'),
+            new OA\Property(property: 'id', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
+            new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
+            new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
+            new OA\Property(property: 'body', type: 'string', nullable: true),
+            new OA\Property(property: 'title', type: 'string', nullable: true),
+            new OA\Property(property: 'author', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
+        ],
+    ),
+)]
+#[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
+#[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
+#[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
+#[OA\Response(response: 404, ref: '#/components/responses/NotFound')]
+final class PostArticleController extends AbstractController
+{
+    private EventDispatcherInterface $eventDispatcher;
+
+    public function __construct(EventDispatcherInterface $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    public function __invoke(Request $request): JsonResponse
+    {
+        $parameters = json_decode(
+            $request->getContent(),
+            true, 512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $this->eventDispatcher->dispatch(new OnPublicationRequestedEvent(
+            $parameters['title'],
+            $parameters['body'],
+            $parameters['categorySlug'],
+        ));
+
+        return JsonResponse::fromJsonString(
+            $request->getSession()->get('last_article_created')
+        );
+    }
+}

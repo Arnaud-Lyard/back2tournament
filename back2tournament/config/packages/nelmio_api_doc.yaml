@@ -1,0 +1,234 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Back2Tournament API
+            version: 1.0.0
+        components:
+            securitySchemes:
+                bearerAuth:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+            schemas:
+                Error:
+                    type: object
+                    properties:
+                        error:
+                            type: string
+                            description: Human-readable reason for the failure
+                Uuid:
+                    type: object
+                    description: An identifier, serialized as a value object
+                    properties:
+                        value: { type: string, format: uuid }
+                Article:
+                    type: object
+                    description: 'A blog article. `author` names the user who published it and `category` the category it is filed under. Its comments are not part of it.'
+                    properties:
+                        category: { $ref: '#/components/schemas/Uuid' }
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                        body: { type: string }
+                        title: { type: string }
+                        author: { $ref: '#/components/schemas/Uuid' }
+                Comment:
+                    type: object
+                    description: 'A comment on an article.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        message: { type: string }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                        articleId: { $ref: '#/components/schemas/Uuid' }
+                Category:
+                    type: object
+                    description: 'A blog category. Unlike other resources, its id is a plain string, not a value object.'
+                    properties:
+                        id: { type: string, format: uuid }
+                        name: { type: string }
+                        slug: { type: string }
+                CurrentUser:
+                    type: object
+                    description: 'The authenticated user, with the player profiles they hold. Unlike other resources, identifiers here are plain strings, not value objects.'
+                    required: [id, email, username, roles, verified, players]
+                    properties:
+                        id: { type: string, format: uuid }
+                        email: { type: string, format: email }
+                        username: { type: string }
+                        roles:
+                            type: array
+                            items: { type: string, example: ROLE_USER }
+                        verified: { type: boolean }
+                        players:
+                            type: array
+                            description: 'One entry per game the user holds a player profile in, oldest first. Empty when they hold none.'
+                            items:
+                                type: object
+                                required: [id, battletag, game]
+                                properties:
+                                    id: { type: string, format: uuid }
+                                    battletag: { type: string, example: 'PlayerOne#1234' }
+                                    game: { type: string, format: uuid, description: Game ID }
+                Game:
+                    type: object
+                    description: A game players can register in
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        title: { type: string }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                Player:
+                    type: object
+                    description: 'One user in one game. `user` names the account, `game` the game.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        battletag: { type: string }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        user: { $ref: '#/components/schemas/Uuid' }
+                Fight:
+                    type: object
+                    description: A fight between two competitors, in the order it holds them
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        competitorOne: { $ref: '#/components/schemas/Uuid' }
+                        competitorTwo: { $ref: '#/components/schemas/Uuid' }
+                        declaredBy:
+                            type: object
+                            nullable: true
+                            description: 'The competitor that declared the outcome. Null while nothing has been declared.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                Result:
+                    type: object
+                    description: What one side of a fight scored, and where that claim stands
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        fight: { $ref: '#/components/schemas/Uuid' }
+                        competitor: { $ref: '#/components/schemas/Uuid' }
+                        score:
+                            type: integer
+                            minimum: 0
+                            example: 3
+                            description: 'Points this side scored. Zero until a declaration carries a real value.'
+                        status:
+                            type: string
+                            enum: [pending, reporting, win, loss, draw]
+                            description: '`pending` while nobody declared anything, `reporting` while one side waits for the other to confirm, then the settled outcome.'
+                        reportedStatus:
+                            type: string
+                            nullable: true
+                            enum: [win, loss, draw]
+                            description: 'The outcome the declaring side claims. Carried only while `status` is `reporting`.'
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                PlayerProfile:
+                    type: object
+                    description: 'A player profile as a list names it: its id and the battletag it goes by.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        battletag:
+                            type: string
+                            nullable: true
+                            example: 'PlayerOne#1234'
+                            description: 'How this profile is named in its game.'
+                FightSide:
+                    type: object
+                    description: 'One side of a fight: the competitor, the player profile behind it, and what that side claims.'
+                    properties:
+                        competitor: { $ref: '#/components/schemas/Uuid' }
+                        player:
+                            type: object
+                            nullable: true
+                            description: 'The player profile this competitor stands for. Null for a team, and for a profile that no longer exists.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        battletag:
+                            type: string
+                            nullable: true
+                            example: 'PlayerOne#1234'
+                            description: 'How this side is named in the game. Null whenever `player` is.'
+                        score:
+                            type: integer
+                            minimum: 0
+                            example: 3
+                            description: 'Points this side scored. Zero until a declaration carries a real value.'
+                        status:
+                            type: string
+                            enum: [pending, reporting, win, loss, draw]
+                            description: 'Where this side stands, as `GET /api/fights/{id}/results/{gameid}` reports it.'
+                        reportedStatus:
+                            type: string
+                            nullable: true
+                            enum: [win, loss, draw]
+                            description: 'The outcome the declaring side claims. Carried only while `status` is `reporting`.'
+                FightSummary:
+                    type: object
+                    description: 'A fight as a list shows it: the fight, where it stands as a whole, and its two sides named by battletag.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        competitorOne: { $ref: '#/components/schemas/Uuid' }
+                        competitorTwo: { $ref: '#/components/schemas/Uuid' }
+                        declaredBy:
+                            type: object
+                            nullable: true
+                            description: 'The competitor that declared the outcome. Null while nothing has been declared.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        game:
+                            type: object
+                            nullable: true
+                            description: 'The game both sides are registered in, read from their profiles. Null when neither side resolves to a player.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        status:
+                            type: string
+                            enum: [pending, reporting, finished]
+                            description: '`pending` while nobody declared anything, `reporting` while a declaration waits for its confirmation, `finished` once both sides are settled.'
+                        sides:
+                            type: array
+                            minItems: 2
+                            maxItems: 2
+                            description: 'Both sides, in the order the fight holds them.'
+                            items: { $ref: '#/components/schemas/FightSide' }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+            responses:
+                BadRequest:
+                    description: 'Invalid input: a value object rule or a business rule was violated'
+                    content:
+                        application/json:
+                            schema: { $ref: '#/components/schemas/Error' }
+                Unauthorized:
+                    description: 'Missing, invalid, expired or revoked JWT'
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code: { type: integer, example: 401 }
+                                    message: { type: string, example: 'JWT Token not found' }
+                Forbidden:
+                    description: 'The user is known but lacks the required role'
+                    content:
+                        application/json:
+                            schema: { $ref: '#/components/schemas/Error' }
+                NotFound:
+                    description: 'A resource referenced by the request does not exist'
+                    content:
+                        application/json:
+                            schema: { $ref: '#/components/schemas/Error' }
+                Conflict:
+                    description: 'The resource already exists'
+                    content:
+                        application/json:
+                            schema: { $ref: '#/components/schemas/Error' }
+        security:
+            - bearerAuth: []
+    areas:
+        path_patterns:
+            - ^/api(?!/doc)

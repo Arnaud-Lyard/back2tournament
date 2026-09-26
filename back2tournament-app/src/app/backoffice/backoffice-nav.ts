@@ -1,0 +1,78 @@
+import {
+  Gamepad2Icon,
+  LayoutDashboardIcon,
+  NewspaperIcon,
+  TagsIcon,
+  type LucideIcon,
+} from "lucide-react"
+import { hasPermission } from "@/features/auth/rbac/can"
+import type { AuthPermission } from "@/features/auth/types"
+
+export interface BackofficeNavItem {
+  href: string
+  labelKey: "dashboard" | "games" | "articles" | "categories"
+  icon: LucideIcon
+  permission: AuthPermission
+}
+
+interface BackofficeNavGroup {
+  labelKey: "general" | "competition" | "content"
+  items: readonly BackofficeNavItem[]
+}
+
+export const BACKOFFICE_HOME = "/backoffice"
+
+/** Each section names the permission its page requires, so the menu never offers a 403. */
+export const backofficeNav: readonly BackofficeNavGroup[] = [
+  {
+    labelKey: "general",
+    items: [
+      {
+        href: BACKOFFICE_HOME,
+        labelKey: "dashboard",
+        icon: LayoutDashboardIcon,
+        permission: "backoffice:access",
+      },
+    ],
+  },
+  {
+    labelKey: "competition",
+    items: [
+      {
+        href: "/backoffice/games",
+        labelKey: "games",
+        icon: Gamepad2Icon,
+        permission: "game:manage",
+      },
+    ],
+  },
+  {
+    labelKey: "content",
+    items: [
+      {
+        href: "/backoffice/articles",
+        labelKey: "articles",
+        icon: NewspaperIcon,
+        permission: "article:create",
+      },
+      {
+        href: "/backoffice/categories",
+        labelKey: "categories",
+        icon: TagsIcon,
+        permission: "category:manage",
+      },
+    ],
+  },
+]
+
+/** The groups and sections these permissions open; empty groups are dropped. */
+export function visibleBackofficeNav(permissions: readonly AuthPermission[]) {
+  return backofficeNav
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        hasPermission(permissions, item.permission)
+      ),
+    }))
+    .filter((group) => group.items.length > 0)
+}

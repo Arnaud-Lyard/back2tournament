@@ -1,0 +1,28 @@
+deptrac:
+    paths:
+        - ./src
+    exclude_files:
+        - '#/Tests/#'
+
+    layers:
+        # ---- Infrastructure layer
+
+        -   name: Infrastructure
+            collectors:
+                -   type: classNameRegex
+                    value: '#^App\\.*\\Infrastructure\\.*#'
+
+        # ---- Domain layer
+
+        -   name: Domain
+            collectors:
+                -   type: classNameRegex
+                    value: '#^App\\.*\\Domain\\.*#'
+
+    ruleset:
+        Domain: [ ]
+        Infrastructure:
+            - Domain
+
+    analyser:
+        types: [ class, use, function_call ]
