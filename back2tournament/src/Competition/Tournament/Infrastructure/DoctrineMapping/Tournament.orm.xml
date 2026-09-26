@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Competition\Tournament\Domain\Entity\Tournament" table="tournament" repository-class="App\Competition\Tournament\Infrastructure\Repository\TournamentRepository">
+        <id name="id" type="guid" column="id" length="36" />
+
+        <field name="name" column="name" length="100" />
+        <field name="game" type="guid" column="game" length="36" />
+        <field name="teamSize" type="integer" column="team_size" />
+        <field name="capacity" type="integer" column="capacity" />
+        <field name="status" type="string" column="status" length="16" enum-type="App\Competition\Tournament\Domain\Enum\TournamentStatus" />
+        <field name="organizer" type="guid" column="organizer" length="36" />
+        <field name="startsAt" type="datetime_immutable" column="starts_at" />
+        <field name="winner" type="guid" column="winner" length="36" nullable="true" />
+
+        <field name="createdAt" type="datetime_immutable" column="created_at" />
+        <field name="updatedAt" type="datetime_immutable" column="updated_at" />
+    </entity>
+
+</doctrine-mapping>

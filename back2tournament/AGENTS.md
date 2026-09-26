@@ -47,18 +47,25 @@ make user           # seed a dev user via app:create-user
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
   any context to learn who the caller is.
 - `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy.
-- `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Team/`
-  — competition profiles. A `Player` is one user in one game; `TeamPlayer` joins players
-  to teams.
+- `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
+  `Competition/Profile/Team/` — competition profiles. A `Game` lists the formats it is
+  played in (`teamSizes`: 1 for 1v1, 5 for 5v5, up to 64). A `Player` is one user in one
+  game. A `Clan` groups players of one game under a leader; players join by invitation
+  and belong to one clan at most. A `Team` is a lineup a clan fields in one format:
+  exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
-  Created lazily when a fight is opened; never through an endpoint of its own.
-- `Competition/Fight/` — fights and their results, including the declare-then-confirm
-  workflow.
-- `Competition/Shared/` — `CompetitorId` and `CompetitorIdProviderInterface`, shared by
-  every Competition module.
-- `Competition/Tournament/` — **three empty files, nothing else.** No entity, no mapping,
-  no Deptrac layer. Creating this context means declaring its layers before the first
-  class compiles, because `make ddd` runs with `--fail-on-uncovered`.
+  Enlisted lazily, through `CompetitorRegistryInterface`, when a fight is opened or a
+  tournament registration made; never through an endpoint of its own.
+- `Competition/Fight/` — fights between two competitors of the same game and format,
+  and their results: one side declares the scores, the other confirms them. A settled
+  fight records `FightSettledEvent`.
+- `Competition/Tournament/` — single-elimination tournaments: registrations, the
+  bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
+  winners moving on as `FightSettledEvent` comes in.
+- `Competition/Shared/` — `CompetitorId`, `TeamSize`, and the contracts every
+  Competition module reads directly: `CompetitorIdProviderInterface`,
+  `CompetitorRegistryInterface` (enlist a player or a team, who a user speaks for, name
+  the sides) and `FightSchedulerInterface` (open a fight with its two pending results).
 
 Each context (except `Shared`) has three layers:
 
@@ -128,7 +135,9 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   `api_<resource>_<action>`; keep the same shape across a resource's routes.
 - Every `{placeholder}` in the path is a `__invoke` argument **and** an
   `#[OA\Parameter(in: 'path')]`. Never document a parameter the route does not have.
-- Body: `json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)`.
+- Body: `json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)`, then read
+  each field through `App\Shared\Infrastructure\Http\JsonBody` so that a value of the
+  wrong type answers 400 rather than a `TypeError`.
 - **Never read the caller's identity from the body or the query string.** The user is
   the JWT identity, read through `CurrentUserProviderInterface`. A `user` key in a
   request payload is always a bug and usually a privilege escalation.
@@ -186,13 +195,14 @@ Two mechanisms, and they are not interchangeable.
 **A contract in `<BC>/Shared/`, read directly.** This is the default when the current
 request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
-the caller injects the interface. `CurrentUserProviderInterface` and
-`CompetitorIdProviderInterface` are the two in place. Prefer this over chaining finder
+the caller injects the interface. `CurrentUserProviderInterface`,
+`CompetitorIdProviderInterface`, `CompetitorRegistryInterface` and
+`FightSchedulerInterface` are the ones in place. Prefer this over chaining finder
 services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
-something that already happened — sending a mail after a user registers, creating a
-competitor after players are verified. Do not use an event chain to assemble the data
+something that already happened — sending a mail after a user registers, moving a
+tournament winner on once its fight is settled (`FightSettledEvent`). Do not use an event chain to assemble the data
 one request needs: each hop adds an event class, a subscriber, a constructor signature
 and a silent `ArgumentCountError` when one of them drifts, and the response then has
 nowhere to go but the session.

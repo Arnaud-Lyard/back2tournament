@@ -1,0 +1,195 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Competition\Profile\Clan\Domain\Entity;
+
+use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
+use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
+use App\Competition\Profile\Clan\Domain\Event\ClanCreatedEvent;
+use App\Competition\Profile\Clan\Domain\Event\ClanMemberInvitedEvent;
+use App\Competition\Profile\Clan\Domain\Event\ClanMemberJoinedEvent;
+use App\Competition\Profile\Clan\Domain\Event\ClanMemberLeftEvent;
+use App\Competition\Profile\Game\Domain\Entity\GameId;
+use App\Competition\Profile\Player\Domain\Entity\PlayerId;
+use App\Shared\Aggregate\AggregateRoot;
+use App\Shared\Exception\ConflictException;
+use App\Shared\Exception\NotFoundException;
+
+/**
+ * A group of players of one game, run by its leader. Players come in by
+ * invitation only and are members once they accept it.
+ */
+class Clan extends AggregateRoot
+{
+    private string $id;
+
+    private string $name;
+
+    private string $tag;
+
+    private string $game;
+
+    private string $leader;
+
+    private \DateTimeImmutable $createdAt;
+
+    private \DateTimeImmutable $updatedAt;
+
+    public function __construct(ClanId $id)
+    {
+        $this->id = $id->getValue();
+    }
+
+    public function getId(): ClanId
+    {
+        return new ClanId($this->id);
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getTag(): string
+    {
+        return $this->tag;
+    }
+
+    public function getGame(): GameId
+    {
+        return new GameId($this->game);
+    }
+
+    public function getLeader(): PlayerId
+    {
+        return new PlayerId($this->leader);
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public static function create(
+        ClanId $clanId,
+        ClanName $name,
+        ClanTag $tag,
+        GameId $gameId,
+        PlayerId $leader,
+    ): self {
+        $clan = new self($clanId);
+        $clan->name = $name->getValue();
+        $clan->tag = $tag->getValue();
+        $clan->game = $gameId->getValue();
+        $clan->leader = $leader->getValue();
+        $clan->setCreatedAt(new \DateTimeImmutable('now'));
+        $clan->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanCreatedEvent($clanId));
+
+        return $clan;
+    }
+
+    /**
+     * The founder's own membership: the leader is a member from the start.
+     */
+    public static function createLeaderMembership(Clan $clan, ClanMemberId $clanMemberId): ClanMember
+    {
+        $membership = new ClanMember($clanMemberId);
+        $membership->setClan($clan->getId());
+        $membership->setPlayer($clan->getLeader());
+        $membership->setRole(ClanRole::LEADER);
+        $membership->setStatus(ClanMemberStatus::ACTIVE);
+        $membership->setCreatedAt(new \DateTimeImmutable('now'));
+        $membership->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanMemberJoinedEvent($clanMemberId));
+
+        return $membership;
+    }
+
+    public static function invite(Clan $clan, ClanMemberId $clanMemberId, PlayerId $playerId): ClanMember
+    {
+        if ($clan->leader === $playerId->getValue()) {
+            throw new ConflictException('the leader already belongs to the clan');
+        }
+
+        $membership = new ClanMember($clanMemberId);
+        $membership->setClan($clan->getId());
+        $membership->setPlayer($playerId);
+        $membership->setRole(ClanRole::MEMBER);
+        $membership->setStatus(ClanMemberStatus::INVITED);
+        $membership->setCreatedAt(new \DateTimeImmutable('now'));
+        $membership->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanMemberInvitedEvent($clanMemberId));
+
+        return $membership;
+    }
+
+    /**
+     * The invited player accepts: the invitation becomes a membership.
+     */
+    public static function join(Clan $clan, ClanMember $membership): ClanMember
+    {
+        self::ensureBelongs($clan, $membership);
+
+        if (ClanMemberStatus::ACTIVE === $membership->getStatus()) {
+            throw new ConflictException('this player already is a member of the clan');
+        }
+
+        $membership->setStatus(ClanMemberStatus::ACTIVE);
+        $membership->setUpdatedAt(new \DateTimeImmutable('now'));
+        $clan->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanMemberJoinedEvent($membership->getId()));
+
+        return $membership;
+    }
+
+    /**
+     * A member leaves, an invitation is declined, or the leader lets someone go:
+     * the membership is to be removed. The leader never leaves their own clan.
+     */
+    public static function remove(Clan $clan, ClanMember $membership): ClanMember
+    {
+        self::ensureBelongs($clan, $membership);
+
+        if (ClanRole::LEADER === $membership->getRole()) {
+            throw new ConflictException('the leader cannot leave the clan');
+        }
+
+        $clan->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanMemberLeftEvent($membership->getId()));
+
+        return $membership;
+    }
+
+    private static function ensureBelongs(Clan $clan, ClanMember $membership): void
+    {
+        if ($membership->getClan()->getValue() !== $clan->id) {
+            throw new NotFoundException('this player has no place in the clan');
+        }
+    }
+}

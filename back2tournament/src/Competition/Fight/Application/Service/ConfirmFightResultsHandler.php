@@ -4,124 +4,82 @@ declare(strict_types=1);
 
 namespace App\Competition\Fight\Application\Service;
 
+use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Fight\Application\Model\ConfirmFightResultsCommand;
 use App\Competition\Fight\Domain\Entity\Fight;
-use App\Competition\Fight\Domain\Enum\ResultStatus;
+use App\Competition\Fight\Domain\Entity\FightId;
+use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
-use App\Shared\Exception\ConflictException;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsMessageHandler]
 final class ConfirmFightResultsHandler
 {
     private ResultRepositoryInterface $resultRepository;
     private FightRepositoryInterface $fightRepository;
+    private CompetitorRegistryInterface $competitorRegistry;
+    private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
-    private SerializerInterface $serializer;
-    private RequestStack $requestStack;
 
     public function __construct(
         ResultRepositoryInterface $resultRepository,
         FightRepositoryInterface $fightRepository,
+        CompetitorRegistryInterface $competitorRegistry,
+        CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
-        SerializerInterface $serializer,
-        RequestStack $requestStack,
     ) {
         $this->resultRepository = $resultRepository;
         $this->fightRepository = $fightRepository;
+        $this->competitorRegistry = $competitorRegistry;
+        $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
-        $this->serializer = $serializer;
-        $this->requestStack = $requestStack;
     }
 
-    public function __invoke(ConfirmFightResultsCommand $confirmFightResultsCommand): void
+    public function __invoke(ConfirmFightResultsCommand $confirmFightResultsCommand): string
     {
-        $fight = $this->fightRepository->findOneBy([
-            'id' => $confirmFightResultsCommand->getFight(),
-        ]);
+        $fightId = new FightId($confirmFightResultsCommand->getFightId());
 
-        if (!$fight) {
+        $fight = $this->fightRepository->findOneBy(['id' => $fightId->getValue()]);
+        if (!$fight instanceof Fight) {
             throw new NotFoundException('Fight not found');
         }
 
-        $existingResultOne = $this->resultRepository->findOneBy([
-            'fight' => $confirmFightResultsCommand->getFight(),
-            'competitor' => $confirmFightResultsCommand->getCompetitorOne(),
-        ]);
+        $represented = $this->competitorRegistry->representedBy((string) $this->currentUserProvider->getUser()->getId());
+        $side = $fight->sideAmong($represented);
+        if (null === $side) {
+            throw new PermissionDeniedException('you do not take part in this fight');
+        }
 
-        if (!$existingResultOne) {
+        $resultOne = $this->resultRepository->findOneBy(['fight' => $fightId->getValue(), 'competitor' => $fight->getCompetitorOne()->getValue()]);
+        $resultTwo = $this->resultRepository->findOneBy(['fight' => $fightId->getValue(), 'competitor' => $fight->getCompetitorTwo()->getValue()]);
+        if (!$resultOne instanceof Result || !$resultTwo instanceof Result) {
             throw new NotFoundException('Result not found');
         }
 
-        $existingResultTwo = $this->resultRepository->findOneBy([
-            'fight' => $confirmFightResultsCommand->getFight(),
-            'competitor' => $confirmFightResultsCommand->getCompetitorTwo(),
-        ]);
-
-        if (!$existingResultTwo) {
-            throw new NotFoundException('Result not found');
-        }
-
-        $declaredBy = $fight->getDeclaredBy();
-
-        if (null === $declaredBy) {
-            throw new ConflictException('no outcome has been declared on this fight yet');
-        }
-
-        if ($declaredBy->getValue() === $confirmFightResultsCommand->getCompetitorOne()) {
-            throw new PermissionDeniedException('the declaring side cannot confirm its own outcome');
-        }
-
-        if (ResultStatus::REPORTING !== $existingResultOne->getStatus()
-            || ResultStatus::REPORTING !== $existingResultTwo->getStatus()) {
-            throw new ConflictException('this fight is not awaiting a confirmation');
-        }
-
-        $scoreOne = $existingResultOne->getScore();
-        $scoreTwo = $existingResultTwo->getScore();
-
-        $statusOne = match (true) {
-            $scoreOne > $scoreTwo => ResultStatus::WIN,
-            $scoreOne < $scoreTwo => ResultStatus::LOSS,
-            default => ResultStatus::DRAW,
-        };
-
-        $statusTwo = match (true) {
-            $scoreTwo > $scoreOne => ResultStatus::WIN,
-            $scoreTwo < $scoreOne => ResultStatus::LOSS,
-            default => ResultStatus::DRAW,
-        };
-
-        $resultOne = Fight::confirmResult(
-            $fight,
-            $existingResultOne,
-            $statusOne,
-        );
-
-        $resultTwo = Fight::confirmResult(
-            $fight,
-            $existingResultTwo,
-            $statusTwo,
-        );
+        Fight::confirmOutcome($fight, $side, $resultOne, $resultTwo);
 
         $this->resultRepository->save($resultOne);
         $this->resultRepository->save($resultTwo);
         $this->fightRepository->save($fight);
 
-        $this->requestStack->getSession()->set(
-            'last_fight_result_confirmed',
-            $this->serializer->serialize($fight, 'json')
-        );
-
+        // FightSettledEvent: a tournament bracket moves its winner on from here.
         foreach ($fight->pullDomainEvents() as $domainEvent) {
             $this->eventDispatcher->dispatch($domainEvent);
         }
 
+        return json_encode(
+            FightView::of(
+                $fight,
+                [$resultOne, $resultTwo],
+                $this->competitorRegistry->describe([$fight->getCompetitorOne()->getValue(), $fight->getCompetitorTwo()->getValue()]),
+                $represented,
+            ),
+            JSON_THROW_ON_ERROR,
+        );
     }
 }

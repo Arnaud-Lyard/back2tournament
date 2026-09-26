@@ -1,7 +1,7 @@
 # back2tournament
 
-Backend API for an e‑sports competition platform — games, player profiles,
-competitions and editorial content.
+Backend API for an e‑sports competition platform — games, player profiles, clans
+and their teams, fights from 1v1 to NvN, tournaments, and editorial content.
 
 Built with **Symfony 7.4 LTS** on **PHP 8.5**, served by
 [FrankenPHP](https://frankenphp.dev) + [Caddy](https://caddyserver.com/) in Docker.
@@ -60,7 +60,11 @@ src/
   Shared/                shared kernel — dependency-free (AggregateRoot, base value objects)
   Authentication/User/   users, roles, password hashing, security
   Blog/                  Article, Category, Shared — editorial content
-  Competition/Profile/   Game, Player — competition profiles
+  Competition/Profile/   Game (and its formats), Player, Clan, Team — competition profiles
+  Competition/Competitor/ the player-or-team that competes
+  Competition/Fight/     fights, 1v1 to NvN, and their declare-then-confirm results
+  Competition/Tournament/ single-elimination tournaments and their bracket
+  Competition/Shared/    contracts shared by the Competition modules
 ```
 
 Each context (except `Shared`) is layered `Domain / Application / Infrastructure`.

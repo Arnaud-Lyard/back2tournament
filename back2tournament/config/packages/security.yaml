@@ -55,6 +55,9 @@ security:
         - { path: '^/api/players/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: '^/api/players/[^/]+/games$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/categories/$, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: '^/api/clans/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: '^/api/teams/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/tournaments, methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/categories/$, methods: [POST], roles: ROLE_ADMIN }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 

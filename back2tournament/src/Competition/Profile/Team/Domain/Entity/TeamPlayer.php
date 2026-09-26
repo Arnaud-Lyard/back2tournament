@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Competition\Profile\Team\Domain\Entity;
 
-use App\Competition\Profile\Team\Domain\Entity\PlayerId;
+use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayerId;
 

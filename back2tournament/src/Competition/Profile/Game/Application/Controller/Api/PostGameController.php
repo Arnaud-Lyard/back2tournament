@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Competition\Profile\Game\Application\Controller\Api;
 
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Competition\Profile\Game\Application\Event\OnGameCreationRequestedEvent;
+use App\Competition\Profile\Game\Application\Model\CreateGameCommand;
+use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\HandleTrait;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/games/', name: 'api_game_post', methods: ['POST'])]
@@ -21,33 +23,31 @@ use Symfony\Component\Routing\Attribute\Route;
         required: ['title'],
         properties: [
             new OA\Property(property: 'title', type: 'string', example: 'Street Fighter 6'),
+            new OA\Property(
+                property: 'teamSizes',
+                type: 'array',
+                items: new OA\Items(type: 'integer', minimum: 1, maximum: 64),
+                description: 'The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. `[1]` when left out.',
+                example: [1, 2, 3],
+            ),
         ],
     ),
 )]
 #[OA\Response(
     response: 200,
     description: 'Game created',
-    content: new OA\JsonContent(
-        description: 'Identifiers are serialized as a `{value: string}` object (Value Object)',
-        properties: [
-            new OA\Property(property: 'id', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-            new OA\Property(property: 'title', type: 'string', nullable: true),
-            new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
-        ],
-    ),
+    content: new OA\JsonContent(ref: '#/components/schemas/Game'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
 #[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
-#[OA\Response(response: 404, ref: '#/components/responses/NotFound')]
 final class PostGameController extends AbstractController
 {
-    private EventDispatcherInterface $eventDispatcher;
+    use HandleTrait;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher)
+    public function __construct(MessageBusInterface $messageBus)
     {
-        $this->eventDispatcher = $eventDispatcher;
+        $this->messageBus = $messageBus;
     }
 
     public function __invoke(Request $request): JsonResponse
@@ -58,12 +58,9 @@ final class PostGameController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $this->eventDispatcher->dispatch(new OnGameCreationRequestedEvent(
-            $parameters['title'],
-        ));
-
-        return JsonResponse::fromJsonString(
-            $request->getSession()->get('last_game_created')
-        );
+        return JsonResponse::fromJsonString($this->handle(new CreateGameCommand(
+            JsonBody::string($parameters, 'title'),
+            JsonBody::optionalIntList($parameters, 'teamSizes') ?? [1],
+        )));
     }
 }

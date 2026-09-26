@@ -24,4 +24,10 @@ final class TeamRepository extends ServiceEntityRepository implements TeamReposi
         $this->getEntityManager()->persist($team);
         $this->getEntityManager()->flush();
     }
+
+    public function remove(Team $team): void
+    {
+        $this->getEntityManager()->remove($team);
+        $this->getEntityManager()->flush();
+    }
 }

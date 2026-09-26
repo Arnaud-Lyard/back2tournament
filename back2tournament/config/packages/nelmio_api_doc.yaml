@@ -76,6 +76,11 @@ nelmio_api_doc:
                     properties:
                         id: { $ref: '#/components/schemas/Uuid' }
                         title: { type: string }
+                        teamSizes:
+                            type: array
+                            description: 'The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. Teams, fights and tournaments only use these.'
+                            items: { type: integer, minimum: 1, maximum: 64 }
+                            example: [1, 2, 3]
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
                 Player:
@@ -88,21 +93,6 @@ nelmio_api_doc:
                         updatedAt: { type: string, format: date-time }
                         game: { $ref: '#/components/schemas/Uuid' }
                         user: { $ref: '#/components/schemas/Uuid' }
-                Fight:
-                    type: object
-                    description: A fight between two competitors, in the order it holds them
-                    properties:
-                        id: { $ref: '#/components/schemas/Uuid' }
-                        competitorOne: { $ref: '#/components/schemas/Uuid' }
-                        competitorTwo: { $ref: '#/components/schemas/Uuid' }
-                        declaredBy:
-                            type: object
-                            nullable: true
-                            description: 'The competitor that declared the outcome. Null while nothing has been declared.'
-                            properties:
-                                value: { type: string, format: uuid }
-                        createdAt: { type: string, format: date-time }
-                        updatedAt: { type: string, format: date-time }
                 Result:
                     type: object
                     description: What one side of a fight scored, and where that claim stands
@@ -136,59 +126,81 @@ nelmio_api_doc:
                             nullable: true
                             example: 'PlayerOne#1234'
                             description: 'How this profile is named in its game.'
-                FightSide:
+                NamedSide:
                     type: object
-                    description: 'One side of a fight: the competitor, the player profile behind it, and what that side claims.'
+                    description: 'A competitor, and what it stands for: a player profile in 1v1, a team in NvN.'
                     properties:
                         competitor: { $ref: '#/components/schemas/Uuid' }
-                        player:
+                        type:
+                            type: string
+                            nullable: true
+                            enum: [player, team]
+                        reference:
                             type: object
                             nullable: true
-                            description: 'The player profile this competitor stands for. Null for a team, and for a profile that no longer exists.'
+                            description: 'The player profile or the team this competitor stands for.'
                             properties:
                                 value: { type: string, format: uuid }
-                        battletag:
+                        name:
                             type: string
                             nullable: true
                             example: 'PlayerOne#1234'
-                            description: 'How this side is named in the game. Null whenever `player` is.'
-                        score:
-                            type: integer
-                            minimum: 0
-                            example: 3
-                            description: 'Points this side scored. Zero until a declaration carries a real value.'
-                        status:
-                            type: string
-                            enum: [pending, reporting, win, loss, draw]
-                            description: 'Where this side stands, as `GET /api/fights/{id}/results/{gameid}` reports it.'
-                        reportedStatus:
-                            type: string
-                            nullable: true
-                            enum: [win, loss, draw]
-                            description: 'The outcome the declaring side claims. Carried only while `status` is `reporting`.'
+                            description: 'The battletag of the profile, or the name of the team. Null when it no longer exists.'
+                FightSide:
+                    description: 'One side of a fight, and what it claims or settled on.'
+                    allOf:
+                        - { $ref: '#/components/schemas/NamedSide' }
+                        - type: object
+                          properties:
+                              score:
+                                  type: integer
+                                  minimum: 0
+                                  example: 3
+                                  description: 'Points this side scored. Zero until a declaration carries a real value.'
+                              status:
+                                  type: string
+                                  enum: [pending, reporting, win, loss, draw]
+                                  description: '`pending` while nobody declared, `reporting` while the declaration waits for its confirmation, then the settled outcome.'
+                              reportedStatus:
+                                  type: string
+                                  nullable: true
+                                  enum: [win, loss, draw]
+                                  description: 'The outcome the declaration claims for this side. Carried only while `status` is `reporting`.'
                 FightSummary:
                     type: object
-                    description: 'A fight as a list shows it: the fight, where it stands as a whole, and its two sides named by battletag.'
+                    description: 'A fight between two competitors of the same game and format, where it stands as a whole, and its two sides.'
                     properties:
                         id: { $ref: '#/components/schemas/Uuid' }
-                        competitorOne: { $ref: '#/components/schemas/Uuid' }
-                        competitorTwo: { $ref: '#/components/schemas/Uuid' }
-                        declaredBy:
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        teamSize: { type: integer, minimum: 1, example: 1, description: 'Players per side: 1 for a 1v1, 5 for a 5v5' }
+                        tournament:
                             type: object
                             nullable: true
-                            description: 'The competitor that declared the outcome. Null while nothing has been declared.'
-                            properties:
-                                value: { type: string, format: uuid }
-                        game:
-                            type: object
-                            nullable: true
-                            description: 'The game both sides are registered in, read from their profiles. Null when neither side resolves to a player.'
+                            description: 'The tournament whose bracket holds this fight. Null for a challenge.'
                             properties:
                                 value: { type: string, format: uuid }
                         status:
                             type: string
                             enum: [pending, reporting, finished]
                             description: '`pending` while nobody declared anything, `reporting` while a declaration waits for its confirmation, `finished` once both sides are settled.'
+                        declaredBy:
+                            type: object
+                            nullable: true
+                            description: 'The competitor that declared the scores. Null while nothing has been declared.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        winner:
+                            type: object
+                            nullable: true
+                            description: 'The competitor that won, once `finished`. Null before, and for a draw.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        mySide:
+                            type: object
+                            nullable: true
+                            description: 'The competitor the authenticated user speaks for in this fight — their player profile, or the team they lead. Null for a bystander.'
+                            properties:
+                                value: { type: string, format: uuid }
                         sides:
                             type: array
                             minItems: 2
@@ -197,6 +209,134 @@ nelmio_api_doc:
                             items: { $ref: '#/components/schemas/FightSide' }
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
+                Clan:
+                    type: object
+                    description: 'A group of players of one game, run by its leader. `leader` names the leader''s player profile.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        name: { type: string, example: 'Back to Tournament' }
+                        tag: { type: string, example: 'B2T', description: '2 to 5 upper-case letters or digits, unique within the game' }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        leader: { $ref: '#/components/schemas/Uuid' }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                ClanSummary:
+                    description: 'A clan as a list shows it.'
+                    allOf:
+                        - { $ref: '#/components/schemas/Clan' }
+                        - type: object
+                          properties:
+                              members: { type: integer, example: 7, description: 'Active members, the leader included; pending invitations are not counted' }
+                ClanMember:
+                    type: object
+                    description: 'The place one player profile holds in one clan: `invited` until they accept, `active` after.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        clan: { $ref: '#/components/schemas/Uuid' }
+                        player: { $ref: '#/components/schemas/PlayerProfile' }
+                        role: { type: string, enum: [leader, member] }
+                        status: { type: string, enum: [invited, active] }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                ClanDetail:
+                    description: 'A clan, its members and pending invitations (leader first), and the teams it fields.'
+                    allOf:
+                        - { $ref: '#/components/schemas/Clan' }
+                        - type: object
+                          properties:
+                              members:
+                                  type: array
+                                  items: { $ref: '#/components/schemas/ClanMember' }
+                              teams:
+                                  type: array
+                                  items: { $ref: '#/components/schemas/Team' }
+                Team:
+                    type: object
+                    description: 'A lineup a clan fields in one format: exactly `size` players, leader first. The leader speaks for the team in fights and tournaments.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        name: { type: string, example: 'Falcons Duo' }
+                        clan: { $ref: '#/components/schemas/Uuid' }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        size: { type: integer, minimum: 1, maximum: 64, example: 2 }
+                        leader: { $ref: '#/components/schemas/Uuid' }
+                        players:
+                            type: array
+                            items: { $ref: '#/components/schemas/PlayerProfile' }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                TournamentSummary:
+                    type: object
+                    description: 'A single-elimination tournament of one game, in one format.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        name: { type: string, example: 'Autumn Cup' }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        teamSize: { type: integer, minimum: 1, example: 1, description: 'Players per side: 1 registers player profiles, more registers teams of that size' }
+                        capacity: { type: integer, minimum: 2, maximum: 128, example: 16 }
+                        participantCount: { type: integer, example: 5 }
+                        status:
+                            type: string
+                            enum: [upcoming, ongoing, finished, cancelled]
+                            description: '`upcoming` while registrations are open, `ongoing` once the bracket is drawn, `finished` when the final is settled.'
+                        organizer: { $ref: '#/components/schemas/Uuid' }
+                        startsAt: { type: string, format: date-time }
+                        winner:
+                            nullable: true
+                            description: 'The competitor that won the final. Null until then.'
+                            allOf:
+                                - { $ref: '#/components/schemas/NamedSide' }
+                        createdAt: { type: string, format: date-time }
+                        updatedAt: { type: string, format: date-time }
+                TournamentParticipant:
+                    description: 'A competitor registered in a tournament. The seed is its registration rank.'
+                    allOf:
+                        - { $ref: '#/components/schemas/NamedSide' }
+                        - type: object
+                          properties:
+                              id: { $ref: '#/components/schemas/Uuid' }
+                              tournament: { $ref: '#/components/schemas/Uuid' }
+                              seed: { type: integer, minimum: 1, example: 1 }
+                              createdAt: { type: string, format: date-time }
+                TournamentMatchup:
+                    type: object
+                    description: 'One slot of the bracket. A side is null until the matchup feeding it is decided, or for good when a seed got a bye.'
+                    properties:
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        round: { type: integer, minimum: 1, example: 1, description: 'The last round is the final' }
+                        position: { type: integer, minimum: 0, example: 0, description: 'From the top of the round' }
+                        sides:
+                            type: array
+                            minItems: 2
+                            maxItems: 2
+                            items:
+                                nullable: true
+                                allOf:
+                                    - { $ref: '#/components/schemas/NamedSide' }
+                        fight:
+                            type: object
+                            nullable: true
+                            description: 'The fight both sides play, opened once both are known. Declared and confirmed like any other fight.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        winner:
+                            type: object
+                            nullable: true
+                            properties:
+                                value: { type: string, format: uuid }
+                TournamentDetail:
+                    description: 'A tournament, its participants by seed and, once it started, its bracket round by round.'
+                    allOf:
+                        - { $ref: '#/components/schemas/TournamentSummary' }
+                        - type: object
+                          properties:
+                              participants:
+                                  type: array
+                                  items: { $ref: '#/components/schemas/TournamentParticipant' }
+                              rounds: { type: integer, example: 3, description: '0 until the bracket is drawn' }
+                              matchups:
+                                  type: array
+                                  items: { $ref: '#/components/schemas/TournamentMatchup' }
             responses:
                 BadRequest:
                     description: 'Invalid input: a value object rule or a business rule was violated'

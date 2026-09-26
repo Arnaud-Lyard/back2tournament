@@ -6,51 +6,15 @@ namespace App\Competition\Fight\Application\Model;
 
 final class ConfirmFightResultsCommand
 {
-    private string $fight;
+    private string $fightId;
 
-    private string $game;
-
-    private string $competitorOne;
-
-    private string $competitorTwo;
-
-    public function getFight(): string
+    public function __construct(string $fightId)
     {
-        return $this->fight;
+        $this->fightId = $fightId;
     }
 
-    public function setFight(string $fight): void
+    public function getFightId(): string
     {
-        $this->fight = $fight;
-    }
-
-    public function getGame(): string
-    {
-        return $this->game;
-    }
-
-    public function setGame(string $game): void
-    {
-        $this->game = $game;
-    }
-
-    public function getCompetitorOne(): string
-    {
-        return $this->competitorOne;
-    }
-
-    public function setCompetitorOne(string $competitorOne): void
-    {
-        $this->competitorOne = $competitorOne;
-    }
-
-    public function getCompetitorTwo(): string
-    {
-        return $this->competitorTwo;
-    }
-
-    public function setCompetitorTwo(string $competitorTwo): void
-    {
-        $this->competitorTwo = $competitorTwo;
+        return $this->fightId;
     }
 }
