@@ -89,7 +89,7 @@ final class RemoveClanMemberHandler
         }
 
         $removed = json_encode(
-            ClanView::membership($membership, $player instanceof Player ? $player : null),
+            $this->normalizeMembership($membership, $player instanceof Player ? $player : null),
             JSON_THROW_ON_ERROR,
         );
 
@@ -112,5 +112,26 @@ final class RemoveClanMemberHandler
 
         return [] !== $teamIds
             && [] !== $this->teamRepository->findBy(['id' => $teamIds, 'clan' => $clanId->getValue()]);
+    }
+
+    /**
+     * A place in a clan, the player named by battletag.
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeMembership(ClanMember $membership, ?Player $player): array
+    {
+        return [
+            'id' => ['value' => $membership->getId()->getValue()],
+            'clan' => ['value' => $membership->getClan()->getValue()],
+            'player' => [
+                'id' => ['value' => $membership->getPlayer()->getValue()],
+                'battletag' => $player?->getBattletag(),
+            ],
+            'role' => $membership->getRole()->value,
+            'status' => $membership->getStatus()->value,
+            'createdAt' => $membership->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $membership->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
     }
 }

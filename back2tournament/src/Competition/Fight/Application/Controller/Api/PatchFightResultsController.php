@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Competition\Fight\Application\Controller\Api;
 
-use App\Competition\Fight\Application\Model\DeclareFightResultsCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
+use App\Competition\Fight\Application\Event\OnUpdateFightResultsEvent;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Messenger\HandleTrait;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Route('/api/fights/{id}/results', name: 'api_fight_results_patch', methods: ['PATCH'])]
 #[OA\Tag(name: 'Fight')]
@@ -40,11 +38,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: 409, description: 'The fight is settled, or the other side already declared')]
 final class PatchFightResultsController extends AbstractController
 {
-    use HandleTrait;
+    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(MessageBusInterface $messageBus)
+    public function __construct(EventDispatcherInterface $eventDispatcher)
     {
-        $this->messageBus = $messageBus;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function __invoke(Request $request, string $id): JsonResponse
@@ -55,10 +53,12 @@ final class PatchFightResultsController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        return JsonResponse::fromJsonString($this->handle(new DeclareFightResultsCommand(
+        $event = $this->eventDispatcher->dispatch(new OnUpdateFightResultsEvent(
             $id,
-            JsonBody::int($parameters, 'score'),
-            JsonBody::int($parameters, 'opponentScore'),
-        )));
+            $parameters['score'],
+            $parameters['opponentScore'],
+        ));
+
+        return JsonResponse::fromJsonString($event->getUpdatedFight());
     }
 }

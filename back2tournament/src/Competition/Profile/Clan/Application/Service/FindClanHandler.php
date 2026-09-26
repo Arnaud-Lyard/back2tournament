@@ -13,7 +13,6 @@ use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
-use App\Competition\Profile\Team\Application\Service\TeamView;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
@@ -86,11 +85,11 @@ final class FindClanHandler
         /** @var array<string, mixed> $view */
         $view = $this->serializer->normalize($clan);
         $view['members'] = array_map(
-            static fn (ClanMember $membership): array => ClanView::membership($membership, $players[$membership->getPlayer()->getValue()] ?? null),
+            fn (ClanMember $membership): array => $this->normalizeMembership($membership, $players[$membership->getPlayer()->getValue()] ?? null),
             $memberships,
         );
         $view['teams'] = array_map(
-            static fn (Team $team): array => TeamView::of($team, array_values(array_filter(array_map(
+            fn (Team $team): array => $this->normalizeTeam($team, array_values(array_filter(array_map(
                 static fn (string $playerId): ?Player => $players[$playerId] ?? null,
                 $lineups[$team->getId()->getValue()] ?? [],
             )))),
@@ -98,5 +97,57 @@ final class FindClanHandler
         );
 
         return json_encode($view, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * A place in a clan, the player named by battletag.
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeMembership(ClanMember $membership, ?Player $player): array
+    {
+        return [
+            'id' => ['value' => $membership->getId()->getValue()],
+            'clan' => ['value' => $membership->getClan()->getValue()],
+            'player' => [
+                'id' => ['value' => $membership->getPlayer()->getValue()],
+                'battletag' => $player?->getBattletag(),
+            ],
+            'role' => $membership->getRole()->value,
+            'status' => $membership->getStatus()->value,
+            'createdAt' => $membership->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $membership->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
+    }
+
+    /**
+     * The team, its lineup named by battletag, leader first.
+     *
+     * @param list<Player> $players the lineup
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeTeam(Team $team, array $players): array
+    {
+        $leader = $team->getLeader()->getValue();
+        usort(
+            $players,
+            static fn (Player $one, Player $two): int => ($two->getId()->getValue() === $leader) <=> ($one->getId()->getValue() === $leader),
+        );
+
+        return [
+            'id' => ['value' => $team->getId()->getValue()],
+            'name' => $team->getName(),
+            'clan' => ['value' => $team->getClan()->getValue()],
+            'game' => ['value' => $team->getGame()->getValue()],
+            'size' => $team->getSize(),
+            'leader' => ['value' => $leader],
+            'players' => array_map(static fn (Player $player): array => [
+                'id' => ['value' => $player->getId()->getValue()],
+                'battletag' => $player->getBattletag(),
+            ], $players),
+            'createdAt' => $team->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $team->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
     }
 }

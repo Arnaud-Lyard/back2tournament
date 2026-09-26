@@ -6,7 +6,6 @@ namespace App\Competition\Tournament\Application\Controller\Api;
 
 use App\Competition\Tournament\Application\Model\RegisterParticipantCommand;
 use App\Shared\Exception\ValidationException;
-use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,8 +54,8 @@ final class PostTournamentParticipantController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $player = JsonBody::optionalString($parameters, 'player');
-        $team = JsonBody::optionalString($parameters, 'team');
+        $player = $parameters['player'] ?? null;
+        $team = $parameters['team'] ?? null;
         if ((null === $player) === (null === $team)) {
             throw new ValidationException('name either a player or a team');
         }

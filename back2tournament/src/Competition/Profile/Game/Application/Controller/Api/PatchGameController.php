@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Competition\Profile\Game\Application\Controller\Api;
 
 use App\Competition\Profile\Game\Application\Model\UpdateGameCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -61,8 +60,8 @@ final class PatchGameController extends AbstractController
 
         return JsonResponse::fromJsonString($this->handle(new UpdateGameCommand(
             $id,
-            JsonBody::optionalString($parameters, 'title'),
-            JsonBody::optionalIntList($parameters, 'teamSizes'),
+            $parameters['title'] ?? null,
+            $parameters['teamSizes'] ?? null,
         )));
     }
 }

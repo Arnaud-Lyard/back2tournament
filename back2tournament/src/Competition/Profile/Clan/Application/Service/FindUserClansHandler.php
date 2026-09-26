@@ -10,6 +10,7 @@ use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
+use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -68,10 +69,31 @@ final class FindUserClansHandler
 
             $items[] = [
                 'clan' => $this->serializer->normalize($clan),
-                'membership' => ClanView::membership($membership, $players[$membership->getPlayer()->getValue()] ?? null),
+                'membership' => $this->normalizeMembership($membership, $players[$membership->getPlayer()->getValue()] ?? null),
             ];
         }
 
         return json_encode($items, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * A place in a clan, the player named by battletag.
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeMembership(ClanMember $membership, ?Player $player): array
+    {
+        return [
+            'id' => ['value' => $membership->getId()->getValue()],
+            'clan' => ['value' => $membership->getClan()->getValue()],
+            'player' => [
+                'id' => ['value' => $membership->getPlayer()->getValue()],
+                'battletag' => $player?->getBattletag(),
+            ],
+            'role' => $membership->getRole()->value,
+            'status' => $membership->getStatus()->value,
+            'createdAt' => $membership->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $membership->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
     }
 }

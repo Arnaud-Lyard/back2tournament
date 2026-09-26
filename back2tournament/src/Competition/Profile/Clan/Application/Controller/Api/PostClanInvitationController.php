@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Competition\Profile\Clan\Application\Controller\Api;
 
 use App\Competition\Profile\Clan\Application\Model\InviteClanMemberCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -56,7 +55,7 @@ final class PostClanInvitationController extends AbstractController
 
         return JsonResponse::fromJsonString($this->handle(new InviteClanMemberCommand(
             $id,
-            JsonBody::string($parameters, 'player'),
+            $parameters['player'],
         )));
     }
 }

@@ -135,9 +135,7 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   `api_<resource>_<action>`; keep the same shape across a resource's routes.
 - Every `{placeholder}` in the path is a `__invoke` argument **and** an
   `#[OA\Parameter(in: 'path')]`. Never document a parameter the route does not have.
-- Body: `json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)`, then read
-  each field through `App\Shared\Infrastructure\Http\JsonBody` so that a value of the
-  wrong type answers 400 rather than a `TypeError`.
+- Body: `json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)`.
 - **Never read the caller's identity from the body or the query string.** The user is
   the JWT identity, read through `CurrentUserProviderInterface`. A `user` key in a
   request payload is always a bug and usually a privilege escalation.
@@ -181,6 +179,9 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   through `SerializerInterface` / `NormalizerInterface`.
 - Value objects serialize as `{"value": "<uuid>"}`. Document that shape in the OpenAPI
   response schema.
+- The handler builds the response it returns: normalize the entity, or, when the
+  response combines several aggregates, build the array in a private method of the
+  handler itself. No shared view class between handlers.
 - POST create endpoints answer **200**, not 201, and carry only the primary resource —
   no secondary entities padded in.
 - Request bodies are read with `json_decode($content, true)`, so a JSON number arrives
@@ -202,10 +203,21 @@ services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a
-tournament winner on once its fight is settled (`FightSettledEvent`). Do not use an event chain to assemble the data
-one request needs: each hop adds an event class, a subscriber, a constructor signature
-and a silent `ArgumentCountError` when one of them drifts, and the response then has
-nowhere to go but the session.
+tournament winner on once its fight is settled (`FightSettledEvent`). Do not use an
+event chain to assemble the data one request needs: each hop adds an event class, a
+subscriber, a constructor signature and a silent `ArgumentCountError` when one of them
+drifts, and the response then has nowhere to go but the session.
+
+**The User context's verification chain** is the one sanctioned exception, kept on
+purpose: creating a player profile, a game or a team, publishing an article, and
+declaring or confirming a fight result go through the User context. The controller dispatches `On<Thing>RequestedEvent` (owning
+context); a subscriber of the User context checks the role and dispatches
+`On<Thing>…VerifiedEvent` carrying the verified user id; a subscriber of the owning
+context runs the command for that user through `HandleTrait`. The handler's JSON goes
+back the same way: the owning subscriber sets it on the verified event, the User
+subscriber copies it onto the requested event, and the controller reads it from the
+event `dispatch()` returned — never from the session. Player creation and article
+publication still read theirs from the session: align them when they are next touched.
 
 Naming, when an event really is warranted: `On<Thing><PastParticiple>Event` in
 `Application/Event/`, subscriber `<Thing><PastParticiple>EventSubscriber` in

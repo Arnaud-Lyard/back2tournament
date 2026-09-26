@@ -35,21 +35,11 @@ final class GameHandlersTest extends TestCase
             }
         );
 
-        $this->createHandler($gameRepository, admin: true)(new CreateGameCommand('Rocket League', [1, 2, 3]));
+        $this->createHandler($gameRepository)(new CreateGameCommand('Rocket League', [1, 2, 3]));
 
         $this->assertInstanceOf(Game::class, $saved);
         $this->assertSame('Rocket League', $saved->getTitle());
         $this->assertSame([1, 2, 3], $saved->getTeamSizes());
-    }
-
-    public function test_only_an_admin_creates_a_game(): void
-    {
-        $gameRepository = $this->createMock(GameRepositoryInterface::class);
-        $gameRepository->expects($this->never())->method('save');
-
-        $this->expectException(PermissionDeniedException::class);
-
-        $this->createHandler($gameRepository, admin: false)(new CreateGameCommand('Rocket League', [1]));
     }
 
     public function test_an_invalid_format_is_refused_before_anything_else(): void
@@ -59,7 +49,7 @@ final class GameHandlersTest extends TestCase
 
         $this->expectException(ValidationException::class);
 
-        $this->createHandler($gameRepository, admin: true)(new CreateGameCommand('Rocket League', [0]));
+        $this->createHandler($gameRepository)(new CreateGameCommand('Rocket League', [0]));
     }
 
     public function test_an_admin_opens_new_formats_on_an_existing_game(): void
@@ -96,11 +86,13 @@ final class GameHandlersTest extends TestCase
         $this->updateHandler($gameRepository, admin: false)(new UpdateGameCommand(self::GAME_ID, 'Valorant', null));
     }
 
-    private function createHandler(GameRepositoryInterface $gameRepository, bool $admin): CreateGameHandler
+    /**
+     * The administrator role is checked upstream, by GameCreationRequestedEventSubscriber.
+     */
+    private function createHandler(GameRepositoryInterface $gameRepository): CreateGameHandler
     {
         return new CreateGameHandler(
             $gameRepository,
-            $this->currentUserProvider($admin),
             $this->createStub(EventDispatcherInterface::class),
             $this->createStub(SerializerInterface::class),
         );

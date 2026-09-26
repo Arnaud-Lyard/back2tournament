@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Competition\Profile\Team\Application\Controller\Api;
 
-use App\Competition\Profile\Team\Application\Model\CreateTeamCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
+use App\Competition\Profile\Team\Application\Event\OnTeamCreationRequestedEvent;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Messenger\HandleTrait;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Route('/api/teams/', name: 'api_team_post', methods: ['POST'])]
 #[OA\Tag(name: 'Team')]
@@ -46,11 +44,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: 404, description: 'The clan does not exist')]
 final class PostTeamController extends AbstractController
 {
-    use HandleTrait;
+    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(MessageBusInterface $messageBus)
+    public function __construct(EventDispatcherInterface $eventDispatcher)
     {
-        $this->messageBus = $messageBus;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function __invoke(Request $request): JsonResponse
@@ -61,12 +59,14 @@ final class PostTeamController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        return JsonResponse::fromJsonString($this->handle(new CreateTeamCommand(
-            JsonBody::string($parameters, 'clan'),
-            JsonBody::string($parameters, 'name'),
-            JsonBody::int($parameters, 'size'),
-            JsonBody::stringList($parameters, 'players'),
-            JsonBody::string($parameters, 'leader'),
-        )));
+        $event = $this->eventDispatcher->dispatch(new OnTeamCreationRequestedEvent(
+            $parameters['name'],
+            $parameters['clan'],
+            $parameters['size'],
+            $parameters['players'],
+            $parameters['leader'],
+        ));
+
+        return JsonResponse::fromJsonString($event->getCreatedTeam());
     }
 }

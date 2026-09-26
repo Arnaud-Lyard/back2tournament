@@ -6,12 +6,12 @@ namespace App\Tests\Competition\Fight\Application;
 
 use App\Competition\Fight\Application\Model\ConfirmFightResultsCommand;
 use App\Competition\Fight\Application\Model\CreateFightCommand;
-use App\Competition\Fight\Application\Model\DeclareFightResultsCommand;
 use App\Competition\Fight\Application\Model\FindPendingUserFightResultsQuery;
+use App\Competition\Fight\Application\Model\UpdateFightResultsCommand;
 use App\Competition\Fight\Application\Service\ConfirmFightResultsHandler;
 use App\Competition\Fight\Application\Service\CreateFightHandler;
-use App\Competition\Fight\Application\Service\DeclareFightResultsHandler;
 use App\Competition\Fight\Application\Service\FindPendingUserFightResultsHandler;
+use App\Competition\Fight\Application\Service\UpdateFightResultsHandler;
 use App\Competition\Fight\Domain\Entity\Fight;
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Fight\Domain\Entity\Result;
@@ -173,8 +173,8 @@ final class FightHandlersTest extends TestCase
         $resultRepository = $this->repositoryMock(ResultRepositoryInterface::class, [$mine, $theirs]);
         $resultRepository->expects($this->exactly(2))->method('save');
 
-        $view = $this->read($this->declareHandler($fight, $resultRepository, [self::MY_SIDE])(
-            new DeclareFightResultsCommand(self::FIGHT_ID, 3, 1)
+        $view = $this->read($this->updateHandler($fight, $resultRepository, [self::MY_SIDE])(
+            new UpdateFightResultsCommand(self::FIGHT_ID, self::MY_USER, 3, 1)
         ));
 
         $this->assertSame('reporting', $view['status']);
@@ -182,6 +182,21 @@ final class FightHandlersTest extends TestCase
         $this->assertSame(self::MY_SIDE, $view['mySide']['value']);
         $this->assertSame(ResultStatus::WIN, $mine->getReportedStatus());
         $this->assertSame(1, $theirs->getScore());
+    }
+
+    public function test_the_side_resolved_is_the_one_of_the_user_verified_upstream(): void
+    {
+        [$fight, $mine, $theirs] = $this->openFight();
+
+        $registry = $this->createMock(CompetitorRegistryInterface::class);
+        $registry->expects($this->once())->method('representedBy')->with(self::MY_USER)->willReturn([self::MY_SIDE]);
+        $registry->method('describe')->willReturn([]);
+
+        $this->updateHandler($fight, $this->repositoryStub(ResultRepositoryInterface::class, [$mine, $theirs]), [], $registry)(
+            new UpdateFightResultsCommand(self::FIGHT_ID, self::MY_USER, 3, 1)
+        );
+
+        $this->assertSame(ResultStatus::WIN, $mine->getReportedStatus());
     }
 
     public function test_a_bystander_declares_nothing_and_nothing_is_written(): void
@@ -193,7 +208,7 @@ final class FightHandlersTest extends TestCase
 
         $this->expectException(PermissionDeniedException::class);
 
-        $this->declareHandler($fight, $resultRepository, [self::STRANGER_PLAYER])(new DeclareFightResultsCommand(self::FIGHT_ID, 3, 1));
+        $this->updateHandler($fight, $resultRepository, [self::STRANGER_PLAYER])(new UpdateFightResultsCommand(self::FIGHT_ID, self::MY_USER, 3, 1));
     }
 
     public function test_a_negative_score_costs_no_query(): void
@@ -203,21 +218,20 @@ final class FightHandlersTest extends TestCase
 
         $this->expectException(ValidationException::class);
 
-        new DeclareFightResultsHandler(
+        new UpdateFightResultsHandler(
             $fightRepository,
             $this->createStub(ResultRepositoryInterface::class),
             $this->registry([self::MY_SIDE]),
-            $this->signedIn(self::MY_USER),
             $this->createStub(EventDispatcherInterface::class),
-        )(new DeclareFightResultsCommand(self::FIGHT_ID, -1, 1));
+        )(new UpdateFightResultsCommand(self::FIGHT_ID, self::MY_USER, -1, 1));
     }
 
     public function test_an_unknown_fight_is_not_found(): void
     {
         $this->expectException(NotFoundException::class);
 
-        $this->declareHandler(null, $this->repositoryStub(ResultRepositoryInterface::class, []), [self::MY_SIDE])(
-            new DeclareFightResultsCommand(self::FIGHT_ID, 3, 1)
+        $this->updateHandler(null, $this->repositoryStub(ResultRepositoryInterface::class, []), [self::MY_SIDE])(
+            new UpdateFightResultsCommand(self::FIGHT_ID, self::MY_USER, 3, 1)
         );
     }
 
@@ -241,7 +255,7 @@ final class FightHandlersTest extends TestCase
         $resultRepository->expects($this->exactly(2))->method('save');
 
         $view = $this->read($this->confirmHandler($fight, $resultRepository, [self::MY_SIDE], $eventDispatcher)(
-            new ConfirmFightResultsCommand(self::FIGHT_ID)
+            new ConfirmFightResultsCommand(self::FIGHT_ID, self::MY_USER)
         ));
 
         $this->assertSame('finished', $view['status']);
@@ -262,7 +276,7 @@ final class FightHandlersTest extends TestCase
         $this->expectException(PermissionDeniedException::class);
         $this->expectExceptionMessageIsOrContains('cannot confirm its own outcome');
 
-        $this->confirmHandler($fight, $resultRepository, [self::MY_SIDE])(new ConfirmFightResultsCommand(self::FIGHT_ID));
+        $this->confirmHandler($fight, $resultRepository, [self::MY_SIDE])(new ConfirmFightResultsCommand(self::FIGHT_ID, self::MY_USER));
     }
 
     public function test_a_caller_who_speaks_for_nobody_reads_an_empty_page_and_costs_no_result_query(): void
@@ -350,13 +364,16 @@ final class FightHandlersTest extends TestCase
     /**
      * @param list<string> $represented
      */
-    private function declareHandler(?Fight $fight, ResultRepositoryInterface $resultRepository, array $represented): DeclareFightResultsHandler
-    {
-        return new DeclareFightResultsHandler(
+    private function updateHandler(
+        ?Fight $fight,
+        ResultRepositoryInterface $resultRepository,
+        array $represented,
+        ?CompetitorRegistryInterface $registry = null,
+    ): UpdateFightResultsHandler {
+        return new UpdateFightResultsHandler(
             $this->repositoryStub(FightRepositoryInterface::class, null === $fight ? [] : [$fight]),
             $resultRepository,
-            $this->registry($represented),
-            $this->signedIn(self::MY_USER),
+            $registry ?? $this->registry($represented),
             $this->createStub(EventDispatcherInterface::class),
         );
     }
@@ -374,7 +391,6 @@ final class FightHandlersTest extends TestCase
             $resultRepository,
             $this->repositoryStub(FightRepositoryInterface::class, [$fight]),
             $this->registry($represented),
-            $this->signedIn(self::MY_USER),
             $eventDispatcher ?? $this->createStub(EventDispatcherInterface::class),
         );
     }

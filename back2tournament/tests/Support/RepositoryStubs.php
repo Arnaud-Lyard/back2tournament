@@ -59,12 +59,18 @@ trait RepositoryStubs
             static fn (object $entity): bool => self::matchesCriteria($entity, $criteria),
         ));
 
-        $repository->method('findOneBy')->willReturnCallback(
-            static fn (array $criteria, ?array $orderBy = null): ?object => $matching($criteria)[0] ?? null
-        );
-        $repository->method('findBy')->willReturnCallback(
-            static fn (array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array => \array_slice($matching($criteria), $offset ?? 0, $limit)
-        );
+        // Only what the interface declares: PHPUnit refuses to configure anything else.
+        if (method_exists($interface, 'findOneBy')) {
+            $repository->method('findOneBy')->willReturnCallback(
+                static fn (array $criteria, ?array $orderBy = null): ?object => $matching($criteria)[0] ?? null
+            );
+        }
+
+        if (method_exists($interface, 'findBy')) {
+            $repository->method('findBy')->willReturnCallback(
+                static fn (array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array => \array_slice($matching($criteria), $offset ?? 0, $limit)
+            );
+        }
 
         if (method_exists($interface, 'count')) {
             $repository->method('count')->willReturnCallback(

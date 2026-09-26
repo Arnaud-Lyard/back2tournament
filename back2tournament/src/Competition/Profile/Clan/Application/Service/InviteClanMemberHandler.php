@@ -8,6 +8,7 @@ use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Profile\Clan\Application\Model\InviteClanMemberCommand;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
+use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
@@ -85,6 +86,27 @@ final class InviteClanMemberHandler
             $this->eventDispatcher->dispatch($domainEvent);
         }
 
-        return json_encode(ClanView::membership($membership, $player), JSON_THROW_ON_ERROR);
+        return json_encode($this->normalizeMembership($membership, $player), JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * A place in a clan, the player named by battletag.
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeMembership(ClanMember $membership, ?Player $player): array
+    {
+        return [
+            'id' => ['value' => $membership->getId()->getValue()],
+            'clan' => ['value' => $membership->getClan()->getValue()],
+            'player' => [
+                'id' => ['value' => $membership->getPlayer()->getValue()],
+                'battletag' => $player?->getBattletag(),
+            ],
+            'role' => $membership->getRole()->value,
+            'status' => $membership->getStatus()->value,
+            'createdAt' => $membership->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $membership->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
     }
 }

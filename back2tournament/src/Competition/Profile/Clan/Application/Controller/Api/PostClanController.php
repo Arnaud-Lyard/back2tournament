@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Competition\Profile\Clan\Application\Controller\Api;
 
 use App\Competition\Profile\Clan\Application\Model\CreateClanCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,9 +54,9 @@ final class PostClanController extends AbstractController
         );
 
         return JsonResponse::fromJsonString($this->handle(new CreateClanCommand(
-            JsonBody::string($parameters, 'game'),
-            JsonBody::string($parameters, 'name'),
-            JsonBody::string($parameters, 'tag'),
+            $parameters['game'],
+            $parameters['name'],
+            $parameters['tag'],
         )));
     }
 }

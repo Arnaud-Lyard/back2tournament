@@ -44,6 +44,8 @@ use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -381,7 +383,7 @@ final class TournamentHandlersTest extends TestCase
         return $registry;
     }
 
-    private function configureRegistry(CompetitorRegistryInterface $registry): void
+    private function configureRegistry(CompetitorRegistryInterface&Stub $registry): void
     {
         $registry->method('enlistPlayer')->willReturnCallback(static fn (string $id): string => self::uuidFor('competitor-of-'.$id));
         $registry->method('enlistTeam')->willReturnCallback(static fn (string $id): string => self::uuidFor('competitor-of-'.$id));
@@ -416,7 +418,7 @@ final class TournamentHandlersTest extends TestCase
         Tournament $tournament,
         ParticipantRepositoryInterface $participantRepository,
         string $caller,
-        ?CompetitorRegistryInterface $registry = null,
+        (CompetitorRegistryInterface&MockObject)|null $registry = null,
     ): RegisterParticipantHandler {
         $myClan = self::aClan(self::MY_CLAN, self::GAME_ID, self::MY_PLAYER);
         [$myTeam, $myLineup] = self::aTeam(self::MY_TEAM, $myClan, [self::MY_PLAYER, self::MATE_PLAYER]);

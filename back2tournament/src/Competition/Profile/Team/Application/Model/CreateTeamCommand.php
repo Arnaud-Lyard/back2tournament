@@ -19,16 +19,19 @@ final class CreateTeamCommand
 
     private string $leader;
 
+    private string $user;
+
     /**
      * @param list<string> $players
      */
-    public function __construct(string $clan, string $name, int $size, array $players, string $leader)
+    public function __construct(string $clan, string $name, int $size, array $players, string $leader, string $user)
     {
         $this->clan = $clan;
         $this->name = $name;
         $this->size = $size;
         $this->players = $players;
         $this->leader = $leader;
+        $this->user = $user;
     }
 
     public function getClan(): string
@@ -57,5 +60,13 @@ final class CreateTeamCommand
     public function getLeader(): string
     {
         return $this->leader;
+    }
+
+    /**
+     * The caller, as the User context verified it.
+     */
+    public function getUser(): string
+    {
+        return $this->user;
     }
 }

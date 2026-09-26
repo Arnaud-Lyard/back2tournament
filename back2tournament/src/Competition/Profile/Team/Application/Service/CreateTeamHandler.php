@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Competition\Profile\Team\Application\Service;
 
-use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
@@ -39,7 +38,6 @@ final class CreateTeamHandler
     private ClanMemberRepositoryInterface $clanMemberRepository;
     private GameRepositoryInterface $gameRepository;
     private PlayerRepositoryInterface $playerRepository;
-    private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
@@ -49,7 +47,6 @@ final class CreateTeamHandler
         ClanMemberRepositoryInterface $clanMemberRepository,
         GameRepositoryInterface $gameRepository,
         PlayerRepositoryInterface $playerRepository,
-        CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->teamRepository = $teamRepository;
@@ -58,7 +55,6 @@ final class CreateTeamHandler
         $this->clanMemberRepository = $clanMemberRepository;
         $this->gameRepository = $gameRepository;
         $this->playerRepository = $playerRepository;
-        $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -78,7 +74,7 @@ final class CreateTeamHandler
 
         $clanLeader = $this->playerRepository->findOneBy(['id' => $clan->getLeader()->getValue()]);
         if (!$clanLeader instanceof Player
-            || $clanLeader->getUser()->getValue() !== (string) $this->currentUserProvider->getUser()->getId()) {
+            || $clanLeader->getUser()->getValue() !== $createTeamCommand->getUser()) {
             throw new PermissionDeniedException('only the clan leader composes its teams');
         }
 
@@ -123,8 +119,39 @@ final class CreateTeamHandler
         }
 
         return json_encode(
-            TeamView::of($team, $this->playerRepository->findBy(['id' => $lineupIds])),
+            $this->normalizeTeam($team, $this->playerRepository->findBy(['id' => $lineupIds])),
             JSON_THROW_ON_ERROR,
         );
+    }
+
+    /**
+     * The team, its lineup named by battletag, leader first.
+     *
+     * @param list<Player> $players the lineup
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeTeam(Team $team, array $players): array
+    {
+        $leader = $team->getLeader()->getValue();
+        usort(
+            $players,
+            static fn (Player $one, Player $two): int => ($two->getId()->getValue() === $leader) <=> ($one->getId()->getValue() === $leader),
+        );
+
+        return [
+            'id' => ['value' => $team->getId()->getValue()],
+            'name' => $team->getName(),
+            'clan' => ['value' => $team->getClan()->getValue()],
+            'game' => ['value' => $team->getGame()->getValue()],
+            'size' => $team->getSize(),
+            'leader' => ['value' => $leader],
+            'players' => array_map(static fn (Player $player): array => [
+                'id' => ['value' => $player->getId()->getValue()],
+                'battletag' => $player->getBattletag(),
+            ], $players),
+            'createdAt' => $team->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $team->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
     }
 }

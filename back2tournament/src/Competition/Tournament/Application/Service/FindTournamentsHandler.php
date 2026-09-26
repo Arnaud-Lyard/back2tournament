@@ -57,7 +57,7 @@ final class FindTournamentsHandler
 
         return json_encode([
             'items' => array_map(
-                static fn (Tournament $tournament): array => TournamentView::summary($tournament, $counts[$tournament->getId()->getValue()] ?? 0, $described),
+                fn (Tournament $tournament): array => $this->normalizeTournament($tournament, $counts[$tournament->getId()->getValue()] ?? 0, $described),
                 $tournaments,
             ),
             'total' => $total,
@@ -65,5 +65,38 @@ final class FindTournamentsHandler
             'limit' => $limit,
             'pages' => (int) ceil($total / $limit),
         ], JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * A tournament as the list shows it; a winner is named by battletag or team name.
+     *
+     * @param array<string, array{type: string, reference: string, name: ?string}> $described the winners, keyed by competitor id
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeTournament(Tournament $tournament, int $participantCount, array $described): array
+    {
+        $winner = $tournament->getWinner();
+        $description = null === $winner ? null : ($described[$winner->getValue()] ?? null);
+
+        return [
+            'id' => ['value' => $tournament->getId()->getValue()],
+            'name' => $tournament->getName(),
+            'game' => ['value' => $tournament->getGame()->getValue()],
+            'teamSize' => $tournament->getTeamSize(),
+            'capacity' => $tournament->getCapacity(),
+            'participantCount' => $participantCount,
+            'status' => $tournament->getStatus()->value,
+            'organizer' => ['value' => $tournament->getOrganizer()->getValue()],
+            'startsAt' => $tournament->getStartsAt()->format(\DateTimeInterface::ATOM),
+            'winner' => null === $winner ? null : [
+                'competitor' => ['value' => $winner->getValue()],
+                'type' => $description['type'] ?? null,
+                'reference' => null === $description ? null : ['value' => $description['reference']],
+                'name' => $description['name'] ?? null,
+            ],
+            'createdAt' => $tournament->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'updatedAt' => $tournament->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
+        ];
     }
 }

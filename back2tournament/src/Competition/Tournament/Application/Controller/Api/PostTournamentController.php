@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Competition\Tournament\Application\Controller\Api;
 
 use App\Competition\Tournament\Application\Model\CreateTournamentCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -56,11 +55,11 @@ final class PostTournamentController extends AbstractController
         );
 
         return JsonResponse::fromJsonString($this->handle(new CreateTournamentCommand(
-            JsonBody::string($parameters, 'name'),
-            JsonBody::string($parameters, 'game'),
-            JsonBody::int($parameters, 'teamSize'),
-            JsonBody::int($parameters, 'capacity'),
-            JsonBody::string($parameters, 'startsAt'),
+            $parameters['name'],
+            $parameters['game'],
+            $parameters['teamSize'],
+            $parameters['capacity'],
+            $parameters['startsAt'],
         )));
     }
 }

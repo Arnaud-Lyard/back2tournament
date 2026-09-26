@@ -54,7 +54,7 @@ final class TeamHandlersTest extends TestCase
         );
 
         $view = json_decode(
-            $this->createHandler($teamRepository, $teamPlayerRepository, self::LEADER_USER)($this->command(2, [self::LEADER_PLAYER, self::MEMBER_PLAYER])),
+            $this->createHandler($teamRepository, $teamPlayerRepository)($this->command(2, [self::LEADER_PLAYER, self::MEMBER_PLAYER], self::LEADER_USER)),
             true,
             512,
             JSON_THROW_ON_ERROR,
@@ -72,8 +72,8 @@ final class TeamHandlersTest extends TestCase
 
         $this->expectException(PermissionDeniedException::class);
 
-        $this->createHandler($teamRepository, $this->createStub(TeamPlayerRepositoryInterface::class), self::MEMBER_USER)(
-            $this->command(2, [self::LEADER_PLAYER, self::MEMBER_PLAYER])
+        $this->createHandler($teamRepository, $this->createStub(TeamPlayerRepositoryInterface::class))(
+            $this->command(2, [self::LEADER_PLAYER, self::MEMBER_PLAYER], self::MEMBER_USER)
         );
     }
 
@@ -85,8 +85,8 @@ final class TeamHandlersTest extends TestCase
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessageIsOrContains('is not played 5v5');
 
-        $this->createHandler($teamRepository, $this->createStub(TeamPlayerRepositoryInterface::class), self::LEADER_USER)(
-            $this->command(5, [self::LEADER_PLAYER, self::MEMBER_PLAYER])
+        $this->createHandler($teamRepository, $this->createStub(TeamPlayerRepositoryInterface::class))(
+            $this->command(5, [self::LEADER_PLAYER, self::MEMBER_PLAYER], self::LEADER_USER)
         );
     }
 
@@ -98,8 +98,8 @@ final class TeamHandlersTest extends TestCase
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessageIsOrContains('active member');
 
-        $this->createHandler($teamRepository, $this->createStub(TeamPlayerRepositoryInterface::class), self::LEADER_USER)(
-            $this->command(2, [self::LEADER_PLAYER, self::INVITED_PLAYER])
+        $this->createHandler($teamRepository, $this->createStub(TeamPlayerRepositoryInterface::class))(
+            $this->command(2, [self::LEADER_PLAYER, self::INVITED_PLAYER], self::LEADER_USER)
         );
     }
 
@@ -137,10 +137,11 @@ final class TeamHandlersTest extends TestCase
 
     /**
      * @param list<string> $players
+     * @param string       $caller  the user the User context verified
      */
-    private function command(int $size, array $players): CreateTeamCommand
+    private function command(int $size, array $players, string $caller): CreateTeamCommand
     {
-        return new CreateTeamCommand(self::CLAN_ID, 'Falcons Duo', $size, $players, self::LEADER_PLAYER);
+        return new CreateTeamCommand(self::CLAN_ID, 'Falcons Duo', $size, $players, self::LEADER_PLAYER, $caller);
     }
 
     private function players(): PlayerRepositoryInterface
@@ -154,7 +155,6 @@ final class TeamHandlersTest extends TestCase
     private function createHandler(
         TeamRepositoryInterface $teamRepository,
         TeamPlayerRepositoryInterface $teamPlayerRepository,
-        string $caller,
     ): CreateTeamHandler {
         $clan = $this->clan();
 
@@ -169,7 +169,6 @@ final class TeamHandlersTest extends TestCase
             ]),
             $this->repositoryStub(GameRepositoryInterface::class, [self::aGame(self::GAME_ID, [1, 2, 3])]),
             $this->players(),
-            $this->signedIn($caller),
             $this->createStub(EventDispatcherInterface::class),
         );
     }

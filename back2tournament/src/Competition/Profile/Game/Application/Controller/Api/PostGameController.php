@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Competition\Profile\Game\Application\Controller\Api;
 
-use App\Competition\Profile\Game\Application\Model\CreateGameCommand;
-use App\Shared\Infrastructure\Http\JsonBody;
+use App\Competition\Profile\Game\Application\Event\OnGameCreationRequestedEvent;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Messenger\HandleTrait;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Route('/api/games/', name: 'api_game_post', methods: ['POST'])]
 #[OA\Tag(name: 'Game')]
@@ -43,11 +41,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
 final class PostGameController extends AbstractController
 {
-    use HandleTrait;
+    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(MessageBusInterface $messageBus)
+    public function __construct(EventDispatcherInterface $eventDispatcher)
     {
-        $this->messageBus = $messageBus;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function __invoke(Request $request): JsonResponse
@@ -58,9 +56,11 @@ final class PostGameController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        return JsonResponse::fromJsonString($this->handle(new CreateGameCommand(
-            JsonBody::string($parameters, 'title'),
-            JsonBody::optionalIntList($parameters, 'teamSizes') ?? [1],
-        )));
+        $event = $this->eventDispatcher->dispatch(new OnGameCreationRequestedEvent(
+            $parameters['title'],
+            $parameters['teamSizes'] ?? [1],
+        ));
+
+        return JsonResponse::fromJsonString($event->getCreatedGame());
     }
 }

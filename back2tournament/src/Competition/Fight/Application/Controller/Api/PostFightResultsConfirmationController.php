@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Competition\Fight\Application\Controller\Api;
 
-use App\Competition\Fight\Application\Model\ConfirmFightResultsCommand;
+use App\Competition\Fight\Application\Event\OnFightResultConfirmationEvent;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Messenger\HandleTrait;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Route('/api/fights/{id}/results/confirmation', name: 'api_fight_results_confirmation_post', methods: ['POST'])]
 #[OA\Tag(name: 'Fight')]
@@ -27,15 +26,17 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: 409, description: 'Nothing was declared yet, or the fight is already settled')]
 final class PostFightResultsConfirmationController extends AbstractController
 {
-    use HandleTrait;
+    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(MessageBusInterface $messageBus)
+    public function __construct(EventDispatcherInterface $eventDispatcher)
     {
-        $this->messageBus = $messageBus;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function __invoke(string $id): JsonResponse
     {
-        return JsonResponse::fromJsonString($this->handle(new ConfirmFightResultsCommand($id)));
+        $event = $this->eventDispatcher->dispatch(new OnFightResultConfirmationEvent($id));
+
+        return JsonResponse::fromJsonString($event->getConfirmedFight());
     }
 }

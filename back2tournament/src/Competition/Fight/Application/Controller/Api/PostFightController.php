@@ -6,7 +6,6 @@ namespace App\Competition\Fight\Application\Controller\Api;
 
 use App\Competition\Fight\Application\Model\CreateFightCommand;
 use App\Shared\Exception\ValidationException;
-use App\Shared\Infrastructure\Http\JsonBody;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,8 +54,8 @@ final class PostFightController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $betweenTeams = null !== JsonBody::optionalString($parameters, 'teamOne') || null !== JsonBody::optionalString($parameters, 'teamTwo');
-        $betweenPlayers = null !== JsonBody::optionalString($parameters, 'playerOne') || null !== JsonBody::optionalString($parameters, 'playerTwo');
+        $betweenTeams = isset($parameters['teamOne']) || isset($parameters['teamTwo']);
+        $betweenPlayers = isset($parameters['playerOne']) || isset($parameters['playerTwo']);
 
         if ($betweenTeams === $betweenPlayers) {
             throw new ValidationException('name either playerOne and playerTwo, or teamOne and teamTwo');
@@ -64,8 +63,8 @@ final class PostFightController extends AbstractController
 
         return JsonResponse::fromJsonString($this->handle(new CreateFightCommand(
             $betweenTeams,
-            JsonBody::string($parameters, $betweenTeams ? 'teamOne' : 'playerOne'),
-            JsonBody::string($parameters, $betweenTeams ? 'teamTwo' : 'playerTwo'),
+            $parameters[$betweenTeams ? 'teamOne' : 'playerOne'],
+            $parameters[$betweenTeams ? 'teamTwo' : 'playerTwo'],
         )));
     }
 }

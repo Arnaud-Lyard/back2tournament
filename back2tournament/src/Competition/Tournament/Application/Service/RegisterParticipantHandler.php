@@ -104,7 +104,7 @@ final class RegisterParticipantHandler
         }
 
         return json_encode(
-            TournamentView::participant($participant, $this->competitorRegistry->describe([$competitorId])),
+            $this->normalizeParticipant($participant, $this->competitorRegistry->describe([$competitorId])),
             JSON_THROW_ON_ERROR,
         );
     }
@@ -183,5 +183,29 @@ final class RegisterParticipantHandler
         }
 
         return $this->competitorRegistry->enlistTeam($teamId->getValue());
+    }
+
+    /**
+     * A place in the tournament; the competitor is named by battletag or team name.
+     *
+     * @param array<string, array{type: string, reference: string, name: ?string}> $described
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeParticipant(Participant $participant, array $described): array
+    {
+        $competitor = $participant->getCompetitor()->getValue();
+        $description = $described[$competitor] ?? null;
+
+        return [
+            'id' => ['value' => $participant->getId()->getValue()],
+            'tournament' => ['value' => $participant->getTournament()->getValue()],
+            'seed' => $participant->getSeed(),
+            'createdAt' => $participant->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'competitor' => ['value' => $competitor],
+            'type' => $description['type'] ?? null,
+            'reference' => null === $description ? null : ['value' => $description['reference']],
+            'name' => $description['name'] ?? null,
+        ];
     }
 }

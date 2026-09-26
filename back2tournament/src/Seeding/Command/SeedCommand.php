@@ -187,7 +187,6 @@ final class SeedCommand extends Command
 
         $fights = 0;
         $clans = 0;
-        $firstPlayers = [];
         foreach ($games as $index => $game) {
             [$me, $opponents] = $this->seedGamePlayers($game, $index, $mine, $rivals);
             $fights += $this->seedGamePlayground($game, $me, $opponents);
@@ -195,12 +194,11 @@ final class SeedCommand extends Command
             $clans += $teamClans;
             $fights += $teamFights;
 
+            // The tournaments are played in the first game, between its seeded players.
             if (0 === $index) {
-                $firstPlayers = [$me, $opponents];
+                $fights += $this->seedTournaments($game, $mine, $me, $opponents);
             }
         }
-
-        $fights += $this->seedTournaments($games[0], $mine, ...$firstPlayers);
 
         $this->seedArticles($mine, $categories);
         $this->entityManager->flush();
