@@ -68,7 +68,10 @@ make user           # seed a dev user via app:create-user
   fight records `FightSettledEvent`. When the sides disagree, an administrator settles
   the fight on the scores they impose (`Fight::arbitrate()`, the fight then reads
   `arbitrated`) or sets the declaration aside so that it is declared again
-  (`Fight::reopen()`); a settled fight is final.
+  (`Fight::reopen()`). Until both sides agree, the result may change: the declaring
+  side corrects its declaration, an administrator arbitrates or reopens. Once settled,
+  confirmed by the other side or arbitrated, a fight is final for everyone,
+  administrators included.
 - `Competition/Tournament/` — single-elimination tournaments: registrations, the
   bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
   winners moving on as `FightSettledEvent` comes in.

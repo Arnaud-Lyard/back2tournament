@@ -336,6 +336,36 @@ final class FightTest extends TestCase
         Fight::reopen($fight, $one, $two);
     }
 
+    /**
+     * Declared by an administrator, a result is as final as one confirmed by
+     * both sides: nobody goes back on it.
+     */
+    public function test_an_arbitrated_fight_is_final_for_everyone(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+        Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_ONE), $one, new Score(3), $two, new Score(0));
+        Fight::arbitrate($fight, $one, new Score(0), $two, new Score(2));
+
+        $attempts = [
+            'the declaring side corrects' => static fn () => Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_ONE), $one, new Score(3), $two, new Score(0)),
+            'the other side declares' => static fn () => Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_TWO), $two, new Score(2), $one, new Score(0)),
+            'the other side confirms' => static fn () => Fight::confirmOutcome($fight, new CompetitorId(self::COMPETITOR_TWO), $one, $two),
+            'an administrator arbitrates again' => static fn () => Fight::arbitrate($fight, $one, new Score(3), $two, new Score(0)),
+            'an administrator reopens it' => static fn () => Fight::reopen($fight, $one, $two),
+        ];
+
+        foreach ($attempts as $attempt => $change) {
+            try {
+                $change();
+                $this->fail(\sprintf('%s: an arbitrated fight changed', $attempt));
+            } catch (ConflictException) {
+            }
+        }
+
+        $this->assertSame([ResultStatus::LOSS, 0], [$one->getStatus(), $one->getScore()]);
+        $this->assertSame([ResultStatus::WIN, 2], [$two->getStatus(), $two->getScore()]);
+    }
+
     public function test_a_settled_fight_is_not_reopened(): void
     {
         [$fight, $one, $two] = $this->openFight();
