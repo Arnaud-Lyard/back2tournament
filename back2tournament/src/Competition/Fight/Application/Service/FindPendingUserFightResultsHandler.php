@@ -123,7 +123,7 @@ final class FindPendingUserFightResultsHandler
     }
 
     /**
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */
@@ -133,13 +133,14 @@ final class FindPendingUserFightResultsHandler
             'competitor' => ['value' => $competitorId],
             'type' => $described[$competitorId]['type'] ?? null,
             'name' => $described[$competitorId]['name'] ?? null,
+            'tag' => $described[$competitorId]['tag'] ?? null,
         ];
     }
 
     /**
      * The player profile behind a 1v1 side; null for a team.
      *
-     * @param array{type: string, reference: string, name: ?string}|null $description
+     * @param array{type: string, reference: string, name: ?string, tag: ?string}|null $description
      *
      * @return array<string, mixed>|null
      */

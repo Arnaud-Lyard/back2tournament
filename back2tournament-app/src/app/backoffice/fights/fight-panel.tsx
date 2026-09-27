@@ -1,5 +1,6 @@
 import { TrophyIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { CopyButton } from "@/components/copy-button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +17,7 @@ import { formatLabel } from "@/features/fights/lib/challenge"
 import type { FightSummary } from "@/features/fights/types"
 import type { Loaded } from "@/libs/api/load"
 import { ArbitrationForm } from "./arbitration-form"
-import { FightStatusBadges } from "./fight-status-badges"
+import { FightStatusBadge } from "./fight-status-badge"
 
 interface FightPanelProps {
   fightId: string
@@ -69,15 +70,18 @@ export async function FightPanel({
           )}
         </CardDescription>
         <CardAction>
-          <FightStatusBadges fight={fight} />
+          <FightStatusBadge fight={fight} />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1">
           {sides.map((side, index) => (
             <div key={side.competitor?.value ?? index} className="contents">
-              <dt className="truncate">
-                {side.name ?? t("unknownSide")}
+              <dt className="flex min-w-0 items-center gap-1.5">
+                <ClanTag tag={side.tag} />
+                <span className="truncate">
+                  {side.name ?? t("unknownSide")}
+                </span>
                 {side.competitor?.value === fight.declaredBy?.value && (
                   <span className="text-xs text-muted-foreground">
                     {" "}
@@ -93,9 +97,7 @@ export async function FightPanel({
         </dl>
         <p className="text-sm text-muted-foreground">
           {fight.status === "finished"
-            ? t(
-                fight.arbitrated ? "panel.finishedArbitrated" : "panel.finished"
-              )
+            ? t("panel.finished")
             : declaring
               ? t("panel.declaredBy", {
                   name: declaring.name ?? t("unknownSide"),

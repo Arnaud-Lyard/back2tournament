@@ -180,7 +180,7 @@ final class CreateFightHandler
      * carrying its own result.
      *
      * @param list<Result>                                                         $results     a side with no result reads as pending, 0 points
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described   the sides, keyed by competitor id
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described   the sides, keyed by competitor id
      * @param list<string>                                                         $represented the competitors the caller speaks for
      *
      * @return array<string, mixed>
@@ -214,6 +214,7 @@ final class CreateFightHandler
                 'type' => $described[$competitor]['type'] ?? null,
                 'reference' => isset($described[$competitor]) ? ['value' => $described[$competitor]['reference']] : null,
                 'name' => $described[$competitor]['name'] ?? null,
+                'tag' => $described[$competitor]['tag'] ?? null,
                 'score' => $result?->getScore() ?? 0,
                 'status' => $status->value,
                 'reportedStatus' => $result?->getReportedStatus()?->value,

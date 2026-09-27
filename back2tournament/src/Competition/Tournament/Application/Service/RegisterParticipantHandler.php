@@ -188,7 +188,7 @@ final class RegisterParticipantHandler
     /**
      * A place in the tournament; the competitor is named by battletag or team name.
      *
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */
@@ -206,6 +206,7 @@ final class RegisterParticipantHandler
             'type' => $description['type'] ?? null,
             'reference' => null === $description ? null : ['value' => $description['reference']],
             'name' => $description['name'] ?? null,
+            'tag' => $description['tag'] ?? null,
         ];
     }
 }

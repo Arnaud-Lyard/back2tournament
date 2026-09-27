@@ -12,7 +12,8 @@ use App\Competition\Fight\Domain\Entity\Fight;
 interface FightSchedulerProviderInterface
 {
     /**
-     * A fight between two competitors, with a pending result for each side.
+     * A fight between two competitors, with a pending result for each side
+     * that records the clan the side plays for.
      */
     public function schedule(
         string $competitorOne,

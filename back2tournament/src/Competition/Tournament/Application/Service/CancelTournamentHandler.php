@@ -89,7 +89,7 @@ final class CancelTournamentHandler
      *
      * @param list<Participant>                                                     $participants
      * @param list<Matchup>                                                         $bracket
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described    the competitors, keyed by id
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described    the competitors, keyed by id
      *
      * @return array<string, mixed>
      */
@@ -135,7 +135,7 @@ final class CancelTournamentHandler
     }
 
     /**
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */
@@ -148,6 +148,7 @@ final class CancelTournamentHandler
             'type' => $description['type'] ?? null,
             'reference' => null === $description ? null : ['value' => $description['reference']],
             'name' => $description['name'] ?? null,
+            'tag' => $description['tag'] ?? null,
         ];
     }
 }

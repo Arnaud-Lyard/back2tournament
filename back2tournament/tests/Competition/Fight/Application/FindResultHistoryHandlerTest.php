@@ -13,8 +13,10 @@ use App\Competition\Fight\Domain\Entity\ResultId;
 use App\Competition\Fight\Domain\Entity\Score;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
+use App\Competition\Shared\Domain\Provider\ClanTagProviderInterface;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\TeamSizeValueObject;
@@ -37,6 +39,7 @@ final class FindResultHistoryHandlerTest extends TestCase
     private const LOST = '67676767-6767-4676-8676-676767676767';
     private const OPEN = '68686868-6868-4686-8686-686868686868';
     private const TEAM_FIGHT = '69696969-6969-4696-8696-696969696969';
+    private const RIVAL_CLAN = '70707070-7070-4707-8707-707070707070';
 
     public function test_a_player_history_tells_each_settled_fight_from_its_side(): void
     {
@@ -68,18 +71,50 @@ final class FindResultHistoryHandlerTest extends TestCase
         $this->assertSame(1, $items['loss']['teamSize']);
     }
 
-    public function test_a_clan_history_is_told_from_its_team(): void
+    public function test_each_side_goes_by_the_tag_of_the_clan_it_played_for_in_that_fight(): void
     {
-        [$fight, $mine, $theirs] = $this->settledFight(self::TEAM_FIGHT, self::MY_TEAM_SIDE, self::RIVAL_TEAM, 2, 2, 2);
+        // Raven played for RIVAL_CLAN then, whatever the clan it is in today.
+        [$won, $mine, $theirs] = $this->settledFight(self::WON, self::MY_SIDE, self::RIVAL, 3, 1, 1, null, self::RIVAL_CLAN);
 
-        $page = $this->read($this->handler([$fight], [$mine, $theirs])(FindResultHistoryQuery::ofClan(self::CLAN_ID, 1, 10)));
+        $page = $this->read($this->handler([$won], [$mine, $theirs])(FindResultHistoryQuery::ofPlayer(self::PLAYER_ID, 1, 10)));
 
-        $this->assertSame(1, $page['total']);
-        $this->assertSame('draw', $page['items'][0]['outcome']);
-        $this->assertSame(2, $page['items'][0]['teamSize']);
-        $this->assertSame('team', $page['items'][0]['side']['type']);
-        $this->assertSame('Demo 2v2', $page['items'][0]['side']['name']);
-        $this->assertSame('Rival 2v2', $page['items'][0]['opponent']['name']);
+        $this->assertSame([null, 'RIV'], [$page['items'][0]['side']['tag'], $page['items'][0]['opponent']['tag']]);
+    }
+
+    public function test_a_clan_history_tells_its_team_fights_and_its_members_duels_from_its_side(): void
+    {
+        [$teamFight, $myTeam, $rivalTeam] = $this->settledFight(self::TEAM_FIGHT, self::MY_TEAM_SIDE, self::RIVAL_TEAM, 2, 2, 2, self::CLAN_ID, self::RIVAL_CLAN);
+        [$duel, $rival, $member] = $this->settledFight(self::LOST, self::RIVAL, self::MY_SIDE, 3, 1, 1, self::RIVAL_CLAN, self::CLAN_ID);
+
+        $resultRepository = $this->repositoryStub(ResultRepositoryInterface::class, [$myTeam, $rivalTeam, $rival, $member]);
+        $resultRepository->method('findSettledAgainstOtherClans')->willReturnCallback(
+            static fn (string $clanId, int $limit, int $offset): array => self::CLAN_ID === $clanId && 0 === $offset ? [$member, $myTeam] : []
+        );
+        $resultRepository->method('countSettledAgainstOtherClans')->willReturn(2);
+
+        $page = $this->read($this->handler([$teamFight, $duel], resultRepository: $resultRepository)(FindResultHistoryQuery::ofClan(self::CLAN_ID, 1, 10)));
+
+        $this->assertSame(2, $page['total']);
+        // The duel a member lost, named after the member, against another clan.
+        $this->assertSame(['loss', 1, 'player', 'Demo#1000', 'B2T', 1, 'Raven#1003', 'RIV', 3], [
+            $page['items'][0]['outcome'],
+            $page['items'][0]['teamSize'],
+            $page['items'][0]['side']['type'],
+            $page['items'][0]['side']['name'],
+            $page['items'][0]['side']['tag'],
+            $page['items'][0]['side']['score'],
+            $page['items'][0]['opponent']['name'],
+            $page['items'][0]['opponent']['tag'],
+            $page['items'][0]['opponent']['score'],
+        ]);
+        // The fight of one of its teams.
+        $this->assertSame(['draw', 2, 'team', 'Demo 2v2', 'Rival 2v2'], [
+            $page['items'][1]['outcome'],
+            $page['items'][1]['teamSize'],
+            $page['items'][1]['side']['type'],
+            $page['items'][1]['side']['name'],
+            $page['items'][1]['opponent']['name'],
+        ]);
     }
 
     public function test_a_profile_that_never_competed_reads_an_empty_page_and_costs_no_result_query(): void
@@ -95,6 +130,7 @@ final class FindResultHistoryHandlerTest extends TestCase
             $registry,
             $this->createStub(FightRepositoryInterface::class),
             $resultRepository,
+            $this->createStub(ClanTagProviderInterface::class),
         )(FindResultHistoryQuery::ofPlayer(self::PLAYER_ID, 1, 10)));
 
         $this->assertSame(['items' => [], 'total' => 0, 'page' => 1, 'limit' => 10, 'pages' => 0], $page);
@@ -102,15 +138,16 @@ final class FindResultHistoryHandlerTest extends TestCase
 
     public function test_an_id_that_is_no_uuid_is_refused_before_any_read(): void
     {
-        $registry = $this->createMock(CompetitorRegistryProviderInterface::class);
-        $registry->expects($this->never())->method('competitorsOfClan');
+        $resultRepository = $this->createMock(ResultRepositoryInterface::class);
+        $resultRepository->expects($this->never())->method('findSettledAgainstOtherClans');
 
         $this->expectException(ValidationException::class);
 
         new FindResultHistoryHandler(
-            $registry,
+            $this->createStub(CompetitorRegistryProviderInterface::class),
             $this->createStub(FightRepositoryInterface::class),
-            $this->createStub(ResultRepositoryInterface::class),
+            $resultRepository,
+            $this->createStub(ClanTagProviderInterface::class),
         )(FindResultHistoryQuery::ofClan('not-a-uuid', 1, 10));
     }
 
@@ -118,11 +155,10 @@ final class FindResultHistoryHandlerTest extends TestCase
      * @param list<Fight>  $fights
      * @param list<Result> $results
      */
-    private function handler(array $fights, array $results): FindResultHistoryHandler
+    private function handler(array $fights, array $results = [], ?ResultRepositoryInterface $resultRepository = null): FindResultHistoryHandler
     {
         $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
         $registry->method('competitorsOfPlayer')->willReturn([self::MY_SIDE]);
-        $registry->method('competitorsOfClan')->willReturn([self::MY_TEAM_SIDE]);
         $registry->method('describe')->willReturn([
             self::MY_SIDE => ['type' => 'player', 'reference' => self::PLAYER_ID, 'name' => 'Demo#1000'],
             self::RIVAL => ['type' => 'player', 'reference' => self::RIVAL, 'name' => 'Raven#1003'],
@@ -130,17 +166,24 @@ final class FindResultHistoryHandlerTest extends TestCase
             self::RIVAL_TEAM => ['type' => 'team', 'reference' => self::RIVAL_TEAM, 'name' => 'Rival 2v2'],
         ]);
 
+        // The tags of the clans as they stand; a profile's current clan does not matter.
+        $clanTagProvider = $this->createStub(ClanTagProviderInterface::class);
+        $clanTagProvider->method('tagsOfClans')->willReturnCallback(
+            static fn (array $clanIds): array => array_intersect_key([self::CLAN_ID => 'B2T', self::RIVAL_CLAN => 'RIV'], array_flip($clanIds))
+        );
+
         return new FindResultHistoryHandler(
             $registry,
             $this->repositoryStub(FightRepositoryInterface::class, $fights),
-            $this->repositoryStub(ResultRepositoryInterface::class, $results),
+            $resultRepository ?? $this->repositoryStub(ResultRepositoryInterface::class, $results),
+            $clanTagProvider,
         );
     }
 
     /**
      * @return array{Fight, Result, Result}
      */
-    private function openFight(string $fightId, string $one, string $two, int $teamSize = 1): array
+    private function openFight(string $fightId, string $one, string $two, int $teamSize = 1, ?string $clanOne = null, ?string $clanTwo = null): array
     {
         $fight = Fight::create(
             new FightId($fightId),
@@ -152,19 +195,20 @@ final class FindResultHistoryHandlerTest extends TestCase
 
         return [
             $fight,
-            Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId($one)),
-            Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId($two)),
+            Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId($one), null === $clanOne ? null : new ClanId($clanOne)),
+            Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId($two), null === $clanTwo ? null : new ClanId($clanTwo)),
         ];
     }
 
     /**
-     * Declared by the first side, confirmed by the second.
+     * Declared by the first side, confirmed by the second; each side played
+     * for the clan given, if any.
      *
      * @return array{Fight, Result, Result}
      */
-    private function settledFight(string $fightId, string $one, string $two, int $scoreOne, int $scoreTwo, int $teamSize = 1): array
+    private function settledFight(string $fightId, string $one, string $two, int $scoreOne, int $scoreTwo, int $teamSize = 1, ?string $clanOne = null, ?string $clanTwo = null): array
     {
-        [$fight, $resultOne, $resultTwo] = $this->openFight($fightId, $one, $two, $teamSize);
+        [$fight, $resultOne, $resultTwo] = $this->openFight($fightId, $one, $two, $teamSize, $clanOne, $clanTwo);
 
         Fight::declareOutcome($fight, new CompetitorId($one), $resultOne, new Score($scoreOne), $resultTwo, new Score($scoreTwo));
         Fight::confirmOutcome($fight, new CompetitorId($two), $resultOne, $resultTwo);

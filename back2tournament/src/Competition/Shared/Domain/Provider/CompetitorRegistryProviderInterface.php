@@ -37,28 +37,26 @@ interface CompetitorRegistryProviderInterface
     public function competitorsOfPlayer(string $playerId): array;
 
     /**
-     * The competitors of a clan's teams. Only the teams that already competed.
-     *
-     * @return list<string>
-     */
-    public function competitorsOfClan(string $clanId): array;
-
-    /**
      * @param list<string> $competitorIds
      *
-     * @return array<string, array{type: string, reference: string, name: ?string}> keyed by competitor id; an unknown id is left out
+     * `tag` is the tag of the clan the side plays for: the clan of the
+     * player profile, or of the team; null for a profile in no clan.
+     *
+     * @return array<string, array{type: string, reference: string, name: ?string, tag: ?string}> keyed by competitor id; an unknown id is left out
      */
     public function describe(array $competitorIds): array;
 
     /**
-     * What a competitor's results count for in the rankings: the player
-     * profile it is, or the clan its team plays for.
+     * Who a competitor's results count for in the rankings: the player
+     * profiles on its side (the profile itself, or the lineup of the team)
+     * and the clan it plays for (the clan the profile is an active member
+     * of, or the clan of the team; null for a profile in no clan).
      *
      * @param list<string> $competitorIds
      *
-     * @return array<string, array{type: 'player'|'clan', id: string}> keyed by competitor id; an unknown id is left out
+     * @return array<string, array{players: list<string>, clan: ?string}> keyed by competitor id; an unknown id is left out
      */
-    public function rankedAs(array $competitorIds): array;
+    public function lineups(array $competitorIds): array;
 
     /**
      * The competitors whose name holds $search: player profiles by battletag,

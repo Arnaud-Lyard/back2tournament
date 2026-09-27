@@ -64,7 +64,11 @@ make user           # seed a dev user via app:create-user
   Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is
   opened or a tournament registration made; never through an endpoint of its own.
 - `Competition/Fight/` — fights between two competitors of the same game and format,
-  and their results: one side declares the scores, the other confirms them. A settled
+  and their results: one side declares the scores, the other confirms them. Each result
+  records the clan its side played for as the fight opened (`Result.clan`: the team's
+  clan, or the clan the player profile was an active member of; null for a profile in
+  no clan), so that a fight stays with that clan whatever its players do next; a clan's
+  results are its fights against other clans. A settled
   fight records `FightSettledEvent`. When the sides disagree, an administrator settles
   the fight on the scores they impose (`Fight::arbitrate()`, the fight then reads
   `arbitrated`) or sets the declaration aside so that it is declared again
@@ -75,20 +79,28 @@ make user           # seed a dev user via app:create-user
 - `Competition/Tournament/` — single-elimination tournaments: registrations, the
   bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
   winners moving on as `FightSettledEvent` comes in.
-- `Competition/Ranking/` — Elo ratings, one per player profile and one per clan, in the
-  ranking of their game. A `Rating` starts at 1000 on its first settled fight and moves
-  by up to `K_FACTOR` (32) points per fight, zero-sum between the two sides: player
-  profiles rate on their 1v1 fights, clans on the fights of their teams (two teams of
-  one clan leave it as it is). Moved as `FightSettledEvent` comes in; a `RatingChange`
-  per rating and fight records the move and keeps a fight from counting twice.
+- `Competition/Ranking/` — Elo ratings of player profiles and clans, one per format of
+  their game (1v1, 2v2…, as `Game.teamSizes` lists them): each format is a ranking of
+  its own. A `Rating` starts at 1000 on its first settled fight in its format and moves
+  by up to `K_FACTOR` (32) points per fight, zero-sum between the two sides. A side
+  rates as the average of its ratings, and each of them moves by what the fight was
+  worth to that average: in a team fight, every player of both lineups moves in the
+  ranking of that format. A clan rates on the fights of its teams and, in 1v1, on the
+  duels of its active members, against another clan only (two sides of one clan leave
+  it as it is). Moved as `FightSettledEvent` comes in; a `RatingChange` per rating and
+  fight records the move and keeps a fight from counting twice.
   `bin/console app:rankings:rebuild` empties the rankings and replays every settled
-  fight in the order it was settled — run it once after deploying the rankings.
+  fight in the order it was settled — run it after a migration that creates or empties
+  the rankings, as `Version20260927160000` (ratings per format) does. A side counts for
+  the clan its result recorded (`Result.clan`), so the replay lands on the same ratings.
 - `Competition/Shared/` — `CompetitorId` and the contracts every
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
-  for, which competitors a player profile or a clan plays as, name the sides, what a
-  competitor ranks as, which competitors bear a name) and
+  for, which competitors a player profile or a clan plays as, name the sides and tag
+  them with their clan, what a competitor ranks as, which competitors bear a name),
+  `ClanTagProviderInterface` (the clan a player profile is an active member of, and
+  the tag of a clan: lists show it before a battletag or a team name) and
   `FightSchedulerProviderInterface` (open a fight with its two pending results). Each
   `…ProviderInterface` has its `…Provider` implementation next to it, in the same
   folder.
@@ -230,8 +242,9 @@ request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
 the caller injects the interface. `CurrentUserProviderInterface`,
 `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
-`CompetitorRegistryProviderInterface`, `FightSchedulerProviderInterface`,
-`CategoryIdProviderInterface` and `AuthorProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
+`CompetitorRegistryProviderInterface`, `ClanTagProviderInterface`,
+`FightSchedulerProviderInterface`, `CategoryIdProviderInterface` and
+`AuthorProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a

@@ -8,6 +8,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
 import { PlayerAvatar } from "@/components/player-avatar"
@@ -147,8 +148,9 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
       {data.winner && (
         <Alert>
           <TrophyIcon />
-          <AlertTitle>
+          <AlertTitle className="flex items-center gap-2">
             {t("winner", { name: data.winner.name ?? "?" })}
+            <ClanTag tag={data.winner.tag} />
           </AlertTitle>
         </Alert>
       )}
@@ -208,6 +210,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                           {participant.seed}
                         </span>
                         <PlayerAvatar battletag={name} size="sm" />
+                        <ClanTag tag={participant.tag} />
                         <span className="truncate text-sm">{name}</span>
                       </div>
                       {canWithdraw && participantId && (

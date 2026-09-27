@@ -863,6 +863,14 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        /** @description A player profile as the list of a game shows it: with the tag of its clan. */
+        GamePlayer: components["schemas"]["Player"] & {
+            /**
+             * @description The tag of the clan the profile is an active member of. Null for a profile in no clan.
+             * @example B2T
+             */
+            clanTag?: string | null;
+        };
         /** @description A player profile as a list names it: its id and the battletag it goes by. */
         PlayerProfile: {
             id?: components["schemas"]["Uuid"];
@@ -887,6 +895,11 @@ export interface components {
              * @example PlayerOne#1234
              */
             name?: string | null;
+            /**
+             * @description The tag of the clan the side plays for: the clan the profile is an active member of, or the clan of the team. Null for a profile in no clan.
+             * @example B2T
+             */
+            tag?: string | null;
         };
         /** @description One side of a fight, and what it claims or settled on. */
         FightSide: components["schemas"]["NamedSide"] & {
@@ -975,12 +988,12 @@ export interface components {
              * @description When the result was confirmed.
              */
             settledAt?: string | null;
-            /** @description The side the list is about: the player profile, a team it plays in, or a team of the clan. */
+            /** @description The side the list is about: the player profile or a team it plays in; for a clan, one of its teams or the member who fought the duel. Its `tag` is the tag of the clan it played for in this fight, whichever clan its players are in today. */
             side: components["schemas"]["NamedSide"] & {
                 /** @example 3 */
                 score?: number;
             };
-            /** @description The other side of the fight. */
+            /** @description The other side of the fight. Its `tag` is the tag of the clan it played for in this fight. */
             opponent?: (components["schemas"]["NamedSide"] & {
                 /** @example 1 */
                 score?: number;
@@ -1167,7 +1180,7 @@ export interface components {
             /** @example Demo#1001 */
             name?: string | null;
             /**
-             * @description The clan tag; null for a player profile
+             * @description The tag of the clan, or of the clan a player profile is an active member of; null for a profile in no clan
              * @example B2T
              */
             tag?: string | null;
@@ -1195,6 +1208,11 @@ export interface components {
             subject: components["schemas"]["RankedSubject"];
         };
         RankingPage: {
+            /**
+             * @description The format of this ranking, as the number of players per side: the one asked for, or the smallest format of the game
+             * @example 2
+             */
+            teamSize: number;
             items: components["schemas"]["RankingEntry"][];
             /**
              * @description Ranked player profiles or clans, every page taken together
@@ -1217,22 +1235,25 @@ export interface components {
              */
             pages: number;
         };
-        /** @description The Elo rating of one player profile or clan, and where it stands in the ranking of its game. */
-        SubjectRating: {
-            subject: components["schemas"]["RankedSubject"];
-            game: components["schemas"]["Uuid"];
+        /** @description The Elo rating of a player profile or a clan in one format, and where it stands in the ranking of that format. */
+        FormatRating: {
             /**
-             * @description Null until the first settled fight
+             * @description The format, as the number of players per side
+             * @example 1
+             */
+            teamSize: number;
+            /**
+             * @description Null until the first settled fight in this format
              * @example 3
              */
             rank: number | null;
             /**
-             * @description How many player profiles, or clans, the ranking of the game holds
+             * @description How many player profiles, or clans, the ranking of this format holds
              * @example 42
              */
             total: number;
             /**
-             * @description 1000 until the first settled fight
+             * @description 1000 until the first settled fight in this format
              * @example 1087
              */
             rating: number;
@@ -1244,6 +1265,12 @@ export interface components {
             draws: number;
             /** @example 3 */
             losses: number;
+        };
+        /** @description The Elo ratings of one player profile or clan: one per format its game is played in, smallest first. */
+        SubjectRating: {
+            subject: components["schemas"]["RankedSubject"];
+            game: components["schemas"]["Uuid"];
+            ratings: components["schemas"]["FormatRating"][];
         };
     };
     responses: {
@@ -1889,7 +1916,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of the settled fights of a clan's teams, newest first. `side` is the clan's team. `items` is empty when no team of the clan finished a fight, when the page is past the last one, and when no clan has this id. */
+            /** @description One page of the settled fights a clan played against other clans, newest first: the fights of its teams, and in 1v1 the duels of its members, as each fight recorded the clan of its sides when it opened. `side` is the clan's team, or the member who fought the duel. A fight between two sides of the clan, or against a player in no clan, is left out. `items` is empty when the clan finished no such fight, when the page is past the last one, and when no clan has this id. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2108,6 +2135,11 @@ export interface operations {
                                 type?: "player" | "team" | null;
                                 /** @description Battletag or team name */
                                 name?: string | null;
+                                /**
+                                 * @description The tag of the clan the side plays for; null for a profile in no clan
+                                 * @example B2T
+                                 */
+                                tag?: string | null;
                             };
                             /** @description The caller's own player profile, for a 1v1. Null for a team. */
                             player?: components["schemas"]["PlayerProfile"] | null;
@@ -2121,6 +2153,11 @@ export interface operations {
                                 type?: "player" | "team" | null;
                                 /** @description Battletag or team name */
                                 name?: string | null;
+                                /**
+                                 * @description The tag of the clan the side plays for; null for a profile in no clan
+                                 * @example B2T
+                                 */
+                                tag?: string | null;
                                 player?: components["schemas"]["PlayerProfile"] | null;
                                 /**
                                  * @description Points the other side scored, as declared. Zero until a declaration.
@@ -2883,7 +2920,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        items: components["schemas"]["Player"][];
+                        items: components["schemas"]["GamePlayer"][];
                         /**
                          * @description Players the filters match, every page taken together
                          * @example 42
@@ -3109,7 +3146,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The Elo rating of a clan and its rank in its game. A clan none of whose teams has settled a fight yet stands at the initial 1000, with `rank` null. */
+            /** @description The Elo ratings of a clan, one per format of its game, and its rank in each. In a format where the clan has not settled a fight yet, it stands at the initial 1000, with `rank` null. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3133,6 +3170,8 @@ export interface operations {
     get_api_rankings_clans: {
         parameters: {
             query?: {
+                /** @description The format, as the number of players per side: 1 for the 1v1 ranking, 2 for the 2v2 one. One of the formats of the game, its smallest one by default. */
+                size?: number;
                 /** @description Which page to read, 1 by default. */
                 page?: number;
                 /** @description How many entries that page holds, 20 by default and 50 at most. */
@@ -3147,7 +3186,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of the Elo ranking of a game's clans, the highest rating first. A clan enters it on the first settled fight of one of its teams, whatever the format. Equal ratings share a rank. `items` is empty when no clan is ranked yet, or when the page is past the last one. */
+            /** @description One page of the Elo ranking of a game's clans in one format, the highest rating first. A clan enters the ranking of a format on its first settled fight in it against another clan: a fight of one of its teams, or in 1v1 a duel of one of its members. Equal ratings share a rank. `items` is empty when no clan is ranked yet, or when the page is past the last one. A format the game is not played in is refused. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3156,7 +3195,15 @@ export interface operations {
                     "application/json": components["schemas"]["RankingPage"];
                 };
             };
-            400: components["responses"]["BadRequest"];
+            /** @description The game is not played in this format, or its id is no UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             404: components["responses"]["NotFound"];
         };
     };
@@ -3172,7 +3219,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The Elo rating of a player profile and its rank in its game. A profile that has not settled a 1v1 fight yet stands at the initial 1000, with `rank` null. */
+            /** @description The Elo ratings of a player profile, one per format of its game, and its rank in each. In a format where the profile has not settled a fight yet, it stands at the initial 1000, with `rank` null. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3196,6 +3243,8 @@ export interface operations {
     get_api_rankings_players: {
         parameters: {
             query?: {
+                /** @description The format, as the number of players per side: 1 for the 1v1 ranking, 2 for the 2v2 one. One of the formats of the game, its smallest one by default. */
+                size?: number;
                 /** @description Which page to read, 1 by default. */
                 page?: number;
                 /** @description How many entries that page holds, 20 by default and 50 at most. */
@@ -3210,7 +3259,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of the Elo ranking of a game's player profiles, the highest rating first. A profile enters it on its first settled 1v1 fight; team fights count for the clans. Equal ratings share a rank. `items` is empty when nobody is ranked yet, or when the page is past the last one. */
+            /** @description One page of the Elo ranking of a game's player profiles in one format, the highest rating first. A profile enters the ranking of a format on its first settled fight in it: its duels in 1v1, the fights of the teams it plays in otherwise, where every player of a side moves by what the fight was worth to the side. Equal ratings share a rank. `items` is empty when nobody is ranked yet, or when the page is past the last one. A format the game is not played in is refused. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3219,7 +3268,15 @@ export interface operations {
                     "application/json": components["schemas"]["RankingPage"];
                 };
             };
-            400: components["responses"]["BadRequest"];
+            /** @description The game is not played in this format, or its id is no UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             404: components["responses"]["NotFound"];
         };
     };

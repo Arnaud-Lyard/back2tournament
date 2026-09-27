@@ -155,6 +155,17 @@ nelmio_api_doc:
                             description: 'The outcome the declaring side claims. Carried only while `status` is `reporting`.'
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
+                GamePlayer:
+                    description: 'A player profile as the list of a game shows it: with the tag of its clan.'
+                    allOf:
+                        - { $ref: '#/components/schemas/Player' }
+                        - type: object
+                          properties:
+                              clanTag:
+                                  type: string
+                                  nullable: true
+                                  example: 'B2T'
+                                  description: 'The tag of the clan the profile is an active member of. Null for a profile in no clan.'
                 PlayerProfile:
                     type: object
                     description: 'A player profile as a list names it: its id and the battletag it goes by.'
@@ -185,6 +196,11 @@ nelmio_api_doc:
                             nullable: true
                             example: 'PlayerOne#1234'
                             description: 'The battletag of the profile, or the name of the team. Null when it no longer exists.'
+                        tag:
+                            type: string
+                            nullable: true
+                            example: 'B2T'
+                            description: 'The tag of the clan the side plays for: the clan the profile is an active member of, or the clan of the team. Null for a profile in no clan.'
                 FightSide:
                     description: 'One side of a fight, and what it claims or settled on.'
                     allOf:
@@ -274,14 +290,14 @@ nelmio_api_doc:
                             nullable: true
                             description: 'When the result was confirmed.'
                         side:
-                            description: 'The side the list is about: the player profile, a team it plays in, or a team of the clan.'
+                            description: 'The side the list is about: the player profile or a team it plays in; for a clan, one of its teams or the member who fought the duel. Its `tag` is the tag of the clan it played for in this fight, whichever clan its players are in today.'
                             allOf:
                                 - { $ref: '#/components/schemas/NamedSide' }
                                 - type: object
                                   properties:
                                       score: { type: integer, minimum: 0, example: 3 }
                         opponent:
-                            description: 'The other side of the fight.'
+                            description: 'The other side of the fight. Its `tag` is the tag of the clan it played for in this fight.'
                             nullable: true
                             allOf:
                                 - { $ref: '#/components/schemas/NamedSide' }
@@ -445,7 +461,7 @@ nelmio_api_doc:
                         type: { type: string, enum: [player, clan] }
                         id: { $ref: '#/components/schemas/Uuid' }
                         name: { type: string, nullable: true, example: 'Demo#1001' }
-                        tag: { type: string, nullable: true, example: 'B2T', description: 'The clan tag; null for a player profile' }
+                        tag: { type: string, nullable: true, example: 'B2T', description: 'The tag of the clan, or of the clan a player profile is an active member of; null for a profile in no clan' }
                 RankingEntry:
                     type: object
                     description: 'One place in a ranking. Every rating starts at 1000 and moves by up to 32 points per settled fight (Elo, K = 32).'
@@ -460,8 +476,9 @@ nelmio_api_doc:
                         subject: { $ref: '#/components/schemas/RankedSubject' }
                 RankingPage:
                     type: object
-                    required: [items, total, page, limit, pages]
+                    required: [teamSize, items, total, page, limit, pages]
                     properties:
+                        teamSize: { type: integer, minimum: 1, example: 2, description: 'The format of this ranking, as the number of players per side: the one asked for, or the smallest format of the game' }
                         items:
                             type: array
                             items: { $ref: '#/components/schemas/RankingEntry' }
@@ -469,20 +486,29 @@ nelmio_api_doc:
                         page: { type: integer, example: 1, description: 'The page these entries come from' }
                         limit: { type: integer, example: 20, description: 'How many entries a full page holds' }
                         pages: { type: integer, example: 3, description: 'How many pages there are, 0 when nobody is ranked yet' }
-                SubjectRating:
+                FormatRating:
                     type: object
-                    description: 'The Elo rating of one player profile or clan, and where it stands in the ranking of its game.'
-                    required: [subject, game, rank, total, rating, fights, wins, draws, losses]
+                    description: 'The Elo rating of a player profile or a clan in one format, and where it stands in the ranking of that format.'
+                    required: [teamSize, rank, total, rating, fights, wins, draws, losses]
                     properties:
-                        subject: { $ref: '#/components/schemas/RankedSubject' }
-                        game: { $ref: '#/components/schemas/Uuid' }
-                        rank: { type: integer, nullable: true, example: 3, description: 'Null until the first settled fight' }
-                        total: { type: integer, example: 42, description: 'How many player profiles, or clans, the ranking of the game holds' }
-                        rating: { type: integer, example: 1087, description: '1000 until the first settled fight' }
+                        teamSize: { type: integer, minimum: 1, example: 1, description: 'The format, as the number of players per side' }
+                        rank: { type: integer, nullable: true, example: 3, description: 'Null until the first settled fight in this format' }
+                        total: { type: integer, example: 42, description: 'How many player profiles, or clans, the ranking of this format holds' }
+                        rating: { type: integer, example: 1087, description: '1000 until the first settled fight in this format' }
                         fights: { type: integer, example: 12 }
                         wins: { type: integer, example: 8 }
                         draws: { type: integer, example: 1 }
                         losses: { type: integer, example: 3 }
+                SubjectRating:
+                    type: object
+                    description: 'The Elo ratings of one player profile or clan: one per format its game is played in, smallest first.'
+                    required: [subject, game, ratings]
+                    properties:
+                        subject: { $ref: '#/components/schemas/RankedSubject' }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        ratings:
+                            type: array
+                            items: { $ref: '#/components/schemas/FormatRating' }
             responses:
                 BadRequest:
                     description: 'Invalid input: a value object rule or a business rule was violated'

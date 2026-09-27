@@ -11,6 +11,7 @@ use App\Competition\Fight\Domain\Entity\ResultId;
 use App\Competition\Fight\Domain\Entity\Score;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Event\FightSettledEvent;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
@@ -30,6 +31,7 @@ final class FightTest extends TestCase
     private const BYSTANDER = '45454545-4545-4545-8545-454545454545';
     private const GAME_ID = '55555555-5555-4555-8555-555555555555';
     private const TOURNAMENT_ID = '66666666-6666-4666-8666-666666666666';
+    private const CLAN_ID = '67676767-6767-4676-8676-676767676767';
 
     public function test_a_fresh_result_is_pending_with_no_score(): void
     {
@@ -42,6 +44,19 @@ final class FightTest extends TestCase
         $this->assertSame(ResultStatus::PENDING, $result->getStatus());
         $this->assertNull($result->getReportedStatus());
         $this->assertSame(0, $result->getScore());
+        $this->assertNull($result->getClan());
+    }
+
+    public function test_a_result_keeps_the_clan_its_side_plays_for_as_the_fight_opens(): void
+    {
+        $result = Fight::createResult(
+            $this->fight(),
+            new ResultId(self::RESULT_ID),
+            new CompetitorId(self::COMPETITOR_ONE),
+            new ClanId(self::CLAN_ID),
+        );
+
+        $this->assertSame(self::CLAN_ID, $result->getClan()?->getValue());
     }
 
     public function test_a_fight_knows_its_game_and_format(): void

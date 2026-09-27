@@ -27,10 +27,10 @@ final class RatingRepository extends ServiceEntityRepository implements RatingRe
         $this->getEntityManager()->flush();
     }
 
-    public function findRanking(RankingSubject $subjectType, string $gameId, int $limit, int $offset): array
+    public function findRanking(RankingSubject $subjectType, string $gameId, int $teamSize, int $limit, int $offset): array
     {
         // Equal ratings share a rank; the one with more fights behind it is listed first.
-        return $this->ranking($subjectType, $gameId)
+        return $this->ranking($subjectType, $gameId, $teamSize)
             ->orderBy('rating.value', 'DESC')
             ->addOrderBy('rating.fights', 'DESC')
             ->addOrderBy('rating.subject', 'ASC')
@@ -40,17 +40,17 @@ final class RatingRepository extends ServiceEntityRepository implements RatingRe
             ->getResult();
     }
 
-    public function countRanking(RankingSubject $subjectType, string $gameId): int
+    public function countRanking(RankingSubject $subjectType, string $gameId, int $teamSize): int
     {
-        return (int) $this->ranking($subjectType, $gameId)
+        return (int) $this->ranking($subjectType, $gameId, $teamSize)
             ->select('COUNT(rating.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }
 
-    public function countAbove(RankingSubject $subjectType, string $gameId, int $value): int
+    public function countAbove(RankingSubject $subjectType, string $gameId, int $teamSize, int $value): int
     {
-        return (int) $this->ranking($subjectType, $gameId)
+        return (int) $this->ranking($subjectType, $gameId, $teamSize)
             ->select('COUNT(rating.id)')
             ->andWhere('rating.value > :value')
             ->setParameter('value', $value)
@@ -63,12 +63,14 @@ final class RatingRepository extends ServiceEntityRepository implements RatingRe
         $this->getEntityManager()->createQuery(\sprintf('DELETE FROM %s rating', Rating::class))->execute();
     }
 
-    private function ranking(RankingSubject $subjectType, string $gameId): QueryBuilder
+    private function ranking(RankingSubject $subjectType, string $gameId, int $teamSize): QueryBuilder
     {
         return $this->createQueryBuilder('rating')
             ->andWhere('rating.subjectType = :subjectType')
             ->andWhere('rating.game = :gameId')
+            ->andWhere('rating.teamSize = :teamSize')
             ->setParameter('subjectType', $subjectType)
-            ->setParameter('gameId', $gameId);
+            ->setParameter('gameId', $gameId)
+            ->setParameter('teamSize', $teamSize);
     }
 }

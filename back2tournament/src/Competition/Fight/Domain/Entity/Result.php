@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Competition\Fight\Domain\Entity;
 
 use App\Competition\Fight\Domain\Enum\ResultStatus;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 
 class Result
@@ -14,6 +15,15 @@ class Result
     private string $fight;
 
     private string $competitor;
+
+    /**
+     * The clan this side played for, as it stood when the fight was opened:
+     * the clan of the team, or the clan the player profile was an active
+     * member of. Null for a profile in no clan. The clans' rankings and
+     * results read it, so a player who changes clans leaves their past
+     * fights with the clan they played them for.
+     */
+    private ?string $clan = null;
 
     private int $score;
 
@@ -55,6 +65,18 @@ class Result
     public function setCompetitor(CompetitorId $competitor): self
     {
         $this->competitor = $competitor->getValue();
+
+        return $this;
+    }
+
+    public function getClan(): ?ClanId
+    {
+        return null === $this->clan ? null : new ClanId($this->clan);
+    }
+
+    public function setClan(?ClanId $clan): self
+    {
+        $this->clan = $clan?->getValue();
 
         return $this;
     }

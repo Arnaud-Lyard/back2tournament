@@ -45,7 +45,7 @@ use Symfony\Component\Routing\Attribute\Route;
     content: new OA\JsonContent(
         required: ['items', 'total', 'page', 'limit', 'pages'],
         properties: [
-            new OA\Property(property: 'items', type: 'array', items: new OA\Items(ref: '#/components/schemas/Player')),
+            new OA\Property(property: 'items', type: 'array', items: new OA\Items(ref: '#/components/schemas/GamePlayer')),
             new OA\Property(property: 'total', type: 'integer', description: 'Players the filters match, every page taken together', example: 42),
             new OA\Property(property: 'page', type: 'integer', description: 'The page these items come from', example: 1),
             new OA\Property(property: 'limit', type: 'integer', description: 'How many items a full page holds', example: 10),

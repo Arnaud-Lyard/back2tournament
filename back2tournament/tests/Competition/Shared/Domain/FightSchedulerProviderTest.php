@@ -9,6 +9,7 @@ use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -19,6 +20,9 @@ final class FightSchedulerProviderTest extends TestCase
     private const ONE = '22222222-2222-4222-8222-222222222222';
     private const TWO = '33333333-3333-4333-8333-333333333333';
     private const TOURNAMENT_ID = '44444444-4444-4444-8444-444444444444';
+    private const CLAN_ID = '55555555-5555-4555-8555-555555555555';
+    private const PLAYER_ID = '66666666-6666-4666-8666-666666666666';
+    private const MATE_ID = '77777777-7777-4777-8777-777777777777';
 
     public function test_a_scheduled_fight_opens_a_pending_result_for_each_side(): void
     {
@@ -34,7 +38,14 @@ final class FightSchedulerProviderTest extends TestCase
             }
         );
 
-        $fight = new FightSchedulerProvider($fightRepository, $resultRepository, $this->createStub(EventDispatcherInterface::class))
+        // ONE plays for a clan, TWO for none.
+        $competitorRegistryProvider = $this->createStub(CompetitorRegistryProviderInterface::class);
+        $competitorRegistryProvider->method('lineups')->willReturn([
+            self::ONE => ['players' => [self::PLAYER_ID], 'clan' => self::CLAN_ID],
+            self::TWO => ['players' => [self::MATE_ID], 'clan' => null],
+        ]);
+
+        $fight = new FightSchedulerProvider($fightRepository, $resultRepository, $competitorRegistryProvider, $this->createStub(EventDispatcherInterface::class))
             ->schedule(self::ONE, self::TWO, self::GAME_ID, 3, self::TOURNAMENT_ID);
 
         $this->assertSame(3, $fight->getTeamSize());
@@ -42,5 +53,6 @@ final class FightSchedulerProviderTest extends TestCase
         $this->assertCount(2, $results);
         $this->assertSame([self::ONE, self::TWO], array_map(static fn (Result $result): string => $result->getCompetitor()->getValue(), $results));
         $this->assertSame([ResultStatus::PENDING, ResultStatus::PENDING], array_map(static fn (Result $result): ResultStatus => $result->getStatus(), $results));
+        $this->assertSame([self::CLAN_ID, null], array_map(static fn (Result $result): ?string => $result->getClan()?->getValue(), $results));
     }
 }

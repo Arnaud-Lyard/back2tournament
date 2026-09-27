@@ -1,6 +1,7 @@
 import { HistoryIcon, TrophyIcon } from "lucide-react"
 import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -23,7 +24,7 @@ import type { Loaded } from "@/libs/api/load"
 
 interface ResultHistoryProps {
   history: Loaded<SettledResultPage>
-  /** Whose results these are: a player profile, or a clan through its teams. */
+  /** Whose results these are: a player profile, or a clan through its teams and members. */
   subject: "player" | "clan"
 }
 
@@ -63,8 +64,9 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
             {items.map((result) => {
               const href = opponentHref(result)
               const opponent = result.opponent?.name ?? t("unknown")
-              // A clan always plays through a team; a profile names its team when it had one.
-              const team = subject === "clan" || result.side.type === "team"
+              // A clan names who played for it: one of its teams, or the member
+              // who fought the duel. A profile names its team when it had one.
+              const named = subject === "clan" || result.side.type === "team"
 
               return (
                 <li
@@ -75,27 +77,29 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
                     <Badge variant={OUTCOME_VARIANT[result.outcome]}>
                       {t(`outcome.${result.outcome}`)}
                     </Badge>
-                    {result.arbitrated && (
-                      <Badge variant="outline" title={t("arbitratedHint")}>
-                        {t("arbitrated")}
-                      </Badge>
-                    )}
-                    <span className="truncate text-sm">
-                      {team && (
-                        <span className="font-medium">
-                          {result.side.name ?? t("unknown")}{" "}
-                        </span>
+                    <span className="flex min-w-0 items-center gap-1.5 text-sm">
+                      {named && (
+                        <>
+                          {/* On a clan's page, its own tag goes without saying. */}
+                          {subject === "player" && (
+                            <ClanTag tag={result.side.tag} />
+                          )}
+                          <span className="truncate font-medium">
+                            {result.side.name ?? t("unknown")}
+                          </span>
+                        </>
                       )}
-                      {t("against")}{" "}
+                      <span className="shrink-0">{t("against")}</span>
+                      <ClanTag tag={result.opponent?.tag} />
                       {href ? (
                         <Link
                           href={href}
-                          className="font-medium underline-offset-4 hover:underline"
+                          className="truncate font-medium underline-offset-4 hover:underline"
                         >
                           {opponent}
                         </Link>
                       ) : (
-                        <span className="font-medium">{opponent}</span>
+                        <span className="truncate font-medium">{opponent}</span>
                       )}
                     </span>
                   </div>

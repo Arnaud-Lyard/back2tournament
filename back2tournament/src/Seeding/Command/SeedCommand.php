@@ -156,6 +156,15 @@ final class SeedCommand extends Command
 
     private int $moment = 0;
 
+    /**
+     * The clan each competitor plays for, keyed by competitor id, once the
+     * clans are seeded: the fights opened from then on record it, as the
+     * platform does. The fights seeded before were played before the clans.
+     *
+     * @var array<string, ClanId>
+     */
+    private array $clanOfCompetitor = [];
+
     public function __construct(
         EntityManagerInterface $entityManager,
         PasswordHasherInterface $passwordHasher,
@@ -209,9 +218,9 @@ final class SeedCommand extends Command
         foreach ($games as $index => $game) {
             [$me, $opponents] = $this->seedGamePlayers($game, $index, $mine, $rivals);
             $fights += $this->seedGamePlayground($game, $me, $opponents);
-            [$teamClans, $teamFights] = $this->seedClans($game, $me, $opponents);
-            $clans += $teamClans;
-            $fights += $teamFights;
+            [$seededClans, $clanFights] = $this->seedClans($game, $me, $opponents);
+            $clans += $seededClans;
+            $fights += $clanFights;
 
             // The tournaments are played in the first game, between its seeded players.
             if (0 === $index) {
@@ -241,7 +250,7 @@ final class SeedCommand extends Command
             ['Tournaments' => 2],
             ['Articles' => \sprintf('%d published, %d drafts, every %dth in French only', self::ARTICLES - self::DRAFT_ARTICLES, self::DRAFT_ARTICLES, self::FRENCH_ONLY_EVERY)],
             ['Comments' => self::COMMENTED_ARTICLES * self::COMMENTS_PER_ARTICLE],
-            ['Ranked' => \sprintf('%d player profiles and clans, from %d settled fights', $rankings['ratings'], $rankings['fights'])],
+            ['Ranked' => \sprintf('%d ratings, one per player profile or clan and format, from %d settled fights', $rankings['ratings'], $rankings['fights'])],
         );
         $io->listing([
             \sprintf('GET /api/results/users/fights — at least %d waiting, %d pages', $challenges, $this->pages($challenges)),
@@ -407,10 +416,12 @@ final class SeedCommand extends Command
      * Two clans per game: the demo account leads one, a rival the other. Each
      * fields a team in every format of the game above 1v1, and the two teams
      * of a format meet in a fight the rivals declared, for the demo to confirm.
+     * In 1v1, members of the two clans settled two duels, which rank the clans
+     * in 1v1 as their team fights rank them in the other formats.
      *
      * @param list<Player> $opponents
      *
-     * @return array{int, int} how many clans and team fights were seeded
+     * @return array{int, int} how many clans and clan fights were seeded
      */
     private function seedClans(Game $game, Player $me, array $opponents): array
     {
@@ -430,6 +441,19 @@ final class SeedCommand extends Command
         $this->entityManager->persist(Clan::invite($mine, new ClanMemberId(Uuid::v4()->toString()), $invited->getId()));
 
         $fights = 0;
+        if ($game->supportsTeamSize(1)) {
+            for ($duel = 0; $duel < 2; ++$duel) {
+                $this->seedFight(
+                    $this->enlist(CompetitorType::PLAYER, (string) $opponents[$duel]->getId()),
+                    $this->enlist(CompetitorType::PLAYER, (string) $opponents[$squad + 1 + $duel]->getId()),
+                    $gameId,
+                    1,
+                    ResultStatus::WIN,
+                );
+                ++$fights;
+            }
+        }
+
         foreach ($game->getTeamSizes() as $size) {
             if (1 === $size) {
                 continue;
@@ -440,6 +464,8 @@ final class SeedCommand extends Command
 
             $theirSide = $this->enlist(CompetitorType::TEAM, (string) $theirTeam->getId());
             $mySide = $this->enlist(CompetitorType::TEAM, (string) $myTeam->getId());
+            $this->clanOfCompetitor[(string) $theirSide] = $theirs->getId();
+            $this->clanOfCompetitor[(string) $mySide] = $mine->getId();
 
             // Two settled fights, for the history on the clan pages.
             for ($settled = 0; $settled < 2; ++$settled) {
@@ -469,6 +495,10 @@ final class SeedCommand extends Command
         foreach ($members as $member) {
             $membership = Clan::invite($clan, new ClanMemberId(Uuid::v4()->toString()), $member->getId());
             $this->entityManager->persist(Clan::join($clan, $membership));
+        }
+
+        foreach ([$leader, ...$members] as $player) {
+            $this->clanOfCompetitor[(string) $this->enlist(CompetitorType::PLAYER, (string) $player->getId())] = $clan->getId();
         }
 
         return $clan;
@@ -650,8 +680,8 @@ final class SeedCommand extends Command
         $fight->setCreatedAt($at);
         $fight->setUpdatedAt($at);
 
-        $resultOne = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $one);
-        $resultTwo = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $two);
+        $resultOne = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $one, $this->clanOfCompetitor[(string) $one] ?? null);
+        $resultTwo = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $two, $this->clanOfCompetitor[(string) $two] ?? null);
 
         if (ResultStatus::PENDING !== $state) {
             $scoreOne = mt_rand(0, 3);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Competition\Ranking\Application;
 
 use App\Competition\Fight\Domain\Entity\FightId;
+use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
@@ -14,10 +15,13 @@ use App\Competition\Ranking\Application\Service\FindRankingHandler;
 use App\Competition\Ranking\Domain\Entity\Rating;
 use App\Competition\Ranking\Domain\Entity\RatingChangeId;
 use App\Competition\Ranking\Domain\Entity\RatingId;
+use App\Competition\Ranking\Domain\Enum\FightOutcome;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\ClanTagProvider;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +45,7 @@ final class FindRankingHandlerTest extends TestCase
         $alice = $this->rating(self::ALICE, wins: 2);
         $bob = $this->rating(self::BOB, losses: 2);
 
-        $page = $this->read($this->handler([$alice, $bob])(FindRankingQuery::ofPlayers(self::GAME_ID, 1, 20)));
+        $page = $this->read($this->handler([$alice, $bob])(FindRankingQuery::ofPlayers(self::GAME_ID, null, 1, 20)));
 
         $this->assertSame(
             [
@@ -51,12 +55,42 @@ final class FindRankingHandlerTest extends TestCase
                 'wins' => 2,
                 'draws' => 0,
                 'losses' => 0,
-                'subject' => ['type' => 'player', 'id' => ['value' => self::ALICE], 'name' => 'Alice#0001', 'tag' => null],
+                'subject' => ['type' => 'player', 'id' => ['value' => self::ALICE], 'name' => 'Alice#0001', 'tag' => 'B2T'],
             ],
             $page['items'][0],
         );
-        $this->assertSame([2, 'Bob#0002'], [$page['items'][1]['rank'], $page['items'][1]['subject']['name']]);
+        // Alice leads a clan, Bob is in none.
+        $this->assertSame([2, 'Bob#0002', null], [$page['items'][1]['rank'], $page['items'][1]['subject']['name'], $page['items'][1]['subject']['tag']]);
         $this->assertSame([2, 1, 20, 1], [$page['total'], $page['page'], $page['limit'], $page['pages']]);
+    }
+
+    public function test_without_a_format_the_ranking_is_the_one_of_the_smallest_format_of_the_game(): void
+    {
+        $handler = $this->handler([$this->rating(self::ALICE, wins: 1, teamSize: 2)], formats: [2, 3], rankings: $rankings);
+
+        $page = $this->read($handler(FindRankingQuery::ofPlayers(self::GAME_ID, null, 1, 20)));
+
+        $this->assertSame(2, $page['teamSize']);
+        $this->assertSame([[RankingSubject::PLAYER, self::GAME_ID, 2]], $rankings);
+    }
+
+    public function test_each_format_has_a_ranking_of_its_own(): void
+    {
+        $handler = $this->handler([$this->rating(self::CLAN_ID, RankingSubject::CLAN, wins: 1, teamSize: 3)], formats: [1, 2, 3], rankings: $rankings);
+
+        $page = $this->read($handler(FindRankingQuery::ofClans(self::GAME_ID, 3, 1, 20)));
+
+        $this->assertSame(3, $page['teamSize']);
+        $this->assertSame([[RankingSubject::CLAN, self::GAME_ID, 3]], $rankings);
+        $this->assertSame([1, 1016], [$page['items'][0]['rank'], $page['items'][0]['rating']]);
+    }
+
+    public function test_a_format_the_game_is_not_played_in_is_refused(): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessageIsOrContains('Rocket League is not played 4v4');
+
+        $this->handler([], formats: [1, 2, 3])(FindRankingQuery::ofPlayers(self::GAME_ID, 4, 1, 20));
     }
 
     public function test_equal_ratings_share_a_rank_and_the_next_one_down_keeps_its_place(): void
@@ -66,7 +100,7 @@ final class FindRankingHandlerTest extends TestCase
             $this->rating(self::BOB, wins: 1),
             $this->rating(self::CAROL, wins: 1),
             $this->rating(self::DAVE, losses: 1),
-        ])(FindRankingQuery::ofPlayers(self::GAME_ID, 1, 20)));
+        ])(FindRankingQuery::ofPlayers(self::GAME_ID, null, 1, 20)));
 
         $this->assertSame([1, 2, 2, 4], array_column($page['items'], 'rank'));
     }
@@ -78,7 +112,7 @@ final class FindRankingHandlerTest extends TestCase
             [$this->rating(self::CAROL, wins: 1), $this->rating(self::DAVE, losses: 1)],
             above: [1016 => 1, 984 => 3],
             total: 4,
-        )(FindRankingQuery::ofPlayers(self::GAME_ID, 2, 2)));
+        )(FindRankingQuery::ofPlayers(self::GAME_ID, null, 2, 2)));
 
         $this->assertSame([2, 4], array_column($page['items'], 'rank'));
         $this->assertSame([4, 2, 2, 2], [$page['total'], $page['page'], $page['limit'], $page['pages']]);
@@ -86,7 +120,7 @@ final class FindRankingHandlerTest extends TestCase
 
     public function test_a_clan_is_named_with_its_tag(): void
     {
-        $page = $this->read($this->handler([$this->rating(self::CLAN_ID, RankingSubject::CLAN, wins: 1)])(FindRankingQuery::ofClans(self::GAME_ID, 1, 20)));
+        $page = $this->read($this->handler([$this->rating(self::CLAN_ID, RankingSubject::CLAN, wins: 1)])(FindRankingQuery::ofClans(self::GAME_ID, null, 1, 20)));
 
         $this->assertSame(
             ['type' => 'clan', 'id' => ['value' => self::CLAN_ID], 'name' => 'Back to Tournament', 'tag' => 'B2T'],
@@ -96,7 +130,7 @@ final class FindRankingHandlerTest extends TestCase
 
     public function test_nobody_ranked_yet_reads_as_an_empty_page(): void
     {
-        $page = $this->read($this->handler([])(FindRankingQuery::ofClans(self::GAME_ID, 1, 20)));
+        $page = $this->read($this->handler([])(FindRankingQuery::ofClans(self::GAME_ID, null, 1, 20)));
 
         $this->assertSame([[], 0, 0], [$page['items'], $page['total'], $page['pages']]);
     }
@@ -105,40 +139,57 @@ final class FindRankingHandlerTest extends TestCase
     {
         $this->expectException(NotFoundException::class);
 
-        $this->handler([], game: false)(FindRankingQuery::ofPlayers(self::GAME_ID, 1, 20));
+        $this->handler([], game: false)(FindRankingQuery::ofPlayers(self::GAME_ID, null, 1, 20));
     }
 
     public function test_a_game_id_that_is_no_uuid_is_refused(): void
     {
         $this->expectException(ValidationException::class);
 
-        $this->handler([])(FindRankingQuery::ofPlayers('not-a-uuid', 1, 20));
+        $this->handler([])(FindRankingQuery::ofPlayers('not-a-uuid', null, 1, 20));
     }
 
     /**
-     * @param list<Rating>      $ratings the page, highest first
-     * @param array<int, int>|null $above   how many rate higher than each value; computed from $ratings when null
+     * @param list<Rating>                                   $ratings  the page, highest first
+     * @param array<int, int>|null                           $above    how many rate higher than each value; computed from $ratings when null
+     * @param list<int>                                      $formats  the formats the game is played in
+     * @param list<array{RankingSubject, string, int}>|null $rankings filled with each ranking read: who, in which game and format
+     *
+     * @param-out list<array{RankingSubject, string, int}> $rankings
      */
-    private function handler(array $ratings, ?array $above = null, ?int $total = null, bool $game = true): FindRankingHandler
+    private function handler(array $ratings, ?array $above = null, ?int $total = null, bool $game = true, array $formats = [1], ?array &$rankings = null): FindRankingHandler
     {
+        $rankings = [];
         $ratingRepository = $this->createStub(RatingRepositoryInterface::class);
-        $ratingRepository->method('findRanking')->willReturn($ratings);
+        $ratingRepository->method('findRanking')->willReturnCallback(
+            static function (RankingSubject $subjectType, string $gameId, int $teamSize) use ($ratings, &$rankings): array {
+                $rankings[] = [$subjectType, $gameId, $teamSize];
+
+                return $ratings;
+            }
+        );
         $ratingRepository->method('countRanking')->willReturn($total ?? \count($ratings));
         $ratingRepository->method('countAbove')->willReturnCallback(
-            static fn (RankingSubject $subjectType, string $gameId, int $value): int => $above[$value]
+            static fn (RankingSubject $subjectType, string $gameId, int $teamSize, int $value): int => $above[$value]
                 ?? \count(array_filter($ratings, static fn (Rating $rating): bool => $rating->getValue() > $value))
         );
 
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::ALICE);
+
         return new FindRankingHandler(
             $ratingRepository,
-            $this->repositoryStub(GameRepositoryInterface::class, $game ? [self::aGame(self::GAME_ID)] : []),
+            $this->repositoryStub(GameRepositoryInterface::class, $game ? [self::aGame(self::GAME_ID, $formats)] : []),
             $this->repositoryStub(PlayerRepositoryInterface::class, [
                 self::aPlayer(self::ALICE, self::USER_ID, self::GAME_ID, 'Alice#0001'),
                 self::aPlayer(self::BOB, self::USER_ID, self::GAME_ID, 'Bob#0002'),
                 self::aPlayer(self::CAROL, self::USER_ID, self::GAME_ID, 'Carol#0003'),
                 self::aPlayer(self::DAVE, self::USER_ID, self::GAME_ID, 'Dave#0004'),
             ]),
-            $this->repositoryStub(ClanRepositoryInterface::class, [self::aClan(self::CLAN_ID, self::GAME_ID, self::ALICE)]),
+            $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            new ClanTagProvider(
+                $this->repositoryStub(ClanMemberRepositoryInterface::class, [self::leadership($clan)]),
+                $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            ),
         );
     }
 
@@ -146,20 +197,26 @@ final class FindRankingHandlerTest extends TestCase
      * A rating made by $wins wins, then $losses losses, each against a newcomer
      * at 1000: one win makes 1016, two 1031; one loss 984, two 969.
      */
-    private function rating(string $subject, RankingSubject $subjectType = RankingSubject::PLAYER, int $wins = 0, int $losses = 0): Rating
+    private function rating(string $subject, RankingSubject $subjectType = RankingSubject::PLAYER, int $wins = 0, int $losses = 0, int $teamSize = 1): Rating
     {
-        $rating = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, new GameId(self::GAME_ID));
+        $rating = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
 
         for ($fight = 0; $fight < $wins + $losses; ++$fight) {
-            $opponent = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, Uuid::v4()->toString(), new GameId(self::GAME_ID));
-            Rating::settle($rating, $opponent, $fight < $wins ? $rating : $opponent, new FightId(Uuid::v4()->toString()), new RatingChangeId(Uuid::v4()->toString()), new RatingChangeId(Uuid::v4()->toString()));
+            $opponent = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, Uuid::v4()->toString(), new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
+            Rating::settle(
+                [$rating],
+                [$opponent],
+                $fight < $wins ? FightOutcome::SIDE_ONE_WON : FightOutcome::SIDE_TWO_WON,
+                new FightId(Uuid::v4()->toString()),
+                [new RatingChangeId(Uuid::v4()->toString()), new RatingChangeId(Uuid::v4()->toString())],
+            );
         }
 
         return $rating;
     }
 
     /**
-     * @return array{items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int}
+     * @return array{teamSize: int, items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int}
      */
     private function read(string $json): array
     {

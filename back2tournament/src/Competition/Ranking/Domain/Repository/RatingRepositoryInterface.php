@@ -19,19 +19,19 @@ interface RatingRepositoryInterface
     public function count(array $criteria = []): int;
 
     /**
-     * One page of a game's ranking, the highest rating first.
+     * One page of the ranking of a game in one format, the highest rating first.
      *
      * @return list<Rating>
      */
-    public function findRanking(RankingSubject $subjectType, string $gameId, int $limit, int $offset): array;
+    public function findRanking(RankingSubject $subjectType, string $gameId, int $teamSize, int $limit, int $offset): array;
 
-    public function countRanking(RankingSubject $subjectType, string $gameId): int;
+    public function countRanking(RankingSubject $subjectType, string $gameId, int $teamSize): int;
 
     /**
-     * How many of a game's ranking rate strictly higher than $value: the rank
-     * of $value is one more.
+     * How many of the ranking of a game in one format rate strictly higher
+     * than $value: the rank of $value is one more.
      */
-    public function countAbove(RankingSubject $subjectType, string $gameId, int $value): int;
+    public function countAbove(RankingSubject $subjectType, string $gameId, int $teamSize, int $value): int;
 
     public function save(Rating $rating): void;
 

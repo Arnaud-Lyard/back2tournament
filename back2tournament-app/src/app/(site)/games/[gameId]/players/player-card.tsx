@@ -1,15 +1,16 @@
 import { ArrowRightIcon } from "lucide-react"
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { PlayerAvatar } from "@/components/player-avatar"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
-import type { Player } from "@/features/players/types"
+import type { GamePlayer } from "@/features/players/types"
 
 export async function PlayerCard({
   player,
   gameId,
 }: {
-  player: Player
+  player: GamePlayer
   gameId: string
 }) {
   const id = player.id?.value
@@ -27,7 +28,10 @@ export async function PlayerCard({
         >
           <PlayerAvatar battletag={battletag} size="lg" />
           <div className="flex min-w-0 flex-col gap-1">
-            <CardTitle className="truncate">{battletag}</CardTitle>
+            <div className="flex min-w-0 items-center gap-2">
+              <ClanTag tag={player.clanTag} />
+              <CardTitle className="truncate">{battletag}</CardTitle>
+            </div>
             <CardDescription className="inline-flex items-center gap-1 text-primary">
               {t("view")}
               <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" />

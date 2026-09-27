@@ -9,6 +9,7 @@ use App\Competition\Fight\Domain\Event\FightCreatedEvent;
 use App\Competition\Fight\Domain\Event\FightSettledEvent;
 use App\Competition\Fight\Domain\Event\ResultCreatedEvent;
 use App\Competition\Fight\Domain\Event\ResultUpdatedEvent;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
@@ -190,14 +191,20 @@ class Fight extends AggregateRoot
         return $fight;
     }
 
+    /**
+     * The pending result of one side, which records the clan the side plays
+     * for as the fight opens; null for a profile in no clan.
+     */
     public static function createResult(
         Fight $fight,
         ResultId $resultId,
         CompetitorId $competitorId,
+        ?ClanId $clan = null,
     ): Result {
         $result = new Result($resultId);
         $result->setFight($fight->getId());
         $result->setCompetitor($competitorId);
+        $result->setClan($clan);
         $result->setScore(0);
         $result->setStatus(ResultStatus::PENDING);
         $result->setCreatedAt(new \DateTimeImmutable('now'));

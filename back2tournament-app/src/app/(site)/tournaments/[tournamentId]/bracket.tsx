@@ -1,5 +1,6 @@
 import { TrophyIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { bracketRounds, roundName } from "@/features/tournaments/lib/bracket"
 import type { TournamentMatchup } from "@/features/tournaments/types"
 import { cn } from "@/libs/utils"
@@ -80,8 +81,11 @@ function SideRow({
         !side && "text-muted-foreground italic"
       )}
     >
-      <span className="truncate">
-        {side ? (side.name ?? "?") : placeholder}
+      <span className="flex min-w-0 items-center gap-1.5">
+        {side && <ClanTag tag={side.tag} />}
+        <span className="truncate">
+          {side ? (side.name ?? "?") : placeholder}
+        </span>
       </span>
       {won && <TrophyIcon className="size-4 shrink-0 text-primary" />}
     </div>

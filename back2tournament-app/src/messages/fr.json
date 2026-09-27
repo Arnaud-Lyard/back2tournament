@@ -636,7 +636,6 @@
         "reporting": "À confirmer",
         "finished": "Terminé"
       },
-      "arbitrated": "Arbitré",
       "unknownSide": "Camp inconnu",
       "list": {
         "title": "Matchs",
@@ -663,8 +662,7 @@
         "declaring": "(a déclaré)",
         "declaredBy": "{name} a déclaré ce score ; l'autre camp ne l'a pas confirmé.",
         "noDeclaration": "Aucun score déclaré pour l'instant.",
-        "finished": "Match confirmé par les deux camps : le résultat est définitif.",
-        "finishedArbitrated": "Match arbitré par un administrateur : le résultat est définitif.",
+        "finished": "Match terminé : le résultat est définitif.",
         "fightId": "Identifiant",
         "copyId": "Copier l'identifiant du match",
         "notFound": {
@@ -678,7 +676,7 @@
       },
       "arbitration": {
         "title": "Imposer un résultat",
-        "description": "Le score saisi remplace toute déclaration : le match est terminé, marqué comme arbitré, et ce résultat est définitif.",
+        "description": "Le score saisi remplace toute déclaration : le match est terminé et ce résultat est définitif.",
         "scoreOf": "Score de {name}",
         "submit": "Imposer ce résultat",
         "confirmTitle": "Imposer {one} {scoreOne} – {scoreTwo} {two} ?",
@@ -864,12 +862,12 @@
     "title": "Derniers résultats",
     "description": {
       "player": "Ses matchs terminés, en 1v1 et avec ses équipes, du plus récent au plus ancien.",
-      "clan": "Les matchs terminés des équipes du clan, du plus récent au plus ancien."
+      "clan": "Ses matchs terminés contre d'autres clans, du plus récent au plus ancien : ceux de ses équipes et, en 1v1, les duels de ses membres."
     },
     "empty": {
       "title": "Aucun résultat",
       "player": "Aucun match terminé pour le moment.",
-      "clan": "Aucune équipe du clan n'a encore terminé de match."
+      "clan": "Le clan n'a encore terminé aucun match contre un autre clan."
     },
     "outcome": {
       "win": "Victoire",
@@ -880,18 +878,19 @@
     "unknown": "adversaire inconnu",
     "tournament": "Tournoi",
     "latest": "Les {shown} derniers sur {total}",
-    "loadError": "Impossible de charger les résultats pour le moment.",
-    "arbitrated": "Arbitré",
-    "arbitratedHint": "Un administrateur a tranché ce match après un litige."
+    "loadError": "Impossible de charger les résultats pour le moment."
   },
   "rankings": {
     "title": "Classement",
-    "description": "Le classement Elo des joueurs et des clans de ce jeu.",
-    "howItWorks": "Tout le monde démarre à 1000 points. Chaque combat confirmé en fait gagner ou perdre jusqu'à 32 : battre mieux classé que soi rapporte davantage. Les joueurs sont classés sur leurs duels, les clans sur les combats de leurs équipes.",
+    "description": "Le classement Elo des joueurs et des clans de ce jeu, format par format.",
+    "howItWorks": "Chaque format a son classement, où tout le monde démarre à 1000 points. Chaque combat confirmé en fait gagner ou perdre jusqu'à 32 : battre mieux classé que soi rapporte davantage. En équipe, chaque joueur gagne ou perd ce que le combat valait pour son équipe. Un clan est classé sur les combats de ses équipes et, en 1v1, sur les duels de ses membres contre ceux d'autres clans.",
     "views": {
       "label": "Classement à afficher",
       "players": "Joueurs",
       "clans": "Clans"
+    },
+    "formats": {
+      "label": "Format du classement"
     },
     "columns": {
       "rank": "Rang",
@@ -904,9 +903,9 @@
     "you": "Vous",
     "unknown": "Inconnu",
     "empty": {
-      "title": "Personne n'est encore classé",
-      "players": "Le classement se remplit à chaque duel confirmé.",
-      "clans": "Les clans entrent au classement avec les combats confirmés de leurs équipes."
+      "title": "Personne n'est encore classé en {format}",
+      "players": "Le classement de ce format se remplit à chaque combat confirmé.",
+      "clans": "Un clan entre au classement avec un combat confirmé contre un autre clan : celui d'une de ses équipes, ou en 1v1 le duel d'un de ses membres."
     },
     "loadError": {
       "title": "Impossible de charger le classement",
@@ -915,8 +914,8 @@
     "card": {
       "title": "Classement Elo",
       "description": {
-        "player": "Calculé sur ses duels confirmés.",
-        "clan": "Calculé sur les combats confirmés de ses équipes."
+        "player": "Une note par format : ses duels en 1v1, les combats de ses équipes dans les autres formats.",
+        "clan": "Une note par format : les combats de ses équipes, et en 1v1 les duels de ses membres contre d'autres clans."
       },
       "viewRanking": "Voir le classement",
       "rating": "Elo",
