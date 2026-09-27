@@ -46,7 +46,10 @@ interface CompetitorRegistryProviderInterface
     /**
      * @param list<string> $competitorIds
      *
-     * @return array<string, array{type: string, reference: string, name: ?string}> keyed by competitor id; an unknown id is left out
+     * `tag` is the tag of the clan the side plays for: the clan of the
+     * player profile, or of the team; null for a profile in no clan.
+     *
+     * @return array<string, array{type: string, reference: string, name: ?string, tag: ?string}> keyed by competitor id; an unknown id is left out
      */
     public function describe(array $competitorIds): array;
 

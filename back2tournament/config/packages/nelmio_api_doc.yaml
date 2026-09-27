@@ -155,6 +155,17 @@ nelmio_api_doc:
                             description: 'The outcome the declaring side claims. Carried only while `status` is `reporting`.'
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
+                GamePlayer:
+                    description: 'A player profile as the list of a game shows it: with the tag of its clan.'
+                    allOf:
+                        - { $ref: '#/components/schemas/Player' }
+                        - type: object
+                          properties:
+                              clanTag:
+                                  type: string
+                                  nullable: true
+                                  example: 'B2T'
+                                  description: 'The tag of the clan the profile is an active member of. Null for a profile in no clan.'
                 PlayerProfile:
                     type: object
                     description: 'A player profile as a list names it: its id and the battletag it goes by.'
@@ -185,6 +196,11 @@ nelmio_api_doc:
                             nullable: true
                             example: 'PlayerOne#1234'
                             description: 'The battletag of the profile, or the name of the team. Null when it no longer exists.'
+                        tag:
+                            type: string
+                            nullable: true
+                            example: 'B2T'
+                            description: 'The tag of the clan the side plays for: the clan the profile is an active member of, or the clan of the team. Null for a profile in no clan.'
                 FightSide:
                     description: 'One side of a fight, and what it claims or settled on.'
                     allOf:
@@ -445,7 +461,7 @@ nelmio_api_doc:
                         type: { type: string, enum: [player, clan] }
                         id: { $ref: '#/components/schemas/Uuid' }
                         name: { type: string, nullable: true, example: 'Demo#1001' }
-                        tag: { type: string, nullable: true, example: 'B2T', description: 'The clan tag; null for a player profile' }
+                        tag: { type: string, nullable: true, example: 'B2T', description: 'The tag of the clan, or of the clan a player profile is an active member of; null for a profile in no clan' }
                 RankingEntry:
                     type: object
                     description: 'One place in a ranking. Every rating starts at 1000 and moves by up to 32 points per settled fight (Elo, K = 32).'

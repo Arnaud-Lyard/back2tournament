@@ -2,6 +2,7 @@ import { CalendarIcon, PlusIcon, TrophyIcon, UsersIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
 import { Pagination } from "@/components/pagination"
@@ -158,6 +159,7 @@ export default async function TournamentsPage({
                         {tournament.winner?.name && (
                           <span className="inline-flex items-center gap-1 font-medium text-foreground">
                             <TrophyIcon className="size-4" />
+                            <ClanTag tag={tournament.winner.tag} />
                             {tournament.winner.name}
                           </span>
                         )}

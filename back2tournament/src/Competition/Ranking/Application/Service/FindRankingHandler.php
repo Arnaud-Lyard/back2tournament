@@ -13,6 +13,7 @@ use App\Competition\Ranking\Application\Model\FindRankingQuery;
 use App\Competition\Ranking\Domain\Entity\Rating;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\ClanTagProviderInterface;
 use App\Shared\Exception\NotFoundException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -23,17 +24,20 @@ final class FindRankingHandler
     private GameRepositoryInterface $gameRepository;
     private PlayerRepositoryInterface $playerRepository;
     private ClanRepositoryInterface $clanRepository;
+    private ClanTagProviderInterface $clanTagProvider;
 
     public function __construct(
         RatingRepositoryInterface $ratingRepository,
         GameRepositoryInterface $gameRepository,
         PlayerRepositoryInterface $playerRepository,
         ClanRepositoryInterface $clanRepository,
+        ClanTagProviderInterface $clanTagProvider,
     ) {
         $this->ratingRepository = $ratingRepository;
         $this->gameRepository = $gameRepository;
         $this->playerRepository = $playerRepository;
         $this->clanRepository = $clanRepository;
+        $this->clanTagProvider = $clanTagProvider;
     }
 
     public function __invoke(FindRankingQuery $findRankingQuery): string
@@ -77,7 +81,8 @@ final class FindRankingHandler
     }
 
     /**
-     * The names of the ranked player profiles or clans, keyed by id.
+     * The names of the ranked player profiles or clans, keyed by id, with the
+     * tag of the clan: the profile's own clan, when it is in one.
      *
      * @param list<string> $subjectIds
      *
@@ -91,8 +96,10 @@ final class FindRankingHandler
 
         $subjects = [];
         if (RankingSubject::PLAYER === $subjectType) {
+            $clans = $this->clanTagProvider->clansOfPlayers($subjectIds);
             foreach ($this->playerRepository->findBy(['id' => $subjectIds]) as $player) {
-                $subjects[$player->getId()->getValue()] = ['name' => (string) $player->getBattletag(), 'tag' => null];
+                $playerId = $player->getId()->getValue();
+                $subjects[$playerId] = ['name' => (string) $player->getBattletag(), 'tag' => $clans[$playerId]['tag'] ?? null];
             }
 
             return $subjects;

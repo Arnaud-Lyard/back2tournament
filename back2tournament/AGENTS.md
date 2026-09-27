@@ -87,8 +87,10 @@ make user           # seed a dev user via app:create-user
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
-  for, which competitors a player profile or a clan plays as, name the sides, what a
-  competitor ranks as, which competitors bear a name) and
+  for, which competitors a player profile or a clan plays as, name the sides and tag
+  them with their clan, what a competitor ranks as, which competitors bear a name),
+  `ClanTagProviderInterface` (the clan a player profile is an active member of, and
+  the tag of a clan: lists show it before a battletag or a team name) and
   `FightSchedulerProviderInterface` (open a fight with its two pending results). Each
   `…ProviderInterface` has its `…Provider` implementation next to it, in the same
   folder.
@@ -230,8 +232,9 @@ request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
 the caller injects the interface. `CurrentUserProviderInterface`,
 `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
-`CompetitorRegistryProviderInterface`, `FightSchedulerProviderInterface`,
-`CategoryIdProviderInterface` and `AuthorProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
+`CompetitorRegistryProviderInterface`, `ClanTagProviderInterface`,
+`FightSchedulerProviderInterface`, `CategoryIdProviderInterface` and
+`AuthorProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a

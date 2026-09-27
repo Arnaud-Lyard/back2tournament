@@ -25,6 +25,7 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
     private PlayerRepositoryInterface $playerRepository;
     private TeamRepositoryInterface $teamRepository;
     private TeamPlayerRepositoryInterface $teamPlayerRepository;
+    private ClanTagProviderInterface $clanTagProvider;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
@@ -32,12 +33,14 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
         PlayerRepositoryInterface $playerRepository,
         TeamRepositoryInterface $teamRepository,
         TeamPlayerRepositoryInterface $teamPlayerRepository,
+        ClanTagProviderInterface $clanTagProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->competitorRepository = $competitorRepository;
         $this->playerRepository = $playerRepository;
         $this->teamRepository = $teamRepository;
         $this->teamPlayerRepository = $teamPlayerRepository;
+        $this->clanTagProvider = $clanTagProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -128,14 +131,24 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
         }
 
         $names = [];
+        $tags = [];
         if ([] !== $references[CompetitorType::PLAYER->value]) {
             foreach ($this->playerRepository->findBy(['id' => $references[CompetitorType::PLAYER->value]]) as $player) {
                 $names[$player->getId()->getValue()] = $player->getBattletag();
             }
+            foreach ($this->clanTagProvider->clansOfPlayers($references[CompetitorType::PLAYER->value]) as $playerId => $clan) {
+                $tags[$playerId] = $clan['tag'];
+            }
         }
         if ([] !== $references[CompetitorType::TEAM->value]) {
+            $clanOfTeam = [];
             foreach ($this->teamRepository->findBy(['id' => $references[CompetitorType::TEAM->value]]) as $team) {
                 $names[$team->getId()->getValue()] = $team->getName();
+                $clanOfTeam[$team->getId()->getValue()] = $team->getClan()->getValue();
+            }
+            $clanTags = $this->clanTagProvider->tagsOfClans(array_values($clanOfTeam));
+            foreach ($clanOfTeam as $teamId => $clanId) {
+                $tags[$teamId] = $clanTags[$clanId] ?? null;
             }
         }
 
@@ -145,6 +158,7 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
                 'type' => $competitor->getType()->value,
                 'reference' => $competitor->getReference(),
                 'name' => $names[$competitor->getReference()] ?? null,
+                'tag' => $tags[$competitor->getReference()] ?? null,
             ];
         }
 

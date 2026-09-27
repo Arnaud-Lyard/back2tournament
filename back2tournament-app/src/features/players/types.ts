@@ -1,6 +1,7 @@
 import type { components, paths } from "@/libs/api/schema"
 
-export type Player = components["schemas"]["Player"]
+/** A player profile as the list of a game shows it: with its clan's tag. */
+export type GamePlayer = components["schemas"]["GamePlayer"]
 
 export type CreatedPlayer =
   paths["/api/players/"]["post"]["responses"][200]["content"]["application/json"]

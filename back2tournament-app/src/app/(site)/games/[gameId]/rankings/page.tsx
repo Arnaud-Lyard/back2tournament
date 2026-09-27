@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
 import { Pagination } from "@/components/pagination"
@@ -183,11 +184,7 @@ export default async function RankingsPage({
                     </TableCell>
                     <TableCell>
                       <span className="flex min-w-0 items-center gap-2">
-                        {entry.subject.tag && (
-                          <Badge variant="secondary" className="font-mono">
-                            {entry.subject.tag}
-                          </Badge>
-                        )}
+                        <ClanTag tag={entry.subject.tag} />
                         {href ? (
                           <Link
                             href={href}

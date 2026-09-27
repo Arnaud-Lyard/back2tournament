@@ -863,6 +863,14 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        /** @description A player profile as the list of a game shows it: with the tag of its clan. */
+        GamePlayer: components["schemas"]["Player"] & {
+            /**
+             * @description The tag of the clan the profile is an active member of. Null for a profile in no clan.
+             * @example B2T
+             */
+            clanTag?: string | null;
+        };
         /** @description A player profile as a list names it: its id and the battletag it goes by. */
         PlayerProfile: {
             id?: components["schemas"]["Uuid"];
@@ -887,6 +895,11 @@ export interface components {
              * @example PlayerOne#1234
              */
             name?: string | null;
+            /**
+             * @description The tag of the clan the side plays for: the clan the profile is an active member of, or the clan of the team. Null for a profile in no clan.
+             * @example B2T
+             */
+            tag?: string | null;
         };
         /** @description One side of a fight, and what it claims or settled on. */
         FightSide: components["schemas"]["NamedSide"] & {
@@ -1167,7 +1180,7 @@ export interface components {
             /** @example Demo#1001 */
             name?: string | null;
             /**
-             * @description The clan tag; null for a player profile
+             * @description The tag of the clan, or of the clan a player profile is an active member of; null for a profile in no clan
              * @example B2T
              */
             tag?: string | null;
@@ -2108,6 +2121,11 @@ export interface operations {
                                 type?: "player" | "team" | null;
                                 /** @description Battletag or team name */
                                 name?: string | null;
+                                /**
+                                 * @description The tag of the clan the side plays for; null for a profile in no clan
+                                 * @example B2T
+                                 */
+                                tag?: string | null;
                             };
                             /** @description The caller's own player profile, for a 1v1. Null for a team. */
                             player?: components["schemas"]["PlayerProfile"] | null;
@@ -2121,6 +2139,11 @@ export interface operations {
                                 type?: "player" | "team" | null;
                                 /** @description Battletag or team name */
                                 name?: string | null;
+                                /**
+                                 * @description The tag of the clan the side plays for; null for a profile in no clan
+                                 * @example B2T
+                                 */
+                                tag?: string | null;
                                 player?: components["schemas"]["PlayerProfile"] | null;
                                 /**
                                  * @description Points the other side scored, as declared. Zero until a declaration.
@@ -2883,7 +2906,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        items: components["schemas"]["Player"][];
+                        items: components["schemas"]["GamePlayer"][];
                         /**
                          * @description Players the filters match, every page taken together
                          * @example 42

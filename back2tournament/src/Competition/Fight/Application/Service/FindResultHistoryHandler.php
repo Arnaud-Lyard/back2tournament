@@ -97,7 +97,7 @@ final class FindResultHistoryHandler
      * A settled fight, told from the side of the result.
      *
      * @param array<string, int>                                                   $scores    both sides' scores, keyed by competitor id
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described the sides, keyed by competitor id
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the sides, keyed by competitor id
      *
      * @return array<string, mixed>
      */
@@ -120,7 +120,7 @@ final class FindResultHistoryHandler
     }
 
     /**
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */
@@ -133,6 +133,7 @@ final class FindResultHistoryHandler
             'type' => $description['type'] ?? null,
             'reference' => null === $description ? null : ['value' => $description['reference']],
             'name' => $description['name'] ?? null,
+            'tag' => $description['tag'] ?? null,
             'score' => $score,
         ];
     }

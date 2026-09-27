@@ -1,5 +1,6 @@
 import { TrophyIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { CopyButton } from "@/components/copy-button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -76,8 +77,11 @@ export async function FightPanel({
         <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1">
           {sides.map((side, index) => (
             <div key={side.competitor?.value ?? index} className="contents">
-              <dt className="truncate">
-                {side.name ?? t("unknownSide")}
+              <dt className="flex min-w-0 items-center gap-1.5">
+                <ClanTag tag={side.tag} />
+                <span className="truncate">
+                  {side.name ?? t("unknownSide")}
+                </span>
                 {side.competitor?.value === fight.declaredBy?.value && (
                   <span className="text-xs text-muted-foreground">
                     {" "}

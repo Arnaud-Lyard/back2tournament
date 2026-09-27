@@ -1,5 +1,6 @@
 import { TrophyIcon } from "lucide-react"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { PlayerAvatar } from "@/components/player-avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -63,11 +64,20 @@ export async function ChallengeRow({ result, gameTitle }: ChallengeRowProps) {
           )}
         </div>
         <div className="flex items-center gap-3 px-(--card-spacing)">
-          <Side name={mine} unknown={t("unknownPlayer")} />
+          <Side
+            name={mine}
+            tag={result.side?.tag}
+            unknown={t("unknownPlayer")}
+          />
           <span className="shrink-0 text-center font-mono text-sm text-muted-foreground">
             {stage === "declare" ? t("versus") : `${score} – ${opponentScore}`}
           </span>
-          <Side name={theirs} unknown={t("unknownOpponent")} align="end" />
+          <Side
+            name={theirs}
+            tag={result.opponent?.tag}
+            unknown={t("unknownOpponent")}
+            align="end"
+          />
         </div>
         <p className="px-(--card-spacing) text-sm text-muted-foreground">
           {stage === "declare"
@@ -103,10 +113,12 @@ export async function ChallengeRow({ result, gameTitle }: ChallengeRowProps) {
 
 function Side({
   name,
+  tag,
   unknown,
   align = "start",
 }: {
   name: string | null | undefined
+  tag: string | null | undefined
   unknown: string
   align?: "start" | "end"
 }) {
@@ -118,7 +130,10 @@ function Side({
       )}
     >
       <PlayerAvatar battletag={name ?? "?"} size="sm" />
-      <span className="truncate text-sm">{name ?? unknown}</span>
+      <span className="flex min-w-0 items-center gap-1.5">
+        <ClanTag tag={tag} />
+        <span className="truncate text-sm">{name ?? unknown}</span>
+      </span>
     </div>
   )
 }

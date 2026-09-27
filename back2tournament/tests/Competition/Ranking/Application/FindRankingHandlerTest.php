@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Competition\Ranking\Application;
 
 use App\Competition\Fight\Domain\Entity\FightId;
+use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
@@ -16,6 +17,7 @@ use App\Competition\Ranking\Domain\Entity\RatingChangeId;
 use App\Competition\Ranking\Domain\Entity\RatingId;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\ClanTagProvider;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\ValidationException;
 use App\Tests\Support\CompetitionFixtures;
@@ -51,11 +53,12 @@ final class FindRankingHandlerTest extends TestCase
                 'wins' => 2,
                 'draws' => 0,
                 'losses' => 0,
-                'subject' => ['type' => 'player', 'id' => ['value' => self::ALICE], 'name' => 'Alice#0001', 'tag' => null],
+                'subject' => ['type' => 'player', 'id' => ['value' => self::ALICE], 'name' => 'Alice#0001', 'tag' => 'B2T'],
             ],
             $page['items'][0],
         );
-        $this->assertSame([2, 'Bob#0002'], [$page['items'][1]['rank'], $page['items'][1]['subject']['name']]);
+        // Alice leads a clan, Bob is in none.
+        $this->assertSame([2, 'Bob#0002', null], [$page['items'][1]['rank'], $page['items'][1]['subject']['name'], $page['items'][1]['subject']['tag']]);
         $this->assertSame([2, 1, 20, 1], [$page['total'], $page['page'], $page['limit'], $page['pages']]);
     }
 
@@ -129,6 +132,8 @@ final class FindRankingHandlerTest extends TestCase
                 ?? \count(array_filter($ratings, static fn (Rating $rating): bool => $rating->getValue() > $value))
         );
 
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::ALICE);
+
         return new FindRankingHandler(
             $ratingRepository,
             $this->repositoryStub(GameRepositoryInterface::class, $game ? [self::aGame(self::GAME_ID)] : []),
@@ -138,7 +143,11 @@ final class FindRankingHandlerTest extends TestCase
                 self::aPlayer(self::CAROL, self::USER_ID, self::GAME_ID, 'Carol#0003'),
                 self::aPlayer(self::DAVE, self::USER_ID, self::GAME_ID, 'Dave#0004'),
             ]),
-            $this->repositoryStub(ClanRepositoryInterface::class, [self::aClan(self::CLAN_ID, self::GAME_ID, self::ALICE)]),
+            $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            new ClanTagProvider(
+                $this->repositoryStub(ClanMemberRepositoryInterface::class, [self::leadership($clan)]),
+                $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            ),
         );
     }
 

@@ -7,9 +7,12 @@ namespace App\Tests\Competition\Shared\Domain;
 use App\Competition\Competitor\Domain\Entity\Competitor;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
+use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
+use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\ClanTagProvider;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProvider;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
@@ -30,6 +33,7 @@ final class CompetitorRegistryProviderTest extends TestCase
     private const TEAM_ID = '55555555-5555-4555-8555-555555555555';
     private const PLAYER_COMPETITOR = '66666666-6666-4666-8666-666666666666';
     private const TEAM_COMPETITOR = '67676767-6767-4676-8676-676767676767';
+    private const MATE_COMPETITOR = '68686868-6868-4686-8686-686868686868';
 
     public function test_a_player_already_enlisted_keeps_its_competitor(): void
     {
@@ -79,7 +83,7 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame([], $registry->representedBy(self::MATE_USER));
     }
 
-    public function test_sides_are_named_by_battletag_or_team_name(): void
+    public function test_sides_are_named_by_battletag_or_team_name_and_tagged_with_their_clan(): void
     {
         $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
             self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
@@ -88,8 +92,20 @@ final class CompetitorRegistryProviderTest extends TestCase
 
         $described = $registry->describe([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR]);
 
-        $this->assertSame(['type' => 'player', 'reference' => self::PLAYER_ID, 'name' => 'Leader#0001'], $described[self::PLAYER_COMPETITOR]);
-        $this->assertSame(['type' => 'team', 'reference' => self::TEAM_ID, 'name' => 'Falcons'], $described[self::TEAM_COMPETITOR]);
+        $this->assertSame(['type' => 'player', 'reference' => self::PLAYER_ID, 'name' => 'Leader#0001', 'tag' => 'B2T'], $described[self::PLAYER_COMPETITOR]);
+        $this->assertSame(['type' => 'team', 'reference' => self::TEAM_ID, 'name' => 'Falcons', 'tag' => 'B2T'], $described[self::TEAM_COMPETITOR]);
+    }
+
+    public function test_a_player_in_no_clan_has_no_tag(): void
+    {
+        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
+            self::aCompetitor(self::MATE_COMPETITOR, CompetitorType::PLAYER, self::MATE_PLAYER),
+        ]));
+
+        $this->assertSame(
+            [self::MATE_COMPETITOR => ['type' => 'player', 'reference' => self::MATE_PLAYER, 'name' => 'Mate#0002', 'tag' => null]],
+            $registry->describe([self::MATE_COMPETITOR]),
+        );
     }
 
     public function test_a_player_has_played_as_itself_and_as_the_teams_it_is_fielded_in(): void
@@ -154,7 +170,8 @@ final class CompetitorRegistryProviderTest extends TestCase
 
     private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistryProvider
     {
-        [$team, $lineup] = self::aTeam(self::TEAM_ID, self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID), [self::PLAYER_ID, self::MATE_PLAYER]);
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID);
+        [$team, $lineup] = self::aTeam(self::TEAM_ID, $clan, [self::PLAYER_ID, self::MATE_PLAYER]);
         $players = [
             self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001'),
             self::aPlayer(self::MATE_PLAYER, self::MATE_USER, self::GAME_ID, 'Mate#0002'),
@@ -173,6 +190,10 @@ final class CompetitorRegistryProviderTest extends TestCase
             $playerRepository,
             $teamRepository,
             $this->repositoryStub(TeamPlayerRepositoryInterface::class, $lineup),
+            new ClanTagProvider(
+                $this->repositoryStub(ClanMemberRepositoryInterface::class, [self::leadership($clan)]),
+                $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            ),
             $this->createStub(EventDispatcherInterface::class),
         );
     }

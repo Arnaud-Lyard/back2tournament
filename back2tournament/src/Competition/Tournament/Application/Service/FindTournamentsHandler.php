@@ -70,7 +70,7 @@ final class FindTournamentsHandler
     /**
      * A tournament as the list shows it; a winner is named by battletag or team name.
      *
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described the winners, keyed by competitor id
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the winners, keyed by competitor id
      *
      * @return array<string, mixed>
      */
@@ -94,6 +94,7 @@ final class FindTournamentsHandler
                 'type' => $description['type'] ?? null,
                 'reference' => null === $description ? null : ['value' => $description['reference']],
                 'name' => $description['name'] ?? null,
+                'tag' => $description['tag'] ?? null,
             ],
             'createdAt' => $tournament->getCreatedAt()?->format(\DateTimeInterface::ATOM),
             'updatedAt' => $tournament->getUpdatedAt()?->format(\DateTimeInterface::ATOM),

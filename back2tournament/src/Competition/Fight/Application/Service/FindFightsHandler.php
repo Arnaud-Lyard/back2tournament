@@ -110,7 +110,7 @@ final class FindFightsHandler
      * own result.
      *
      * @param list<Result>                                                         $results
-     * @param array<string, array{type: string, reference: string, name: ?string}> $described the sides, keyed by competitor id
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the sides, keyed by competitor id
      *
      * @return array<string, mixed>
      */
@@ -138,6 +138,7 @@ final class FindFightsHandler
                 'type' => $described[$competitor]['type'] ?? null,
                 'reference' => isset($described[$competitor]) ? ['value' => $described[$competitor]['reference']] : null,
                 'name' => $described[$competitor]['name'] ?? null,
+                'tag' => $described[$competitor]['tag'] ?? null,
                 'score' => $result?->getScore() ?? 0,
                 'status' => $status->value,
                 'reportedStatus' => $result?->getReportedStatus()?->value,

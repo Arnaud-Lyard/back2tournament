@@ -1,6 +1,7 @@
 import { HistoryIcon, TrophyIcon } from "lucide-react"
 import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { ClanTag } from "@/components/clan-tag"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -75,22 +76,29 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
                     <Badge variant={OUTCOME_VARIANT[result.outcome]}>
                       {t(`outcome.${result.outcome}`)}
                     </Badge>
-                    <span className="truncate text-sm">
+                    <span className="flex min-w-0 items-center gap-1.5 text-sm">
                       {team && (
-                        <span className="font-medium">
-                          {result.side.name ?? t("unknown")}{" "}
-                        </span>
+                        <>
+                          {/* On a clan's page, its own tag goes without saying. */}
+                          {subject === "player" && (
+                            <ClanTag tag={result.side.tag} />
+                          )}
+                          <span className="truncate font-medium">
+                            {result.side.name ?? t("unknown")}
+                          </span>
+                        </>
                       )}
-                      {t("against")}{" "}
+                      <span className="shrink-0">{t("against")}</span>
+                      <ClanTag tag={result.opponent?.tag} />
                       {href ? (
                         <Link
                           href={href}
-                          className="font-medium underline-offset-4 hover:underline"
+                          className="truncate font-medium underline-offset-4 hover:underline"
                         >
                           {opponent}
                         </Link>
                       ) : (
-                        <span className="font-medium">{opponent}</span>
+                        <span className="truncate font-medium">{opponent}</span>
                       )}
                     </span>
                   </div>
