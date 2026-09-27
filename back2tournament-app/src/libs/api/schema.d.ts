@@ -165,6 +165,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/results/clans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_results_clan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/fights/{id}": {
         parameters: {
             query?: never;
@@ -205,6 +221,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["get_api_results_pending_user_fights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/results/players/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_results_player"];
         put?: never;
         post?: never;
         delete?: never;
@@ -782,6 +814,64 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+        };
+        /** @description A settled fight, told from the side of the player profile or clan it is listed for. */
+        SettledResult: {
+            fight: components["schemas"]["Uuid"];
+            game: components["schemas"]["Uuid"];
+            /**
+             * @description Players per side: 1 for a 1v1, 5 for a 5v5
+             * @example 1
+             */
+            teamSize: number;
+            /** @description The tournament whose bracket held this fight. Null for a challenge. */
+            tournament?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            /**
+             * @description How the fight ended for `side`.
+             * @enum {string}
+             */
+            outcome: "win" | "loss" | "draw";
+            /**
+             * Format: date-time
+             * @description When the result was confirmed.
+             */
+            settledAt?: string | null;
+            /** @description The side the list is about: the player profile, a team it plays in, or a team of the clan. */
+            side: components["schemas"]["NamedSide"] & {
+                /** @example 3 */
+                score?: number;
+            };
+            /** @description The other side of the fight. */
+            opponent?: (components["schemas"]["NamedSide"] & {
+                /** @example 1 */
+                score?: number;
+            }) | null;
+        };
+        SettledResultPage: {
+            items: components["schemas"]["SettledResult"][];
+            /**
+             * @description Settled fights, every page taken together
+             * @example 12
+             */
+            total: number;
+            /**
+             * @description The page these items come from
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description How many items a full page holds
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description How many pages there are, 0 when nothing was settled
+             * @example 2
+             */
+            pages: number;
         };
         /** @description A group of players of one game, run by its leader. `leader` names the leader's player profile. */
         Clan: {
@@ -1478,6 +1568,35 @@ export interface operations {
             403: components["responses"]["Forbidden"];
         };
     };
+    get_api_results_clan: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many results that page holds, 10 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the settled fights of a clan's teams, newest first. `side` is the clan's team. `items` is empty when no team of the clan finished a fight, when the page is past the last one, and when no clan has this id. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettledResultPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
     get_api_fight: {
         parameters: {
             query?: never;
@@ -1635,6 +1754,35 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    get_api_results_player: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many results that page holds, 10 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Player profile ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the settled fights of a player profile, newest first: its 1v1 fights, and those of the teams whose lineup it belongs to. `side` is the profile or its team. `items` is empty when the profile never finished a fight, when the page is past the last one, and when no profile has this id. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettledResultPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
         };
     };
     patch_api_fight_results_patch: {

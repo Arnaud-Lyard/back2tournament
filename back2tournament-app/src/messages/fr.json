@@ -714,5 +714,27 @@
       "toBeDecided": "À déterminer",
       "underWay": "Match en cours"
     }
+  },
+  "history": {
+    "title": "Derniers résultats",
+    "description": {
+      "player": "Ses matchs terminés, en 1v1 et avec ses équipes, du plus récent au plus ancien.",
+      "clan": "Les matchs terminés des équipes du clan, du plus récent au plus ancien."
+    },
+    "empty": {
+      "title": "Aucun résultat",
+      "player": "Aucun match terminé pour le moment.",
+      "clan": "Aucune équipe du clan n'a encore terminé de match."
+    },
+    "outcome": {
+      "win": "Victoire",
+      "loss": "Défaite",
+      "draw": "Nul"
+    },
+    "against": "contre",
+    "unknown": "adversaire inconnu",
+    "tournament": "Tournoi",
+    "latest": "Les {shown} derniers sur {total}",
+    "loadError": "Impossible de charger les résultats pour le moment."
   }
 }

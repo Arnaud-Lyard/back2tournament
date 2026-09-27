@@ -66,9 +66,10 @@ make user           # seed a dev user via app:create-user
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
-  for, name the sides) and `FightSchedulerProviderInterface` (open a fight with its
-  two pending results). Each `…ProviderInterface` has its `…Provider` implementation
-  next to it, in the same folder.
+  for, which competitors a player profile or a clan plays as, name the sides) and
+  `FightSchedulerProviderInterface` (open a fight with its two pending results). Each
+  `…ProviderInterface` has its `…Provider` implementation next to it, in the same
+  folder.
 
 Each context (except `Shared`) has three layers:
 

@@ -714,5 +714,27 @@
       "toBeDecided": "To be decided",
       "underWay": "Match under way"
     }
+  },
+  "history": {
+    "title": "Latest results",
+    "description": {
+      "player": "Their finished fights, in 1v1 and with their teams, newest first.",
+      "clan": "The finished fights of the clan's teams, newest first."
+    },
+    "empty": {
+      "title": "No results",
+      "player": "No finished fight yet.",
+      "clan": "No team of the clan has finished a fight yet."
+    },
+    "outcome": {
+      "win": "Win",
+      "loss": "Loss",
+      "draw": "Draw"
+    },
+    "against": "against",
+    "unknown": "unknown opponent",
+    "tournament": "Tournament",
+    "latest": "The latest {shown} of {total}",
+    "loadError": "The results cannot be loaded right now."
   }
 }

@@ -8,6 +8,7 @@ use App\Competition\Competitor\Domain\Entity\Competitor;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
+use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProvider;
 use App\Tests\Support\CompetitionFixtures;
@@ -91,9 +92,39 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame(['type' => 'team', 'reference' => self::TEAM_ID, 'name' => 'Falcons'], $described[self::TEAM_COMPETITOR]);
     }
 
+    public function test_a_player_has_played_as_itself_and_as_the_teams_it_is_fielded_in(): void
+    {
+        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
+            self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
+            self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
+        ]));
+
+        $this->assertEqualsCanonicalizing([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR], $registry->competitorsOfPlayer(self::PLAYER_ID));
+        // A teammate who never played a duel competes only through the team.
+        $this->assertSame([self::TEAM_COMPETITOR], $registry->competitorsOfPlayer(self::MATE_PLAYER));
+    }
+
+    public function test_a_player_who_never_competed_has_no_competitor(): void
+    {
+        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, []));
+
+        $this->assertSame([], $registry->competitorsOfPlayer(self::PLAYER_ID));
+    }
+
+    public function test_a_clan_competes_through_its_teams(): void
+    {
+        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
+            self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
+            self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
+        ]));
+
+        $this->assertSame([self::TEAM_COMPETITOR], $registry->competitorsOfClan(self::CLAN_ID));
+        $this->assertSame([], $registry->competitorsOfClan(self::GAME_ID));
+    }
+
     private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistryProvider
     {
-        [$team] = self::aTeam(self::TEAM_ID, self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID), [self::PLAYER_ID, self::MATE_PLAYER]);
+        [$team, $lineup] = self::aTeam(self::TEAM_ID, self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID), [self::PLAYER_ID, self::MATE_PLAYER]);
 
         return new CompetitorRegistryProvider(
             $competitorRepository,
@@ -102,6 +133,7 @@ final class CompetitorRegistryProviderTest extends TestCase
                 self::aPlayer(self::MATE_PLAYER, self::MATE_USER, self::GAME_ID, 'Mate#0002'),
             ]),
             $this->repositoryStub(TeamRepositoryInterface::class, [$team]),
+            $this->repositoryStub(TeamPlayerRepositoryInterface::class, $lineup),
             $this->createStub(EventDispatcherInterface::class),
         );
     }

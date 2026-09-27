@@ -413,14 +413,17 @@ final class SeedCommand extends Command
             $myTeam = $this->seedTeam($mine, \sprintf('Demo %1$dv%1$d', $size), array_merge([$me], \array_slice($opponents, 0, $size - 1)));
             $theirTeam = $this->seedTeam($theirs, \sprintf('Rival %1$dv%1$d', $size), array_merge([$opponents[$squad]], \array_slice($opponents, $squad + 1, $size - 1)));
 
+            $theirSide = $this->enlist(CompetitorType::TEAM, (string) $theirTeam->getId());
+            $mySide = $this->enlist(CompetitorType::TEAM, (string) $myTeam->getId());
+
+            // Two settled fights, for the history on the clan pages.
+            for ($settled = 0; $settled < 2; ++$settled) {
+                $this->seedFight($mySide, $theirSide, $gameId, $size, ResultStatus::WIN);
+                ++$fights;
+            }
+
             // The rivals declared: the demo account, leading its team, confirms.
-            $this->seedFight(
-                $this->enlist(CompetitorType::TEAM, (string) $theirTeam->getId()),
-                $this->enlist(CompetitorType::TEAM, (string) $myTeam->getId()),
-                $gameId,
-                $size,
-                ResultStatus::REPORTING,
-            );
+            $this->seedFight($theirSide, $mySide, $gameId, $size, ResultStatus::REPORTING);
             ++$fights;
         }
 

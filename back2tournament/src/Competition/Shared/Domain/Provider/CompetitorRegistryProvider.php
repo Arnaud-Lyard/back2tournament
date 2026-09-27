@@ -8,6 +8,7 @@ use App\Competition\Competitor\Domain\Entity\Competitor;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
+use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use Symfony\Component\Uid\Uuid;
@@ -18,17 +19,20 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
     private CompetitorRepositoryInterface $competitorRepository;
     private PlayerRepositoryInterface $playerRepository;
     private TeamRepositoryInterface $teamRepository;
+    private TeamPlayerRepositoryInterface $teamPlayerRepository;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         CompetitorRepositoryInterface $competitorRepository,
         PlayerRepositoryInterface $playerRepository,
         TeamRepositoryInterface $teamRepository,
+        TeamPlayerRepositoryInterface $teamPlayerRepository,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->competitorRepository = $competitorRepository;
         $this->playerRepository = $playerRepository;
         $this->teamRepository = $teamRepository;
+        $this->teamPlayerRepository = $teamPlayerRepository;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -67,6 +71,41 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
         }
 
         return array_map(static fn (Competitor $competitor): string => $competitor->getId()->getValue(), $competitors);
+    }
+
+    public function competitorsOfPlayer(string $playerId): array
+    {
+        $teamIds = [];
+        foreach ($this->teamPlayerRepository->findBy(['player' => $playerId]) as $teamPlayer) {
+            $teamIds[] = $teamPlayer->getTeam()->getValue();
+        }
+
+        $competitors = $this->competitorRepository->findBy(['type' => CompetitorType::PLAYER, 'reference' => $playerId]);
+        if ([] !== $teamIds) {
+            $competitors = array_merge(
+                $competitors,
+                $this->competitorRepository->findBy(['type' => CompetitorType::TEAM, 'reference' => $teamIds]),
+            );
+        }
+
+        return array_map(static fn (Competitor $competitor): string => $competitor->getId()->getValue(), $competitors);
+    }
+
+    public function competitorsOfClan(string $clanId): array
+    {
+        $teamIds = [];
+        foreach ($this->teamRepository->findBy(['clan' => $clanId]) as $team) {
+            $teamIds[] = $team->getId()->getValue();
+        }
+
+        if ([] === $teamIds) {
+            return [];
+        }
+
+        return array_map(
+            static fn (Competitor $competitor): string => $competitor->getId()->getValue(),
+            $this->competitorRepository->findBy(['type' => CompetitorType::TEAM, 'reference' => $teamIds]),
+        );
     }
 
     public function describe(array $competitorIds): array

@@ -209,6 +209,55 @@ nelmio_api_doc:
                             items: { $ref: '#/components/schemas/FightSide' }
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
+                SettledResult:
+                    type: object
+                    description: 'A settled fight, told from the side of the player profile or clan it is listed for.'
+                    required: [fight, game, teamSize, outcome, side]
+                    properties:
+                        fight: { $ref: '#/components/schemas/Uuid' }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        teamSize: { type: integer, minimum: 1, example: 1, description: 'Players per side: 1 for a 1v1, 5 for a 5v5' }
+                        tournament:
+                            type: object
+                            nullable: true
+                            description: 'The tournament whose bracket held this fight. Null for a challenge.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        outcome:
+                            type: string
+                            enum: [win, loss, draw]
+                            description: 'How the fight ended for `side`.'
+                        settledAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: 'When the result was confirmed.'
+                        side:
+                            description: 'The side the list is about: the player profile, a team it plays in, or a team of the clan.'
+                            allOf:
+                                - { $ref: '#/components/schemas/NamedSide' }
+                                - type: object
+                                  properties:
+                                      score: { type: integer, minimum: 0, example: 3 }
+                        opponent:
+                            description: 'The other side of the fight.'
+                            nullable: true
+                            allOf:
+                                - { $ref: '#/components/schemas/NamedSide' }
+                                - type: object
+                                  properties:
+                                      score: { type: integer, minimum: 0, example: 1 }
+                SettledResultPage:
+                    type: object
+                    required: [items, total, page, limit, pages]
+                    properties:
+                        items:
+                            type: array
+                            items: { $ref: '#/components/schemas/SettledResult' }
+                        total: { type: integer, example: 12, description: 'Settled fights, every page taken together' }
+                        page: { type: integer, example: 1, description: 'The page these items come from' }
+                        limit: { type: integer, example: 10, description: 'How many items a full page holds' }
+                        pages: { type: integer, example: 2, description: 'How many pages there are, 0 when nothing was settled' }
                 Clan:
                     type: object
                     description: 'A group of players of one game, run by its leader. `leader` names the leader''s player profile.'
