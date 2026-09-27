@@ -7,8 +7,6 @@ namespace App\Tests\Competition\Profile\Clan\Domain;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
-use App\Competition\Profile\Clan\Domain\Entity\ClanName;
-use App\Competition\Profile\Clan\Domain\Entity\ClanTag;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
@@ -16,6 +14,8 @@ use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\ClanNameValueObject;
+use App\Shared\ValueObject\ClanTagValueObject;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -43,7 +43,7 @@ final class ClanTest extends TestCase
 
     public function test_a_tag_is_stored_upper_cased(): void
     {
-        $this->assertSame('B2T', new ClanTag(' b2t ')->getValue());
+        $this->assertSame('B2T', new ClanTagValueObject(' b2t ')->getValue());
     }
 
     #[DataProvider('refusedTags')]
@@ -51,7 +51,7 @@ final class ClanTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        new ClanTag($tag);
+        new ClanTagValueObject($tag);
     }
 
     public static function refusedTags(): iterable
@@ -65,7 +65,7 @@ final class ClanTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        new ClanName('   ');
+        new ClanNameValueObject('   ');
     }
 
     public function test_an_invited_player_waits_for_accepting(): void
@@ -108,8 +108,8 @@ final class ClanTest extends TestCase
     {
         $other = Clan::create(
             new ClanId(self::OTHER_CLAN_ID),
-            new ClanName('Others'),
-            new ClanTag('OTH'),
+            new ClanNameValueObject('Others'),
+            new ClanTagValueObject('OTH'),
             new GameId(self::GAME_ID),
             new PlayerId(self::LEADER_ID),
         );
@@ -147,8 +147,8 @@ final class ClanTest extends TestCase
     {
         return Clan::create(
             new ClanId(self::CLAN_ID),
-            new ClanName('Back to Tournament'),
-            new ClanTag('B2T'),
+            new ClanNameValueObject('Back to Tournament'),
+            new ClanTagValueObject('B2T'),
             new GameId(self::GAME_ID),
             new PlayerId(self::LEADER_ID),
         );

@@ -17,14 +17,14 @@ use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Profile\Team\Application\Model\CreateTeamCommand;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
-use App\Competition\Profile\Team\Domain\Entity\TeamName;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayerId;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamNameValueObject;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -61,8 +61,8 @@ final class CreateTeamHandler
     public function __invoke(CreateTeamCommand $createTeamCommand): string
     {
         $clanId = new ClanId($createTeamCommand->getClan());
-        $name = new TeamName($createTeamCommand->getName());
-        $size = new TeamSize($createTeamCommand->getSize());
+        $name = new TeamNameValueObject($createTeamCommand->getName());
+        $size = new TeamSizeValueObject($createTeamCommand->getSize());
         $leader = new PlayerId($createTeamCommand->getLeader());
         $lineup = array_map(static fn (string $player): PlayerId => new PlayerId($player), $createTeamCommand->getPlayers());
         $lineupIds = array_values(array_unique(array_map(static fn (PlayerId $player): string => $player->getValue(), $lineup)));

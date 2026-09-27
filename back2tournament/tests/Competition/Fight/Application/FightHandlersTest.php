@@ -30,12 +30,12 @@ use App\Competition\Profile\Team\Domain\Entity\TeamPlayer;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
 use PHPUnit\Framework\TestCase;
@@ -435,7 +435,7 @@ final class FightHandlersTest extends TestCase
             new CompetitorId(self::MY_SIDE),
             new CompetitorId(self::THEIR_SIDE),
             new GameId(self::GAME_ID),
-            new TeamSize($teamSize),
+            new TeamSizeValueObject($teamSize),
         );
     }
 

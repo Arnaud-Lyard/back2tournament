@@ -9,9 +9,9 @@ use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
-use App\Competition\Profile\Team\Domain\Entity\TeamName;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamNameValueObject;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\TestCase;
 
 final class TeamTest extends TestCase
@@ -60,7 +60,7 @@ final class TeamTest extends TestCase
     {
         $this->expectException(ValidationException::class);
 
-        new TeamName('');
+        new TeamNameValueObject('');
     }
 
     /**
@@ -70,10 +70,10 @@ final class TeamTest extends TestCase
     {
         return Team::create(
             new TeamId(self::TEAM_ID),
-            new TeamName('Falcons'),
+            new TeamNameValueObject('Falcons'),
             new ClanId(self::CLAN_ID),
             new GameId(self::GAME_ID),
-            new TeamSize($size),
+            new TeamSizeValueObject($size),
             new PlayerId($leader),
             array_map(static fn (string $player): PlayerId => new PlayerId($player), $players),
         );

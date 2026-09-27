@@ -11,8 +11,8 @@ use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -44,7 +44,7 @@ final class FightSchedulerProvider implements FightSchedulerProviderInterface
             new CompetitorId($competitorOne),
             new CompetitorId($competitorTwo),
             new GameId($gameId),
-            new TeamSize($teamSize),
+            new TeamSizeValueObject($teamSize),
             null === $tournamentId ? null : new TournamentId($tournamentId),
         );
 

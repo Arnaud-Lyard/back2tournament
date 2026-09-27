@@ -11,12 +11,12 @@ use App\Competition\Fight\Domain\Event\ResultCreatedEvent;
 use App\Competition\Fight\Domain\Event\ResultUpdatedEvent;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 
 /**
  * Two competitors, of the same game and format, and the outcome they agree on:
@@ -159,7 +159,7 @@ class Fight extends AggregateRoot
         CompetitorId $competitorOne,
         CompetitorId $competitorTwo,
         GameId $gameId,
-        TeamSize $teamSize,
+        TeamSizeValueObject $teamSize,
         ?TournamentId $tournamentId = null,
     ): self {
         if ($competitorOne->getValue() === $competitorTwo->getValue()) {

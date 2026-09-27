@@ -7,9 +7,9 @@ namespace App\Competition\Profile\Game\Domain\Entity;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Event\GameCreatedEvent;
 use App\Competition\Profile\Game\Domain\Event\GameUpdatedEvent;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 
 class Game extends AggregateRoot
 {
@@ -57,7 +57,7 @@ class Game extends AggregateRoot
     }
 
     /**
-     * @param list<TeamSize> $teamSizes
+     * @param list<TeamSizeValueObject> $teamSizes
      */
     public function setTeamSizes(array $teamSizes): self
     {
@@ -66,7 +66,7 @@ class Game extends AggregateRoot
         }
 
         $sizes = array_values(array_unique(array_map(
-            static fn (TeamSize $teamSize): int => $teamSize->getValue(),
+            static fn (TeamSizeValueObject $teamSize): int => $teamSize->getValue(),
             $teamSizes,
         )));
         sort($sizes);
@@ -106,7 +106,7 @@ class Game extends AggregateRoot
     }
 
     /**
-     * @param list<TeamSize> $teamSizes
+     * @param list<TeamSizeValueObject> $teamSizes
      */
     public static function create(
         GameId $gameId,
@@ -129,7 +129,7 @@ class Game extends AggregateRoot
     }
 
     /**
-     * @param list<TeamSize>|null $teamSizes null keeps the formats as they are
+     * @param list<TeamSizeValueObject>|null $teamSizes null keeps the formats as they are
      */
     public static function update(Game $game, ?string $title, ?array $teamSizes): self
     {

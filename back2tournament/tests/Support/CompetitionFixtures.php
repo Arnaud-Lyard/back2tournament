@@ -12,8 +12,6 @@ use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
-use App\Competition\Profile\Clan\Domain\Entity\ClanName;
-use App\Competition\Profile\Clan\Domain\Entity\ClanTag;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\GameId as PlayerGameId;
@@ -22,11 +20,13 @@ use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Player\Domain\Entity\UserId;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
-use App\Competition\Profile\Team\Domain\Entity\TeamName;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayer;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayerId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
+use App\Shared\ValueObject\ClanNameValueObject;
+use App\Shared\ValueObject\ClanTagValueObject;
+use App\Shared\ValueObject\TeamNameValueObject;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -50,7 +50,7 @@ trait CompetitionFixtures
         return Game::create(
             new GameId($gameId),
             'Rocket League',
-            array_map(static fn (int $size): TeamSize => new TeamSize($size), $teamSizes),
+            array_map(static fn (int $size): TeamSizeValueObject => new TeamSizeValueObject($size), $teamSizes),
         );
     }
 
@@ -61,7 +61,7 @@ trait CompetitionFixtures
 
     private static function aClan(string $clanId, string $gameId, string $leaderId, string $tag = 'B2T'): Clan
     {
-        return Clan::create(new ClanId($clanId), new ClanName('Back to Tournament'), new ClanTag($tag), new GameId($gameId), new PlayerId($leaderId));
+        return Clan::create(new ClanId($clanId), new ClanNameValueObject('Back to Tournament'), new ClanTagValueObject($tag), new GameId($gameId), new PlayerId($leaderId));
     }
 
     private static function leadership(Clan $clan): ClanMember
@@ -88,10 +88,10 @@ trait CompetitionFixtures
     {
         $team = Team::create(
             new TeamId($teamId),
-            new TeamName($name),
+            new TeamNameValueObject($name),
             $clan->getId(),
             $clan->getGame(),
-            new TeamSize(\count($playerIds)),
+            new TeamSizeValueObject(\count($playerIds)),
             new PlayerId($playerIds[0]),
             array_map(static fn (string $playerId): PlayerId => new PlayerId($playerId), $playerIds),
         );

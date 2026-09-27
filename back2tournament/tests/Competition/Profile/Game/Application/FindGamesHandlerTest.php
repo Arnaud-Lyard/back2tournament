@@ -9,7 +9,7 @@ use App\Competition\Profile\Game\Application\Service\FindGamesHandler;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -36,8 +36,8 @@ final class FindGamesHandlerTest extends TestCase
     {
         $handler = new FindGamesHandler(
             $this->gameRepository([
-                Game::create(new GameId(self::FIRST_GAME_ID), 'Overwatch', [new TeamSize(5)]),
-                Game::create(new GameId(self::SECOND_GAME_ID), 'StarCraft', [new TeamSize(1)]),
+                Game::create(new GameId(self::FIRST_GAME_ID), 'Overwatch', [new TeamSizeValueObject(5)]),
+                Game::create(new GameId(self::SECOND_GAME_ID), 'StarCraft', [new TeamSizeValueObject(1)]),
             ]),
             $this->normalizer(),
         );

@@ -9,17 +9,17 @@ use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Application\Model\CreateTournamentCommand;
 use App\Competition\Tournament\Domain\Entity\Matchup;
 use App\Competition\Tournament\Domain\Entity\OrganizerId;
 use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\Tournament;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
-use App\Competition\Tournament\Domain\Entity\TournamentName;
 use App\Competition\Tournament\Domain\Repository\TournamentRepositoryInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
+use App\Shared\ValueObject\TournamentNameValueObject;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -46,9 +46,9 @@ final class CreateTournamentHandler
 
     public function __invoke(CreateTournamentCommand $createTournamentCommand): string
     {
-        $name = new TournamentName($createTournamentCommand->getName());
+        $name = new TournamentNameValueObject($createTournamentCommand->getName());
         $gameId = new GameId($createTournamentCommand->getGame());
-        $teamSize = new TeamSize($createTournamentCommand->getTeamSize());
+        $teamSize = new TeamSizeValueObject($createTournamentCommand->getTeamSize());
         $startsAt = self::dateTime($createTournamentCommand->getStartsAt());
 
         $game = $this->gameRepository->findOneBy(['id' => $gameId->getValue()]);

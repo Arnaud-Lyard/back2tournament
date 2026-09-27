@@ -62,7 +62,7 @@ make user           # seed a dev user via app:create-user
 - `Competition/Tournament/` — single-elimination tournaments: registrations, the
   bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
   winners moving on as `FightSettledEvent` comes in.
-- `Competition/Shared/` — `CompetitorId`, `TeamSize`, and the contracts every
+- `Competition/Shared/` — `CompetitorId` and the contracts every
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
@@ -169,11 +169,15 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   load, call the domain method, save, dispatch the recorded domain events.
 - A scalar that carries a business rule gets a value object, built at the top of the
   handler before any repository read, so an invalid payload costs no query. Follow the
-  house shape: an abstract `<Concept>ValueObject` in `Shared/ValueObject/` doing the
-  checking in `ensureIsValid<Concept>()`, and a `final class <Concept>` extending it in
-  the owning context. Keep the entity's getter returning the raw scalar unless you mean
-  to change the JSON: a getter that returns the value object serializes as
-  `{"value": …}` and rewrites the published contract.
+  house shape: one `final class <Concept>ValueObject` per concept in
+  `Shared/ValueObject/`, doing the checking in `ensureIsValid<Concept>()`, and used as
+  is by every context — never subclassed in the owning context. Two concepts with
+  different rules get two value objects, even when they look alike
+  (`TeamNameValueObject`, `TournamentNameValueObject`). The older value objects
+  (`EmailValueObject`, `BattletagValueObject`, `ScoreValueObject`…) are still abstract,
+  with a `final class <Concept>` in their context. Keep the entity's getter returning
+  the raw scalar unless you mean to change the JSON: a getter that returns the value
+  object serializes as `{"value": …}` and rewrites the published contract.
 - Authorisation happens before any write: resolve which side of the aggregate the
   current user is, and throw `PermissionDeniedException` when they are on neither.
   A resolver that silently falls back to "the first one" is a security hole.

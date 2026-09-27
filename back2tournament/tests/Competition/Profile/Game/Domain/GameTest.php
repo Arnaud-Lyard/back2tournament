@@ -7,8 +7,8 @@ namespace App\Tests\Competition\Profile\Game\Domain;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Event\GameUpdatedEvent;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -70,7 +70,7 @@ final class GameTest extends TestCase
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessageIsOrContains(\sprintf('<%d>', $size));
 
-        new TeamSize($size);
+        new TeamSizeValueObject($size);
     }
 
     public static function refusedSizes(): iterable
@@ -81,10 +81,10 @@ final class GameTest extends TestCase
     }
 
     /**
-     * @return list<TeamSize>
+     * @return list<TeamSizeValueObject>
      */
     private function sizes(int ...$sizes): array
     {
-        return array_map(static fn (int $size): TeamSize => new TeamSize($size), $sizes);
+        return array_map(static fn (int $size): TeamSizeValueObject => new TeamSizeValueObject($size), $sizes);
     }
 }

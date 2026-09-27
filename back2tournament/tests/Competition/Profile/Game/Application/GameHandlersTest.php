@@ -12,10 +12,10 @@ use App\Competition\Profile\Game\Application\Service\UpdateGameHandler;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -54,7 +54,7 @@ final class GameHandlersTest extends TestCase
 
     public function test_an_admin_opens_new_formats_on_an_existing_game(): void
     {
-        $game = Game::create(new GameId(self::GAME_ID), 'Valorant', [new TeamSize(1)]);
+        $game = Game::create(new GameId(self::GAME_ID), 'Valorant', [new TeamSizeValueObject(1)]);
 
         $gameRepository = $this->createMock(GameRepositoryInterface::class);
         $gameRepository->method('findOneBy')->willReturn($game);

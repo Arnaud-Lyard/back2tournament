@@ -15,6 +15,8 @@ use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\NotFoundException;
+use App\Shared\ValueObject\ClanNameValueObject;
+use App\Shared\ValueObject\ClanTagValueObject;
 
 /**
  * A group of players of one game, run by its leader. Players come in by
@@ -92,8 +94,8 @@ class Clan extends AggregateRoot
 
     public static function create(
         ClanId $clanId,
-        ClanName $name,
-        ClanTag $tag,
+        ClanNameValueObject $name,
+        ClanTagValueObject $tag,
         GameId $gameId,
         PlayerId $leader,
     ): self {

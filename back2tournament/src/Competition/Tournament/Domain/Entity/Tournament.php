@@ -7,7 +7,6 @@ namespace App\Competition\Tournament\Domain\Entity;
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Domain\Enum\TournamentStatus;
 use App\Competition\Tournament\Domain\Event\ParticipantRegisteredEvent;
 use App\Competition\Tournament\Domain\Event\ParticipantWithdrawnEvent;
@@ -18,6 +17,8 @@ use App\Competition\Tournament\Domain\Event\TournamentStartedEvent;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
+use App\Shared\ValueObject\TournamentNameValueObject;
 
 /**
  * A single-elimination tournament of one game, in one format.
@@ -129,9 +130,9 @@ class Tournament extends AggregateRoot
 
     public static function create(
         TournamentId $tournamentId,
-        TournamentName $name,
+        TournamentNameValueObject $name,
         GameId $gameId,
-        TeamSize $teamSize,
+        TeamSizeValueObject $teamSize,
         int $capacity,
         OrganizerId $organizer,
         \DateTimeImmutable $startsAt,

@@ -9,13 +9,12 @@ use App\Shared\Exception\ValidationException;
 /**
  * How many players stand on each side of a fight: 1 for a 1v1, 5 for a 5v5.
  */
-abstract class TeamSizeValueObject
+final class TeamSizeValueObject
 {
     public const MIN = 1;
-
     public const MAX = 64;
 
-    protected int $value;
+    private int $value;
 
     public function __construct(int $value)
     {
@@ -29,7 +28,7 @@ abstract class TeamSizeValueObject
         return $this->value;
     }
 
-    protected function ensureIsValidTeamSize(int $size): void
+    private function ensureIsValidTeamSize(int $size): void
     {
         if ($size < self::MIN || $size > self::MAX) {
             throw new ValidationException(sprintf(

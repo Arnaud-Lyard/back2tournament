@@ -26,8 +26,6 @@ use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
-use App\Competition\Profile\Clan\Domain\Entity\ClanName;
-use App\Competition\Profile\Clan\Domain\Entity\ClanTag;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\GameId as PlayerGameId;
@@ -36,17 +34,19 @@ use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Player\Domain\Entity\UserId;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
-use App\Competition\Profile\Team\Domain\Entity\TeamName;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayerId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Domain\Entity\MatchupId;
 use App\Competition\Tournament\Domain\Entity\OrganizerId;
 use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\ParticipantId;
 use App\Competition\Tournament\Domain\Entity\Tournament;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
-use App\Competition\Tournament\Domain\Entity\TournamentName;
+use App\Shared\ValueObject\ClanNameValueObject;
+use App\Shared\ValueObject\ClanTagValueObject;
+use App\Shared\ValueObject\TeamNameValueObject;
+use App\Shared\ValueObject\TeamSizeValueObject;
+use App\Shared\ValueObject\TournamentNameValueObject;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -237,7 +237,7 @@ final class SeedCommand extends Command
     {
         $games = [];
         foreach (self::GAMES as $title => $sizes) {
-            $teamSizes = array_map(static fn (int $size): TeamSize => new TeamSize($size), $sizes);
+            $teamSizes = array_map(static fn (int $size): TeamSizeValueObject => new TeamSizeValueObject($size), $sizes);
 
             $existing = $this->entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
             if ($existing instanceof Game) {
@@ -434,7 +434,7 @@ final class SeedCommand extends Command
      */
     private function seedClan(Game $game, string $name, string $tag, Player $leader, array $members): Clan
     {
-        $clan = Clan::create(new ClanId(Uuid::v4()->toString()), new ClanName($name), new ClanTag($tag), $game->getId(), $leader->getId());
+        $clan = Clan::create(new ClanId(Uuid::v4()->toString()), new ClanNameValueObject($name), new ClanTagValueObject($tag), $game->getId(), $leader->getId());
         $this->entityManager->persist($clan);
         $this->entityManager->persist(Clan::createLeaderMembership($clan, new ClanMemberId(Uuid::v4()->toString())));
 
@@ -453,10 +453,10 @@ final class SeedCommand extends Command
     {
         $team = Team::create(
             new TeamId(Uuid::v4()->toString()),
-            new TeamName($name),
+            new TeamNameValueObject($name),
             $clan->getId(),
             $clan->getGame(),
-            new TeamSize(\count($lineup)),
+            new TeamSizeValueObject(\count($lineup)),
             $lineup[0]->getId(),
             array_map(static fn (Player $player): PlayerId => $player->getId(), $lineup),
         );
@@ -528,9 +528,9 @@ final class SeedCommand extends Command
     {
         $tournament = Tournament::create(
             new TournamentId(Uuid::v4()->toString()),
-            new TournamentName($name),
+            new TournamentNameValueObject($name),
             $game->getId(),
-            new TeamSize(1),
+            new TeamSizeValueObject(1),
             8,
             new OrganizerId((string) $organizer->getId()),
             $this->now->modify('+3 days'),
@@ -616,7 +616,7 @@ final class SeedCommand extends Command
             $one,
             $two,
             new GameId($gameId),
-            new TeamSize($teamSize),
+            new TeamSizeValueObject($teamSize),
             $tournamentId,
         );
         $fight->setCreatedAt($at);

@@ -9,8 +9,6 @@ use App\Competition\Profile\Clan\Application\Model\CreateClanCommand;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
-use App\Competition\Profile\Clan\Domain\Entity\ClanName;
-use App\Competition\Profile\Clan\Domain\Entity\ClanTag;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
@@ -19,6 +17,8 @@ use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\NotFoundException;
+use App\Shared\ValueObject\ClanNameValueObject;
+use App\Shared\ValueObject\ClanTagValueObject;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -53,8 +53,8 @@ final class CreateClanHandler
     public function __invoke(CreateClanCommand $createClanCommand): string
     {
         $gameId = new GameId($createClanCommand->getGame());
-        $name = new ClanName($createClanCommand->getName());
-        $tag = new ClanTag($createClanCommand->getTag());
+        $name = new ClanNameValueObject($createClanCommand->getName());
+        $tag = new ClanTagValueObject($createClanCommand->getTag());
 
         $founder = $this->playerRepository->findOneBy([
             'user' => (string) $this->currentUserProvider->getUser()->getId(),

@@ -11,9 +11,10 @@ use App\Competition\Profile\Team\Domain\Entity\TeamId;
 use App\Competition\Profile\Team\Domain\Event\TeamCreatedEvent;
 use App\Competition\Profile\Team\Domain\Event\TeamDisbandedEvent;
 use App\Competition\Profile\Team\Domain\Event\TeamPlayerCreatedEvent;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamNameValueObject;
+use App\Shared\ValueObject\TeamSizeValueObject;
 
 /**
  * A lineup a clan fields in one format: exactly `size` of its members, one of
@@ -115,10 +116,10 @@ class Team extends AggregateRoot
      */
     public static function create(
         TeamId $teamId,
-        TeamName $name,
+        TeamNameValueObject $name,
         ClanId $clanId,
         GameId $gameId,
-        TeamSize $size,
+        TeamSizeValueObject $size,
         PlayerId $leader,
         array $players,
     ): self {

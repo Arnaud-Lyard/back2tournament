@@ -9,9 +9,9 @@ use App\Competition\Profile\Game\Application\Model\UpdateGameCommand;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -40,7 +40,7 @@ final class UpdateGameHandler
     {
         $gameId = new GameId($updateGameCommand->getGameId());
         $teamSizes = null === $updateGameCommand->getTeamSizes() ? null : array_map(
-            static fn (int $teamSize): TeamSize => new TeamSize($teamSize),
+            static fn (int $teamSize): TeamSizeValueObject => new TeamSizeValueObject($teamSize),
             $updateGameCommand->getTeamSizes(),
         );
 

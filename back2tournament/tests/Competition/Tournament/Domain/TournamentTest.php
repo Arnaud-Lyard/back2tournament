@@ -7,7 +7,6 @@ namespace App\Tests\Competition\Tournament\Domain;
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Domain\Entity\Matchup;
 use App\Competition\Tournament\Domain\Entity\MatchupId;
 use App\Competition\Tournament\Domain\Entity\OrganizerId;
@@ -15,10 +14,11 @@ use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\ParticipantId;
 use App\Competition\Tournament\Domain\Entity\Tournament;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
-use App\Competition\Tournament\Domain\Entity\TournamentName;
 use App\Competition\Tournament\Domain\Enum\TournamentStatus;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
+use App\Shared\ValueObject\TournamentNameValueObject;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
@@ -59,9 +59,9 @@ final class TournamentTest extends TestCase
 
         Tournament::create(
             new TournamentId(self::TOURNAMENT_ID),
-            new TournamentName('Autumn Cup'),
+            new TournamentNameValueObject('Autumn Cup'),
             new GameId(self::GAME_ID),
-            new TeamSize(1),
+            new TeamSizeValueObject(1),
             8,
             new OrganizerId(self::ORGANIZER_ID),
             new \DateTimeImmutable('-1 day'),
@@ -235,9 +235,9 @@ final class TournamentTest extends TestCase
     {
         return Tournament::create(
             new TournamentId(self::TOURNAMENT_ID),
-            new TournamentName('Autumn Cup'),
+            new TournamentNameValueObject('Autumn Cup'),
             new GameId(self::GAME_ID),
-            new TeamSize(1),
+            new TeamSizeValueObject(1),
             $capacity,
             new OrganizerId(self::ORGANIZER_ID),
             new \DateTimeImmutable('+1 week'),

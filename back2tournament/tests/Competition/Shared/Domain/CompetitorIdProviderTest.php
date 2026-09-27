@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Competition\Shared\Domain;
 
 use App\Competition\Competitor\Domain\Entity\Competitor;
-use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use App\Competition\Fight\Domain\Entity\Fight;
@@ -17,9 +16,10 @@ use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Player\Domain\Entity\UserId;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
+use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Provider\CompetitorIdProvider;
 use App\Shared\Exception\NotFoundException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\TestCase;
 
 final class CompetitorIdProviderTest extends TestCase
@@ -148,7 +148,7 @@ final class CompetitorIdProviderTest extends TestCase
             new CompetitorId(self::COMPETITOR_ID),
             new CompetitorId(self::OPPONENT_ID),
             new FightGameId(self::GAME_ID),
-            new TeamSize(1),
+            new TeamSizeValueObject(1),
         );
     }
 

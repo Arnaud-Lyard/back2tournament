@@ -13,11 +13,11 @@ use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Event\FightSettledEvent;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\TestCase;
 
 final class FightTest extends TestCase
@@ -51,7 +51,7 @@ final class FightTest extends TestCase
             new CompetitorId(self::COMPETITOR_ONE),
             new CompetitorId(self::COMPETITOR_TWO),
             new GameId(self::GAME_ID),
-            new TeamSize(5),
+            new TeamSizeValueObject(5),
         );
 
         $this->assertSame(self::GAME_ID, $fight->getGame()->getValue());
@@ -68,7 +68,7 @@ final class FightTest extends TestCase
             new CompetitorId(self::COMPETITOR_ONE),
             new CompetitorId(self::COMPETITOR_ONE),
             new GameId(self::GAME_ID),
-            new TeamSize(1),
+            new TeamSizeValueObject(1),
         );
     }
 
@@ -248,7 +248,7 @@ final class FightTest extends TestCase
             new CompetitorId(self::COMPETITOR_ONE),
             new CompetitorId(self::COMPETITOR_TWO),
             new GameId(self::GAME_ID),
-            new TeamSize(1),
+            new TeamSizeValueObject(1),
             $tournamentId,
         );
     }

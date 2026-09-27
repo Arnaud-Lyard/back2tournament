@@ -8,7 +8,7 @@ use App\Competition\Profile\Game\Application\Model\CreateGameCommand;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -34,7 +34,7 @@ final class CreateGameHandler
     public function __invoke(CreateGameCommand $createGameCommand): string
     {
         $teamSizes = array_map(
-            static fn (int $teamSize): TeamSize => new TeamSize($teamSize),
+            static fn (int $teamSize): TeamSizeValueObject => new TeamSizeValueObject($teamSize),
             $createGameCommand->getTeamSizes(),
         );
 

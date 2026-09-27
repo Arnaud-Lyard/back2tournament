@@ -13,7 +13,6 @@ use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Competition\Tournament\Application\EventSubscriber\FightSettledEventSubscriber;
@@ -34,7 +33,6 @@ use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\ParticipantId;
 use App\Competition\Tournament\Domain\Entity\Tournament;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
-use App\Competition\Tournament\Domain\Entity\TournamentName;
 use App\Competition\Tournament\Domain\Enum\TournamentStatus;
 use App\Competition\Tournament\Domain\Repository\MatchupRepositoryInterface;
 use App\Competition\Tournament\Domain\Repository\ParticipantRepositoryInterface;
@@ -42,6 +40,8 @@ use App\Competition\Tournament\Domain\Repository\TournamentRepositoryInterface;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
+use App\Shared\ValueObject\TournamentNameValueObject;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -229,7 +229,7 @@ final class TournamentHandlersTest extends TestCase
                 new CompetitorId($one),
                 new CompetitorId($two),
                 new GameId($game),
-                new TeamSize($teamSize),
+                new TeamSizeValueObject($teamSize),
                 new TournamentId((string) $tournament),
             )
         );
@@ -284,7 +284,7 @@ final class TournamentHandlersTest extends TestCase
                 $participants[0]->getCompetitor(),
                 $participants[1]->getCompetitor(),
                 new GameId(self::GAME_ID),
-                new TeamSize(1),
+                new TeamSizeValueObject(1),
             ));
 
         $this->advanceHandler($tournament, $bracket, $scheduler)(
@@ -332,9 +332,9 @@ final class TournamentHandlersTest extends TestCase
     {
         $tournament = Tournament::create(
             new TournamentId(self::TOURNAMENT_ID),
-            new TournamentName('Autumn Cup'),
+            new TournamentNameValueObject('Autumn Cup'),
             new GameId(self::GAME_ID),
-            new TeamSize($teamSize),
+            new TeamSizeValueObject($teamSize),
             $capacity,
             new OrganizerId(self::ORGANIZER),
             new \DateTimeImmutable('+1 week'),
