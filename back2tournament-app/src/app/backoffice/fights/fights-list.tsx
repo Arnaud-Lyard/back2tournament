@@ -81,16 +81,21 @@ export async function FightsList({
                     scroll={false}
                     className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 font-medium underline-offset-4 hover:underline"
                   >
-                    <ClanTag tag={one?.tag} />
-                    <span className="truncate">
-                      {one?.name ?? t("unknownSide")}
+                    {/* A tag stays with its name: the line breaks between the sides. */}
+                    <span className="inline-flex min-w-0 items-center gap-1">
+                      <ClanTag tag={one?.tag} />
+                      <span className="truncate">
+                        {one?.name ?? t("unknownSide")}
+                      </span>
                     </span>
                     <span className="text-muted-foreground">
                       {t("list.versus")}
                     </span>
-                    <ClanTag tag={two?.tag} />
-                    <span className="truncate">
-                      {two?.name ?? t("unknownSide")}
+                    <span className="inline-flex min-w-0 items-center gap-1">
+                      <ClanTag tag={two?.tag} />
+                      <span className="truncate">
+                        {two?.name ?? t("unknownSide")}
+                      </span>
                     </span>
                   </Link>
                 </TableCell>
