@@ -736,6 +736,13 @@ export interface components {
              * @example demo
              */
             authorName?: string | null;
+            /**
+             * @description The English title. The English version is whole: `titleEn` and `bodyEn` are both set, or both null when the article is in French only.
+             * @example The weekend results
+             */
+            titleEn?: string | null;
+            /** @description The English body, null when the article is in French only. */
+            bodyEn?: string | null;
         };
         /** @description A comment on an article. */
         Comment: {
@@ -1534,7 +1541,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        /** @description Requires an editor or an administrator. Every key is optional: a key left out keeps what the article has. A draft and a published article are edited alike; editing does not change the status or the author. */
+        /** @description Requires an editor or an administrator. Every key is optional: a key left out keeps what the article has. `titleEn` and `bodyEn` sent empty or null remove the English version, which must stay whole: a title and a body, or neither. A draft and a published article are edited alike; editing does not change the status or the author. */
         requestBody: {
             content: {
                 "application/json": {
@@ -1547,6 +1554,10 @@ export interface operations {
                      * @example actualites
                      */
                     categorySlug?: string;
+                    /** @example The weekend results */
+                    titleEn?: string | null;
+                    /** @example Looking back at Saturday's matches… */
+                    bodyEn?: string | null;
                 };
             };
         };
@@ -1647,6 +1658,16 @@ export interface operations {
                      * @example news
                      */
                     categorySlug: string;
+                    /**
+                     * @description The English title. Optional, but the English version is whole: send it with `bodyEn`, or neither. Blank reads as absent.
+                     * @example My article
+                     */
+                    titleEn?: string | null;
+                    /**
+                     * @description The English body, sent with `titleEn`.
+                     * @example Article content...
+                     */
+                    bodyEn?: string | null;
                 };
             };
         };

@@ -1,4 +1,4 @@
-import { ExternalLinkIcon, PencilIcon } from "lucide-react"
+import { ExternalLinkIcon, LanguagesIcon, PencilIcon } from "lucide-react"
 import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -78,6 +78,28 @@ export async function ArticlePreview({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="whitespace-pre-line">{article.body}</p>
+        <section
+          aria-labelledby="preview-english"
+          className="flex flex-col gap-2 rounded-lg border border-dashed p-3"
+        >
+          <h3
+            id="preview-english"
+            className="flex items-center gap-2 text-sm font-medium"
+          >
+            <LanguagesIcon className="size-4" />
+            {t("english")}
+          </h3>
+          {article.titleEn && article.bodyEn ? (
+            <div lang="en" className="flex flex-col gap-1">
+              <p className="font-medium">{article.titleEn}</p>
+              <p className="whitespace-pre-line text-muted-foreground">
+                {article.bodyEn}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("noEnglish")}</p>
+          )}
+        </section>
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-muted-foreground">
           <dt>{t("category")}</dt>
           <dd className="truncate">

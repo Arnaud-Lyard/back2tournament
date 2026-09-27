@@ -31,6 +31,7 @@ import type { ArticleSummary, Category } from "@/features/blog/types"
 import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 import { useFieldErrors } from "@/hooks/use-field-errors"
 import { cn } from "@/libs/utils"
+import { EnglishVersionFields } from "./english-version-fields"
 
 interface EditArticleFormProps {
   articleId: string
@@ -57,8 +58,19 @@ export function EditArticleForm({
       ?.slug ?? ""
   )
   const [body, setBody] = useState(article.body ?? "")
-  const parsed = updateArticleSchema.safeParse({ title, categorySlug, body })
-  const fieldErrors = useFieldErrors<"title" | "categorySlug" | "body">(parsed)
+  const [titleEn, setTitleEn] = useState(article.titleEn ?? "")
+  const [bodyEn, setBodyEn] = useState(article.bodyEn ?? "")
+  // Both English fields emptied remove the English version.
+  const parsed = updateArticleSchema.safeParse({
+    title,
+    categorySlug,
+    body,
+    titleEn,
+    bodyEn,
+  })
+  const fieldErrors = useFieldErrors<
+    "title" | "categorySlug" | "body" | "titleEn" | "bodyEn"
+  >(parsed)
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -147,6 +159,14 @@ export function EditArticleForm({
               />
               <FieldError errors={fieldErrors.messagesFor("body")} />
             </Field>
+            <EnglishVersionFields
+              idPrefix="edit-article"
+              titleEn={titleEn}
+              bodyEn={bodyEn}
+              onTitleEnChange={setTitleEn}
+              onBodyEnChange={setBodyEn}
+              fieldErrors={fieldErrors}
+            />
           </FieldGroup>
         </form>
       </CardContent>

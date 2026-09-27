@@ -1,10 +1,41 @@
 import { z } from "zod"
 import { message, requiredText, slug } from "@/libs/validation"
 
-export const createArticleSchema = z.object({
+/**
+ * The fields of an article. Its English version is optional, but whole: a
+ * title and a body, or neither; a blank field counts as left empty.
+ */
+export const articleFields = z.object({
   title: requiredText(),
   categorySlug: slug(),
   body: z.string().trim().min(1, message("required")),
+  titleEn: z.string().trim().max(255, message("tooLong")).optional(),
+  bodyEn: z.string().trim().optional(),
 })
+
+/**
+ * Flags the empty half of an English version whose other half is filled.
+ * A field left out is not judged: an edit may change one of the two.
+ */
+export function refineEnglishVersion(
+  data: { titleEn?: string; bodyEn?: string },
+  context: z.RefinementCtx
+) {
+  if (data.titleEn === undefined || data.bodyEn === undefined) return
+  if ((data.titleEn === "") === (data.bodyEn === "")) return
+
+  context.addIssue({
+    code: "custom",
+    message: message("translationIncomplete"),
+    path: [data.titleEn === "" ? "titleEn" : "bodyEn"],
+  })
+}
+
+export const createArticleSchema = articleFields.superRefine((data, context) =>
+  refineEnglishVersion(
+    { titleEn: data.titleEn ?? "", bodyEn: data.bodyEn ?? "" },
+    context
+  )
+)
 
 export type CreateArticleInput = z.infer<typeof createArticleSchema>

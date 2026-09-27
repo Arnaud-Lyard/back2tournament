@@ -101,6 +101,11 @@
         "gone": "This article no longer exists.",
         "closed": "Comments open once the article is published."
       }
+    },
+    "frenchOnly": "In French",
+    "untranslated": {
+      "title": "Only in French",
+      "description": "This article has not been translated into English yet: here is its French version."
     }
   },
   "games": {
@@ -579,7 +584,9 @@
         },
         "commentsError": "The comments could not be loaded.",
         "edit": "Edit",
-        "viewOnBlog": "View on the blog"
+        "viewOnBlog": "View on the blog",
+        "english": "English version",
+        "noEnglish": "None: the site read in English shows the French version."
       },
       "noCategories": "No categories: create one first",
       "list": {
@@ -594,7 +601,16 @@
           "author": "Author",
           "category": "Category",
           "date": "Date"
-        }
+        },
+        "translated": "Translated into English"
+      },
+      "english": {
+        "legend": "English version",
+        "description": "Optional: it shows when the site is read in English. Without it, the site shows the French version. The title and the body go together.",
+        "titleLabel": "Title in English",
+        "titlePlaceholder": "Spring tournament results",
+        "bodyLabel": "Content in English",
+        "bodyPlaceholder": "Write the English version…"
       }
     },
     "loadError": {
@@ -627,7 +643,8 @@
     "leaderInLineup": "The captain must play in the team.",
     "invalidCapacity": "Between 2 and 128 participants.",
     "invalidDate": "Pick a date and time to come.",
-    "invalidTeamSizes": "Players per side between 1 and 64, separated by commas: 1, 2, 5."
+    "invalidTeamSizes": "Players per side between 1 and 64, separated by commas: 1, 2, 5.",
+    "translationIncomplete": "The English version needs both a title and a body: fill in both, or empty both."
   },
   "apiErrors": {
     "invalid": "The server rejected this data.",

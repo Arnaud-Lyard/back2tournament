@@ -101,6 +101,11 @@
         "gone": "Cet article n'existe plus.",
         "closed": "Les commentaires ouvriront à la publication de l'article."
       }
+    },
+    "frenchOnly": "En français",
+    "untranslated": {
+      "title": "Article en français uniquement",
+      "description": "Cet article n'a pas encore été traduit en anglais : voici sa version française."
     }
   },
   "games": {
@@ -579,7 +584,9 @@
         },
         "commentsError": "Impossible de charger les commentaires.",
         "edit": "Modifier",
-        "viewOnBlog": "Voir sur le blog"
+        "viewOnBlog": "Voir sur le blog",
+        "english": "Version anglaise",
+        "noEnglish": "Aucune : le site lu en anglais affiche la version française."
       },
       "noCategories": "Aucune catégorie : créez-en une d'abord",
       "list": {
@@ -594,7 +601,16 @@
           "author": "Auteur",
           "category": "Catégorie",
           "date": "Date"
-        }
+        },
+        "translated": "Traduit en anglais"
+      },
+      "english": {
+        "legend": "Version anglaise",
+        "description": "Facultative : elle s'affiche quand le site est lu en anglais. Sans elle, le site montre la version française. Titre et contenu vont ensemble.",
+        "titleLabel": "Titre en anglais",
+        "titlePlaceholder": "Spring tournament results",
+        "bodyLabel": "Contenu en anglais",
+        "bodyPlaceholder": "Write the English version…"
       }
     },
     "loadError": {
@@ -627,7 +643,8 @@
     "leaderInLineup": "Le capitaine doit faire partie de l'équipe.",
     "invalidCapacity": "Entre 2 et 128 participants.",
     "invalidDate": "Choisissez une date et une heure à venir.",
-    "invalidTeamSizes": "Des joueurs par camp entre 1 et 64, séparés par des virgules : 1, 2, 5."
+    "invalidTeamSizes": "Des joueurs par camp entre 1 et 64, séparés par des virgules : 1, 2, 5.",
+    "translationIncomplete": "La version anglaise demande un titre et un contenu : remplissez les deux, ou videz-les."
   },
   "apiErrors": {
     "invalid": "Le serveur a refusé ces données.",

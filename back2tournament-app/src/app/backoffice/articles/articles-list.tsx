@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -81,7 +82,14 @@ export async function ArticlesList({
                   </Link>
                 </TableCell>
                 <TableCell>
-                  <ArticleStatusBadge article={article} />
+                  <span className="flex items-center gap-1">
+                    <ArticleStatusBadge article={article} />
+                    {article.titleEn && (
+                      <Badge variant="outline" title={t("translated")}>
+                        EN
+                      </Badge>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell className="max-w-28 truncate">
                   {article.authorName ?? (
