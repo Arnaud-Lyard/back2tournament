@@ -12,6 +12,10 @@ final class CreateArticleCommand
 
     private string $category;
 
+    private ?string $titleEn = null;
+
+    private ?string $bodyEn = null;
+
     public function getTitle(): string
     {
         return $this->title;
@@ -40,5 +44,28 @@ final class CreateArticleCommand
     public function setCategory(string $category): void
     {
         $this->category = $category;
+    }
+
+    /**
+     * The English title; null or blank when the article is written in French only.
+     */
+    public function getTitleEn(): ?string
+    {
+        return $this->titleEn;
+    }
+
+    public function setTitleEn(?string $titleEn): void
+    {
+        $this->titleEn = $titleEn;
+    }
+
+    public function getBodyEn(): ?string
+    {
+        return $this->bodyEn;
+    }
+
+    public function setBodyEn(?string $bodyEn): void
+    {
+        $this->bodyEn = $bodyEn;
     }
 }

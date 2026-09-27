@@ -37,6 +37,8 @@ final class OnPublicationRequestedUserVerifiedEventSubscriber implements EventSu
         $createArticleCommand = new CreateArticleCommand();
         $createArticleCommand->setTitle($event->getTitle());
         $createArticleCommand->setBody($event->getBody());
+        $createArticleCommand->setTitleEn($event->getTitleEn());
+        $createArticleCommand->setBodyEn($event->getBodyEn());
         $createArticleCommand->setCategory(
             $this->categoryIdProvider->bySlug($event->getCategorySlug())
         );

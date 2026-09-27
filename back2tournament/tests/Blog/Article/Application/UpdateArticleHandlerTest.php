@@ -88,6 +88,48 @@ final class UpdateArticleHandlerTest extends TestCase
         $this->assertSame(['title' => 'New title', 'authorName' => 'demo'], $payload);
     }
 
+    public function test_an_editor_gives_the_article_its_english_version(): void
+    {
+        $article = $this->published();
+
+        $this->handler($this->articleRepository($article))(new UpdateArticleCommand(self::ARTICLE_ID, null, null, null, ' The title ', 'The body'));
+
+        $this->assertSame(['The title', 'The body'], [$article->getTitleEn(), $article->getBodyEn()]);
+        // The French version stays as it is.
+        $this->assertSame(['Title', 'Body'], [$article->getTitle(), $article->getBody()]);
+    }
+
+    public function test_an_english_field_left_out_keeps_its_value(): void
+    {
+        $article = $this->published();
+        Article::translate($article, new ArticleTitleValueObject('The title'), new ArticleBodyValueObject('The body'));
+
+        $this->handler($this->articleRepository($article))(new UpdateArticleCommand(self::ARTICLE_ID, null, null, null, 'A better title', null));
+
+        $this->assertSame(['A better title', 'The body'], [$article->getTitleEn(), $article->getBodyEn()]);
+    }
+
+    public function test_emptied_english_fields_remove_the_english_version(): void
+    {
+        $article = $this->published();
+        Article::translate($article, new ArticleTitleValueObject('The title'), new ArticleBodyValueObject('The body'));
+
+        $this->handler($this->articleRepository($article))(new UpdateArticleCommand(self::ARTICLE_ID, null, null, null, '', ''));
+
+        $this->assertSame([null, null], [$article->getTitleEn(), $article->getBodyEn()]);
+    }
+
+    public function test_an_english_title_alone_is_refused_and_nothing_is_saved(): void
+    {
+        $articleRepository = $this->articleRepositoryMock($this->published());
+        $articleRepository->expects($this->never())->method('save');
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessageIsOrContains('the English version needs both a title and a body');
+
+        $this->handler($articleRepository)(new UpdateArticleCommand(self::ARTICLE_ID, null, null, null, 'The title', null));
+    }
+
     public function test_only_an_editor_edits_an_article(): void
     {
         $articleRepository = $this->articleRepositoryMock($this->published());

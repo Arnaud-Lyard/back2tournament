@@ -51,6 +51,15 @@ nelmio_api_doc:
                             nullable: true
                             example: 'demo'
                             description: 'The username of `author`. Null for a draft.'
+                        titleEn:
+                            type: string
+                            nullable: true
+                            example: 'The weekend results'
+                            description: 'The English title. The English version is whole: `titleEn` and `bodyEn` are both set, or both null when the article is in French only.'
+                        bodyEn:
+                            type: string
+                            nullable: true
+                            description: 'The English body, null when the article is in French only.'
                 Comment:
                     type: object
                     description: 'A comment on an article.'

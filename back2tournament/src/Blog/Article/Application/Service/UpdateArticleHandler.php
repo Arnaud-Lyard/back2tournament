@@ -51,6 +51,12 @@ final class UpdateArticleHandler
         $articleId = new ArticleId($updateArticleCommand->getArticleId());
         $title = null === $updateArticleCommand->getTitle() ? null : new ArticleTitleValueObject($updateArticleCommand->getTitle());
         $body = null === $updateArticleCommand->getBody() ? null : new ArticleBodyValueObject($updateArticleCommand->getBody());
+        // The English version: null keeps it, blank removes it.
+        $titleEnGiven = $updateArticleCommand->getTitleEn();
+        $bodyEnGiven = $updateArticleCommand->getBodyEn();
+        $titleEn = self::isBlank($titleEnGiven) ? null : new ArticleTitleValueObject((string) $titleEnGiven);
+        $bodyEn = self::isBlank($bodyEnGiven) ? null : new ArticleBodyValueObject((string) $bodyEnGiven);
+        $translates = null !== $titleEnGiven || null !== $bodyEnGiven;
 
         if (!$this->currentUserProvider->isGranted('ROLE_EDITOR')) {
             throw new PermissionDeniedException('only an editor edits an article');
@@ -64,7 +70,17 @@ final class UpdateArticleHandler
         $categorySlug = $updateArticleCommand->getCategorySlug();
         $categoryId = null === $categorySlug ? null : new CategoryId($this->categoryIdProvider->bySlug($categorySlug));
 
-        Article::update($article, $title, $body, $categoryId);
+        if (!$translates || null !== $title || null !== $body || null !== $categoryId) {
+            Article::update($article, $title, $body, $categoryId);
+        }
+        if ($translates) {
+            // A field left out keeps its English value, so the version stays whole.
+            Article::translate(
+                $article,
+                null === $titleEnGiven ? self::englishTitleOf($article) : $titleEn,
+                null === $bodyEnGiven ? self::englishBodyOf($article) : $bodyEn,
+            );
+        }
 
         $this->articleRepository->save($article);
 
@@ -78,5 +94,20 @@ final class UpdateArticleHandler
         $normalized['authorName'] = null === $author ? null : ($this->authorProvider->usernames([$author])[$author] ?? null);
 
         return json_encode($normalized, JSON_THROW_ON_ERROR);
+    }
+
+    private static function isBlank(?string $value): bool
+    {
+        return null === $value || '' === trim($value);
+    }
+
+    private static function englishTitleOf(Article $article): ?ArticleTitleValueObject
+    {
+        return null === $article->getTitleEn() ? null : new ArticleTitleValueObject($article->getTitleEn());
+    }
+
+    private static function englishBodyOf(Article $article): ?ArticleBodyValueObject
+    {
+        return null === $article->getBodyEn() ? null : new ArticleBodyValueObject($article->getBodyEn());
     }
 }

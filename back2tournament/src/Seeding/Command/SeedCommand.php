@@ -123,13 +123,21 @@ final class SeedCommand extends Command
         'Wraith', 'Zenith', 'Apex', 'Basilisk', 'Comet',
     ];
 
+    /**
+     * Each headline in French, the language the site is written in, and in English.
+     */
     private const HEADLINES = [
-        'The season opener everyone underestimated',
-        'How the underdog roster reached the final',
-        'Five habits that separate ranked from tournament play',
-        'Reading the patch notes like a coach',
-        'The bracket that rewrote the standings',
+        ['Le match d\'ouverture que tout le monde a sous-estimé', 'The season opener everyone underestimated'],
+        ['Comment l\'équipe outsider a atteint la finale', 'How the underdog roster reached the final'],
+        ['Cinq habitudes qui séparent le classé du tournoi', 'Five habits that separate ranked from tournament play'],
+        ['Lire les notes de patch comme un coach', 'Reading the patch notes like a coach'],
+        ['Le tableau qui a bouleversé le classement', 'The bracket that rewrote the standings'],
     ];
+
+    /**
+     * Every fourth article is left in French only.
+     */
+    private const FRENCH_ONLY_EVERY = 4;
 
     private const TABLES = [
         'rating_change', 'rating',
@@ -231,7 +239,7 @@ final class SeedCommand extends Command
             ['Clans' => $clans],
             ['Fights' => $fights],
             ['Tournaments' => 2],
-            ['Articles' => \sprintf('%d published, %d drafts', self::ARTICLES - self::DRAFT_ARTICLES, self::DRAFT_ARTICLES)],
+            ['Articles' => \sprintf('%d published, %d drafts, every %dth in French only', self::ARTICLES - self::DRAFT_ARTICLES, self::DRAFT_ARTICLES, self::FRENCH_ONLY_EVERY)],
             ['Comments' => self::COMMENTED_ARTICLES * self::COMMENTS_PER_ARTICLE],
             ['Ranked' => \sprintf('%d player profiles and clans, from %d settled fights', $rankings['ratings'], $rankings['fights'])],
         );
@@ -704,15 +712,18 @@ final class SeedCommand extends Command
         $publisherId = new AuthorId((string) $publisher->getId());
 
         for ($index = 0; $index < self::ARTICLES; ++$index) {
-            $headline = self::HEADLINES[$index % \count(self::HEADLINES)];
+            [$headline, $headlineEn] = self::HEADLINES[$index % \count(self::HEADLINES)];
             $category = $categories[$index % \count($categories)];
             $at = $this->nextMoment();
+            $inEnglish = self::FRENCH_ONLY_EVERY - 1 !== $index % self::FRENCH_ONLY_EVERY;
 
             $article = Article::create(
                 new ArticleId(Uuid::v4()->toString()),
                 new ArticleTitleValueObject(\sprintf('%s (%02d)', $headline, $index + 1)),
                 new ArticleBodyValueObject($this->body($headline)),
                 new CategoryId($category->getId()),
+                $inEnglish ? new ArticleTitleValueObject(\sprintf('%s (%02d)', $headlineEn, $index + 1)) : null,
+                $inEnglish ? new ArticleBodyValueObject($this->bodyEn($headlineEn)) : null,
             );
             if ($index < self::ARTICLES - self::DRAFT_ARTICLES) {
                 Article::publish($article, $publisherId);
@@ -731,7 +742,7 @@ final class SeedCommand extends Command
                 $comment = Article::createComment(
                     $article,
                     new CommentId(Uuid::v4()->toString()),
-                    \sprintf('Seeded comment %d on "%s".', $reply + 1, $headline),
+                    \sprintf('Commentaire de démonstration %d sur « %s ».', $reply + 1, $headline),
                     new AuthorId((string) $commenter->getId()),
                 );
                 $comment->setCreatedAt($at);
@@ -744,6 +755,15 @@ final class SeedCommand extends Command
     }
 
     private function body(string $headline): string
+    {
+        return implode("\n\n", [
+            $headline.'.',
+            'Contenu de démonstration, assez long pour qu\'on en tire un extrait et qu\'une ligne de liste passe à la ligne.',
+            'Les chiffres ne veulent rien dire : cet article existe pour que le blog compte plus d\'articles qu\'une page n\'en montre.',
+        ]);
+    }
+
+    private function bodyEn(string $headline): string
     {
         return implode("\n\n", [
             $headline.'.',

@@ -47,6 +47,31 @@ final class CreateArticleHandlerTest extends TestCase
         $this->assertSame(['title' => 'Patch notes', 'authorName' => null], $payload);
     }
 
+    public function test_the_english_version_is_saved_with_the_article(): void
+    {
+        $saved = $this->saved(fn (CreateArticleCommand $command) => $this->translated($command, ' Patch notes EN ', 'Body EN'));
+
+        $this->assertSame(['Patch notes EN', 'Body EN'], [$saved->getTitleEn(), $saved->getBodyEn()]);
+    }
+
+    public function test_blank_english_fields_leave_the_article_in_french_only(): void
+    {
+        $saved = $this->saved(fn (CreateArticleCommand $command) => $this->translated($command, '  ', ''));
+
+        $this->assertSame([null, null], [$saved->getTitleEn(), $saved->getBodyEn()]);
+    }
+
+    public function test_an_english_title_without_its_body_saves_nothing(): void
+    {
+        $articleRepository = $this->createMock(ArticleRepositoryInterface::class);
+        $articleRepository->expects($this->never())->method('save');
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessageIsOrContains('the English version needs both a title and a body');
+
+        $this->handler($articleRepository, $this->createStub(NormalizerInterface::class))($this->translated($this->command('Patch notes'), 'Patch notes EN', null));
+    }
+
     public function test_a_blank_title_saves_nothing(): void
     {
         $articleRepository = $this->createMock(ArticleRepositoryInterface::class);
@@ -60,6 +85,35 @@ final class CreateArticleHandlerTest extends TestCase
     private function handler(ArticleRepositoryInterface $articleRepository, NormalizerInterface $normalizer): CreateArticleHandler
     {
         return new CreateArticleHandler($articleRepository, $this->createStub(EventDispatcherInterface::class), $normalizer);
+    }
+
+    /**
+     * @param callable(CreateArticleCommand): CreateArticleCommand $prepare
+     */
+    private function saved(callable $prepare): Article
+    {
+        $saved = null;
+
+        $articleRepository = $this->createStub(ArticleRepositoryInterface::class);
+        $articleRepository->method('save')->willReturnCallback(
+            static function (Article $article) use (&$saved): void {
+                $saved = $article;
+            }
+        );
+
+        $this->handler($articleRepository, $this->createStub(NormalizerInterface::class))($prepare($this->command('Patch notes')));
+
+        $this->assertInstanceOf(Article::class, $saved);
+
+        return $saved;
+    }
+
+    private function translated(CreateArticleCommand $command, ?string $titleEn, ?string $bodyEn): CreateArticleCommand
+    {
+        $command->setTitleEn($titleEn);
+        $command->setBodyEn($bodyEn);
+
+        return $command;
     }
 
     private function command(string $title): CreateArticleCommand

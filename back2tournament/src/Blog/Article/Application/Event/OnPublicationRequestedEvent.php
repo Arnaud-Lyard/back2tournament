@@ -14,13 +14,19 @@ final class OnPublicationRequestedEvent extends Event
 
     private string $categorySlug;
 
+    private ?string $titleEn;
+
+    private ?string $bodyEn;
+
     private string $createdArticle;
 
-    public function __construct(string $title, string $body, string $categorySlug)
+    public function __construct(string $title, string $body, string $categorySlug, ?string $titleEn = null, ?string $bodyEn = null)
     {
         $this->title = $title;
         $this->body = $body;
         $this->categorySlug = $categorySlug;
+        $this->titleEn = $titleEn;
+        $this->bodyEn = $bodyEn;
     }
 
     public function getTitle(): string
@@ -36,6 +42,19 @@ final class OnPublicationRequestedEvent extends Event
     public function getCategorySlug(): string
     {
         return $this->categorySlug;
+    }
+
+    /**
+     * The English title, null when the article is written in French only.
+     */
+    public function getTitleEn(): ?string
+    {
+        return $this->titleEn;
+    }
+
+    public function getBodyEn(): ?string
+    {
+        return $this->bodyEn;
     }
 
     /**

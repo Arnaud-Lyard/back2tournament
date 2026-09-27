@@ -17,6 +17,7 @@ use App\Blog\Article\Domain\Event\CommentCreatedEvent;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Blog\Shared\Domain\Entity\ValueObject\CategoryId;
 use App\Shared\Exception\ConflictException;
+use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\ArticleBodyValueObject;
 use App\Shared\ValueObject\ArticleTitleValueObject;
 
@@ -40,6 +41,14 @@ class Article extends AggregateRoot
     private ArticleStatus $status = ArticleStatus::DRAFT;
 
     private ?\DateTimeImmutable $publishedAt = null;
+
+    /**
+     * The English version of the article: both its title and its body, or
+     * neither when it has none. The site reads it in English.
+     */
+    private ?string $titleEn = null;
+
+    private ?string $bodyEn = null;
 
     private string $category;
 
@@ -142,6 +151,16 @@ class Article extends AggregateRoot
         return $this->publishedAt;
     }
 
+    public function getTitleEn(): ?string
+    {
+        return $this->titleEn;
+    }
+
+    public function getBodyEn(): ?string
+    {
+        return $this->bodyEn;
+    }
+
     public function setPublishedAt(?\DateTimeImmutable $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
@@ -151,16 +170,20 @@ class Article extends AggregateRoot
 
     /**
      * A new article is a draft: it has no author until someone publishes it.
+     * Its English version is optional, but whole: a title and a body, or neither.
      */
     public static function create(
         ArticleId $articleId,
         ArticleTitleValueObject $title,
         ArticleBodyValueObject $body,
-        CategoryId $categoryId
+        CategoryId $categoryId,
+        ?ArticleTitleValueObject $titleEn = null,
+        ?ArticleBodyValueObject $bodyEn = null,
     ): self {
         $article = new self($articleId);
         $article->setTitle($title->getValue());
         $article->setBody($body->getValue());
+        self::setEnglishVersion($article, $titleEn, $bodyEn);
         $article->setCreatedAt(new \DateTimeImmutable('now'));
         $article->setUpdatedAt(new \DateTimeImmutable('now'));
         $article->setStatus(ArticleStatus::DRAFT);
@@ -189,6 +212,21 @@ class Article extends AggregateRoot
         if (null !== $categoryId) {
             $article->setCategory($categoryId);
         }
+        $article->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));
+    }
+
+    /**
+     * Gives the article its English version, or takes it away when both are
+     * null. A title without a body, or a body without a title, is refused.
+     */
+    public static function translate(
+        Article $article,
+        ?ArticleTitleValueObject $titleEn,
+        ?ArticleBodyValueObject $bodyEn
+    ): void {
+        self::setEnglishVersion($article, $titleEn, $bodyEn);
         $article->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));
@@ -228,6 +266,19 @@ class Article extends AggregateRoot
         $article->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $article->recordDomainEvent(new ArticleUnpublishedEvent($article->getId()));
+    }
+
+    private static function setEnglishVersion(
+        Article $article,
+        ?ArticleTitleValueObject $titleEn,
+        ?ArticleBodyValueObject $bodyEn
+    ): void {
+        if ((null === $titleEn) !== (null === $bodyEn)) {
+            throw new ValidationException('the English version needs both a title and a body');
+        }
+
+        $article->titleEn = $titleEn?->getValue();
+        $article->bodyEn = $bodyEn?->getValue();
     }
 
     public static function createComment(

@@ -50,6 +50,8 @@ make user           # seed a dev user via app:create-user
   `Article` is a `draft` until an editor publishes it: whoever publishes it becomes its
   `author` — not whoever wrote it — and taking it back to draft clears the author. Only
   a published article is public and takes comments; a comment records who wrote it.
+  An article is written in French and may carry an English version (`titleEn`,
+  `bodyEn`): both or neither, which the site shows when it is read in English.
   `Blog/Shared/Domain/Provider/` holds `CategoryIdProviderInterface` (a category by its
   slug) and `AuthorProviderInterface` (the usernames behind author and commenter ids).
 - `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,

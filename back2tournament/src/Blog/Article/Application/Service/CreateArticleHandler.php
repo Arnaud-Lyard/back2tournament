@@ -37,12 +37,17 @@ final class CreateArticleHandler
     {
         $title = new ArticleTitleValueObject($createArticleCommand->getTitle());
         $body = new ArticleBodyValueObject($createArticleCommand->getBody());
+        // A blank English field is no English field.
+        $titleEn = self::isBlank($createArticleCommand->getTitleEn()) ? null : new ArticleTitleValueObject((string) $createArticleCommand->getTitleEn());
+        $bodyEn = self::isBlank($createArticleCommand->getBodyEn()) ? null : new ArticleBodyValueObject((string) $createArticleCommand->getBodyEn());
 
         $article = Article::create(
             new ArticleId(Uuid::v4()->toString()),
             $title,
             $body,
-            new CategoryId($createArticleCommand->getCategory())
+            new CategoryId($createArticleCommand->getCategory()),
+            $titleEn,
+            $bodyEn,
         );
 
         $this->articleRepository->save($article);
@@ -57,5 +62,10 @@ final class CreateArticleHandler
         $normalized['authorName'] = null;
 
         return json_encode($normalized, JSON_THROW_ON_ERROR);
+    }
+
+    private static function isBlank(?string $value): bool
+    {
+        return null === $value || '' === trim($value);
     }
 }
