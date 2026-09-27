@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
     content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/Comment')),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
-#[OA\Response(response: 404, ref: '#/components/responses/NotFound')]
+#[OA\Response(response: 404, description: 'No article has this id, or it is a draft and the caller is not an editor', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 #[Security(name: null)]
 final class GetArticleCommentsController extends AbstractController
 {

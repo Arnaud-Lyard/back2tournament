@@ -21,6 +21,8 @@ interface ListCardProps {
   title: string
   description: string
   count: number
+  /** False when the rows speak for themselves, e.g. one page of a longer list. */
+  showCount?: boolean
   emptyTitle: string
   emptyDescription: string
   children: ReactNode
@@ -31,6 +33,7 @@ export function ListCard({
   title,
   description,
   count,
+  showCount = true,
   emptyTitle,
   emptyDescription,
   children,
@@ -40,7 +43,7 @@ export function ListCard({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
-        {count > 0 && (
+        {showCount && count > 0 && (
           <CardAction>
             <Badge variant="secondary">{count}</Badge>
           </CardAction>

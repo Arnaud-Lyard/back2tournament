@@ -14,12 +14,18 @@ final class FindArticlesQuery
 
     private ?string $categorySlug;
 
-    public function __construct(int $page, int $limit, ?string $search = null, ?string $categorySlug = null)
+    private string $status;
+
+    /**
+     * @param string $status `published` by default; `draft` or `all` for an editor
+     */
+    public function __construct(int $page, int $limit, ?string $search = null, ?string $categorySlug = null, string $status = '')
     {
         $this->page = max(1, $page);
         $this->limit = min(50, max(1, $limit));
         $this->search = '' === trim($search ?? '') ? null : trim($search);
         $this->categorySlug = '' === trim($categorySlug ?? '') ? null : trim($categorySlug);
+        $this->status = '' === trim($status) ? 'published' : trim($status);
     }
 
     public function getPage(): int
@@ -45,5 +51,10 @@ final class FindArticlesQuery
     public function getCategorySlug(): ?string
     {
         return $this->categorySlug;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
     }
 }

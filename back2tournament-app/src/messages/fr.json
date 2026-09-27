@@ -64,7 +64,12 @@
     "title": "Blog",
     "description": "L'actualité de la plateforme, des tournois et des joueurs.",
     "readMore": "Lire la suite",
+    "byAuthor": "Par {author}",
     "back": "Retour au blog",
+    "draft": {
+      "title": "Brouillon",
+      "description": "Cet article n'est pas publié : seuls les éditeurs peuvent le lire."
+    },
     "searchPlaceholder": "Rechercher un article…",
     "searchLabel": "Rechercher dans les articles",
     "filterLabel": "Filtrer par catégorie",
@@ -82,6 +87,7 @@
     },
     "comments": {
       "title": "{count, plural, =0 {Commentaires} one {# commentaire} other {# commentaires}}",
+      "anonymous": "Anonyme",
       "label": "Votre commentaire",
       "placeholder": "Partagez votre avis…",
       "submit": "Publier",
@@ -89,9 +95,11 @@
       "postError": "Publication impossible",
       "signInPrompt": "Connectez-vous pour commenter cet article.",
       "signIn": "Se connecter",
+      "closed": "Les commentaires ouvriront à la publication de l'article.",
       "errors": {
         "signedOut": "Votre session a expiré : reconnectez-vous pour commenter.",
-        "gone": "Cet article n'existe plus."
+        "gone": "Cet article n'existe plus.",
+        "closed": "Les commentaires ouvriront à la publication de l'article."
       }
     }
   },
@@ -501,9 +509,9 @@
     },
     "articles": {
       "title": "Articles",
-      "description": "Rédigez les articles du site et consultez-les avec leurs commentaires.",
+      "description": "Rédigez les articles du site, relisez-les avec leurs commentaires et publiez-les.",
       "formTitle": "Nouvel article",
-      "formDescription": "L'article est publié sous votre nom.",
+      "formDescription": "L'article est enregistré comme brouillon : son auteur sera l'éditeur qui le publie.",
       "titleLabel": "Titre",
       "titlePlaceholder": "Résultats du tournoi de printemps",
       "category": "Catégorie",
@@ -511,21 +519,55 @@
       "categoryDescription": "Les catégories se gèrent depuis la section Catégories.",
       "body": "Contenu",
       "bodyPlaceholder": "Rédigez votre article…",
-      "submit": "Publier l'article",
-      "success": "Article publié",
-      "successDescription": "Il est visible sur le site.",
-      "error": "Publication impossible",
+      "submit": "Enregistrer le brouillon",
+      "success": "Brouillon enregistré",
+      "successDescription": "Il n'est pas encore sur le site : publiez-le depuis son aperçu.",
+      "error": "Enregistrement impossible",
       "errors": {
-        "forbidden": "La publication d'articles est réservée aux éditeurs.",
+        "forbidden": "La rédaction d'articles est réservée aux éditeurs.",
         "categoryNotFound": "Cette catégorie n'existe plus."
       },
       "view": "Voir l'article",
       "writeAnother": "Rédiger un autre article",
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publié"
+      },
+      "publication": {
+        "publish": "Publier",
+        "unpublish": "Repasser en brouillon",
+        "published": "Article publié",
+        "publishedDescription": "Il est sur le site, sous votre nom.",
+        "unpublished": "Article repassé en brouillon",
+        "unpublishedDescription": "Il n'est plus sur le site.",
+        "publishError": "Publication impossible",
+        "unpublishError": "Retour en brouillon impossible",
+        "errors": {
+          "forbidden": "La publication est réservée aux éditeurs.",
+          "gone": "Cet article n'existe plus.",
+          "changed": "Le statut de l'article a déjà changé : rechargez la page."
+        }
+      },
+      "edit": {
+        "title": "Modifier l'article",
+        "description": "Le statut et l'auteur de l'article ne changent pas.",
+        "submit": "Enregistrer",
+        "cancel": "Annuler",
+        "success": "Article modifié",
+        "error": "Modification impossible",
+        "errors": {
+          "forbidden": "La modification d'articles est réservée aux éditeurs.",
+          "notFound": "Cet article ou cette catégorie n'existe plus."
+        }
+      },
       "preview": {
         "publishedAt": "Publié le {date}",
+        "writtenAt": "Rédigé le {date}",
         "category": "Catégorie",
         "author": "Auteur",
+        "noAuthor": "Aucun tant que l'article n'est pas publié",
         "comments": "{count, plural, =0 {Aucun commentaire} one {# commentaire} other {# commentaires}}",
+        "anonymous": "Anonyme",
         "notFound": {
           "title": "Article introuvable",
           "description": "Aucun article ne porte cet identifiant."
@@ -534,20 +576,23 @@
           "title": "Impossible de charger l'article",
           "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
         },
-        "commentsError": "Impossible de charger les commentaires."
+        "commentsError": "Impossible de charger les commentaires.",
+        "edit": "Modifier",
+        "viewOnBlog": "Voir sur le blog"
       },
       "noCategories": "Aucune catégorie : créez-en une d'abord",
       "list": {
         "title": "Tous les articles",
-        "description": "Du plus récent au plus ancien.",
+        "description": "Brouillons et articles publiés, du plus récent au plus ancien.",
         "emptyTitle": "Aucun article",
-        "emptyDescription": "Les articles publiés apparaissent ici.",
-        "view": "Voir",
+        "emptyDescription": "Les articles rédigés apparaissent ici.",
+        "noAuthor": "—",
         "columns": {
           "title": "Titre",
+          "status": "Statut",
+          "author": "Auteur",
           "category": "Catégorie",
-          "publishedAt": "Publié le",
-          "actions": "Actions"
+          "date": "Date"
         }
       }
     },
@@ -714,5 +759,27 @@
       "toBeDecided": "À déterminer",
       "underWay": "Match en cours"
     }
+  },
+  "history": {
+    "title": "Derniers résultats",
+    "description": {
+      "player": "Ses matchs terminés, en 1v1 et avec ses équipes, du plus récent au plus ancien.",
+      "clan": "Les matchs terminés des équipes du clan, du plus récent au plus ancien."
+    },
+    "empty": {
+      "title": "Aucun résultat",
+      "player": "Aucun match terminé pour le moment.",
+      "clan": "Aucune équipe du clan n'a encore terminé de match."
+    },
+    "outcome": {
+      "win": "Victoire",
+      "loss": "Défaite",
+      "draw": "Nul"
+    },
+    "against": "contre",
+    "unknown": "adversaire inconnu",
+    "tournament": "Tournoi",
+    "latest": "Les {shown} derniers sur {total}",
+    "loadError": "Impossible de charger les résultats pour le moment."
   }
 }

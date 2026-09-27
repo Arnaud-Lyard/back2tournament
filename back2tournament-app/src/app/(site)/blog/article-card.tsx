@@ -4,6 +4,7 @@ import { MediaPlaceholder } from "@/components/media-placeholder"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { toExcerpt } from "@/features/blog/lib/excerpt"
+import { articleDate } from "@/features/blog/lib/publication"
 import type { ArticleSummary, Category } from "@/features/blog/types"
 
 interface ArticleCardProps {
@@ -23,6 +24,7 @@ export async function ArticleCard({ article, categories }: ArticleCardProps) {
   const category = categories.find(
     (candidate) => candidate.id === article.category?.value
   )
+  const date = articleDate(article)
 
   return (
     <li>
@@ -35,12 +37,13 @@ export async function ArticleCard({ article, categories }: ArticleCardProps) {
           <div className="flex flex-1 flex-col gap-2 p-4">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {category && <Badge variant="secondary">{category.name}</Badge>}
-              {article.createdAt && (
-                <time dateTime={article.createdAt}>
-                  {format.dateTime(new Date(article.createdAt), {
-                    dateStyle: "medium",
-                  })}
+              {date && (
+                <time dateTime={date}>
+                  {format.dateTime(new Date(date), { dateStyle: "medium" })}
                 </time>
+              )}
+              {article.authorName && (
+                <span>{t("byAuthor", { author: article.authorName })}</span>
               )}
             </div>
             <CardTitle className="text-lg">{article.title}</CardTitle>

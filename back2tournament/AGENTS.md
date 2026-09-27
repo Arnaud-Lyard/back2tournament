@@ -46,7 +46,12 @@ make user           # seed a dev user via app:create-user
 - `Authentication/User/` — users, roles, password hashing, Symfony Security integration.
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
   any context to learn who the caller is.
-- `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy.
+- `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy. An
+  `Article` is a `draft` until an editor publishes it: whoever publishes it becomes its
+  `author` — not whoever wrote it — and taking it back to draft clears the author. Only
+  a published article is public and takes comments; a comment records who wrote it.
+  `Blog/Shared/Domain/Provider/` holds `CategoryIdProviderInterface` (a category by its
+  slug) and `AuthorProviderInterface` (the usernames behind author and commenter ids).
 - `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
   `Competition/Profile/Team/` — competition profiles. A `Game` lists the formats it is
   played in (`teamSizes`: 1 for 1v1, 5 for 5v5, up to 64). A `Player` is one user in one
@@ -66,9 +71,10 @@ make user           # seed a dev user via app:create-user
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
-  for, name the sides) and `FightSchedulerProviderInterface` (open a fight with its
-  two pending results). Each `…ProviderInterface` has its `…Provider` implementation
-  next to it, in the same folder.
+  for, which competitors a player profile or a clan plays as, name the sides) and
+  `FightSchedulerProviderInterface` (open a fight with its two pending results). Each
+  `…ProviderInterface` has its `…Provider` implementation next to it, in the same
+  folder.
 
 Each context (except `Shared`) has three layers:
 
@@ -207,8 +213,8 @@ request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
 the caller injects the interface. `CurrentUserProviderInterface`,
 `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
-`CompetitorRegistryProviderInterface` and `FightSchedulerProviderInterface` are the
-ones in place. Prefer this over chaining finder services, and over events.
+`CompetitorRegistryProviderInterface`, `FightSchedulerProviderInterface`,
+`CategoryIdProviderInterface` and `AuthorProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a
@@ -218,15 +224,15 @@ subscriber, a constructor signature and a silent `ArgumentCountError` when one o
 drifts, and the response then has nowhere to go but the session.
 
 **The User context's verification chain** is the one sanctioned exception, kept on
-purpose: creating a player profile, a game or a team, publishing an article, and
+purpose: creating a player profile, a game or a team, writing an article, and
 declaring or confirming a fight result go through the User context. The controller dispatches `On<Thing>RequestedEvent` (owning
 context); a subscriber of the User context checks the role and dispatches
 `On<Thing>…VerifiedEvent` carrying the verified user id; a subscriber of the owning
 context runs the command for that user through `HandleTrait`. The handler's JSON goes
 back the same way: the owning subscriber sets it on the verified event, the User
 subscriber copies it onto the requested event, and the controller reads it from the
-event `dispatch()` returned — never from the session. Player creation and article
-publication still read theirs from the session: align them when they are next touched.
+event `dispatch()` returned — never from the session. Player creation still reads its
+own from the session: align it when it is next touched.
 
 Naming, when an event really is warranted: `On<Thing><PastParticiple>Event` in
 `Application/Event/`, subscriber `<Thing><PastParticiple>EventSubscriber` in

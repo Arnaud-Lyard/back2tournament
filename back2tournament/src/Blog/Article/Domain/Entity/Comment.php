@@ -19,6 +19,11 @@ class Comment
 
     private string $articleId;
 
+    /**
+     * The user who wrote the comment. Null for a comment older than this field.
+     */
+    private ?string $author = null;
+
     public function __construct(CommentId $commentId)
     {
         $this->id = $commentId->getValue();
@@ -67,5 +72,15 @@ class Comment
     public function setArticleId(ArticleId $articleId): void
     {
         $this->articleId = $articleId->getValue();
+    }
+
+    public function getAuthor(): ?AuthorId
+    {
+        return null === $this->author ? null : new AuthorId($this->author);
+    }
+
+    public function setAuthor(AuthorId $author): void
+    {
+        $this->author = $author->getValue();
     }
 }

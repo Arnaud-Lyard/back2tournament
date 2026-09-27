@@ -114,7 +114,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patch_api_article_patch"];
         trace?: never;
     };
     "/api/articles/": {
@@ -131,6 +131,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/articles/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patch_api_article_status_patch"];
         trace?: never;
     };
     "/api/comments/": {
@@ -159,6 +175,22 @@ export interface paths {
         get: operations["get_api_category_list"];
         put?: never;
         post: operations["post_api_category_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/results/clans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_results_clan"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -205,6 +237,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["get_api_results_pending_user_fights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/results/players/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_results_player"];
         put?: never;
         post?: never;
         delete?: never;
@@ -594,7 +642,7 @@ export interface components {
             /** Format: uuid */
             value?: string;
         };
-        /** @description A blog article. `author` names the user who published it and `category` the category it is filed under. Its comments are not part of it. */
+        /** @description A blog article. A draft is read by editors only; once published it is public. `author` is the user who published it — not the one who wrote it — and `category` the category it is filed under. Its comments are not part of it. */
         Article: {
             category?: components["schemas"]["Uuid"];
             id?: components["schemas"]["Uuid"];
@@ -604,7 +652,26 @@ export interface components {
             updatedAt?: string;
             body?: string;
             title?: string;
-            author?: components["schemas"]["Uuid"];
+            /**
+             * @description `draft` until an editor publishes it.
+             * @enum {string}
+             */
+            status?: "draft" | "published";
+            /**
+             * Format: date-time
+             * @description When the article was published. Null for a draft.
+             */
+            publishedAt?: string | null;
+            /** @description The user who published the article. Null for a draft. */
+            author?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            /**
+             * @description The username of `author`. Null for a draft.
+             * @example demo
+             */
+            authorName?: string | null;
         };
         /** @description A comment on an article. */
         Comment: {
@@ -615,6 +682,16 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
             articleId?: components["schemas"]["Uuid"];
+            /** @description The user who wrote the comment. Null for a comment older than authorship. */
+            author?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            /**
+             * @description The username of `author`.
+             * @example rival01
+             */
+            authorName?: string | null;
         };
         /** @description A blog category. Unlike other resources, its id is a plain string, not a value object. */
         Category: {
@@ -782,6 +859,64 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+        };
+        /** @description A settled fight, told from the side of the player profile or clan it is listed for. */
+        SettledResult: {
+            fight: components["schemas"]["Uuid"];
+            game: components["schemas"]["Uuid"];
+            /**
+             * @description Players per side: 1 for a 1v1, 5 for a 5v5
+             * @example 1
+             */
+            teamSize: number;
+            /** @description The tournament whose bracket held this fight. Null for a challenge. */
+            tournament?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            /**
+             * @description How the fight ended for `side`.
+             * @enum {string}
+             */
+            outcome: "win" | "loss" | "draw";
+            /**
+             * Format: date-time
+             * @description When the result was confirmed.
+             */
+            settledAt?: string | null;
+            /** @description The side the list is about: the player profile, a team it plays in, or a team of the clan. */
+            side: components["schemas"]["NamedSide"] & {
+                /** @example 3 */
+                score?: number;
+            };
+            /** @description The other side of the fight. */
+            opponent?: (components["schemas"]["NamedSide"] & {
+                /** @example 1 */
+                score?: number;
+            }) | null;
+        };
+        SettledResultPage: {
+            items: components["schemas"]["SettledResult"][];
+            /**
+             * @description Settled fights, every page taken together
+             * @example 12
+             */
+            total: number;
+            /**
+             * @description The page these items come from
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description How many items a full page holds
+             * @example 10
+             */
+            limit: number;
+            /**
+             * @description How many pages there are, 0 when nothing was settled
+             * @example 2
+             */
+            pages: number;
         };
         /** @description A group of players of one game, run by its leader. `leader` names the leader's player profile. */
         Clan: {
@@ -1194,7 +1329,15 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
+            /** @description No article has this id, or it is a draft and the caller is not an editor */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     get_api_article: {
@@ -1209,49 +1352,67 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Article found, including its comments */
+            /** @description The article with its comments, oldest first. A draft is found by an editor or an administrator only. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        category?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        id?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        /** Format: date-time */
-                        createdAt?: string;
-                        /** Format: date-time */
-                        updatedAt?: string;
-                        body?: string | null;
-                        title?: string | null;
-                        author?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        comments?: {
-                            id?: {
-                                /** Format: uuid */
-                                value?: string;
-                            };
-                            message?: string;
-                            /** Format: date-time */
-                            createdAt?: string;
-                            /** Format: date-time */
-                            updatedAt?: string;
-                            articleId?: {
-                                /** Format: uuid */
-                                value?: string;
-                            };
-                        }[];
+                    "application/json": components["schemas"]["Article"] & {
+                        comments?: components["schemas"]["Comment"][];
                     };
                 };
             };
+            /** @description No article has this id, or it is a draft and the caller is not an editor */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    patch_api_article_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Article ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Requires an editor or an administrator. Every key is optional: a key left out keeps what the article has. A draft and a published article are edited alike; editing does not change the status or the author. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example Les résultats du week-end */
+                    title?: string;
+                    /** @example Retour sur les matchs de samedi… */
+                    body?: string;
+                    /**
+                     * @description The category to file the article under, named by its slug.
+                     * @example actualites
+                     */
+                    categorySlug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The article as edited */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Article"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -1266,6 +1427,8 @@ export interface operations {
                 q?: string;
                 /** @description Keeps the articles filed under this category, named by its slug. */
                 category?: string;
+                /** @description `published` by default: the public blog. `draft` and `all` are for an editor or an administrator, and answer 403 to anyone else. */
+                status?: "published" | "draft" | "all";
             };
             header?: never;
             path?: never;
@@ -1273,7 +1436,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of articles, newest first. Comments are not included: `GET /api/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one. */
+            /** @description One page of articles, newest first: a published article by its publication date, a draft by the day it was written. Comments are not included: `GET /api/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1305,6 +1468,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
             /** @description No category has the requested slug */
             404: {
                 headers: {
@@ -1337,39 +1501,58 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Article created */
+            /** @description The article created, as a draft: it has no author until an editor publishes it (`PATCH /api/articles/{id}/status`) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        /** @description Category ID (resolved from categorySlug) */
-                        category?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        id?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        /** Format: date-time */
-                        createdAt?: string;
-                        /** Format: date-time */
-                        updatedAt?: string;
-                        body?: string | null;
-                        title?: string | null;
-                        author?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                    };
+                    "application/json": components["schemas"]["Article"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    patch_api_article_status_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Article ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Requires an editor or an administrator. `published` publishes the article: the authenticated user becomes its author, whoever wrote it, and `publishedAt` is set. `draft` takes it back off the blog: it loses its author and its publication date until it is published again. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example published
+                     * @enum {string}
+                     */
+                    status: "draft" | "published";
+                };
+            };
+        };
+        responses: {
+            /** @description The article in its new status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Article"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     post_api_comment_post: {
@@ -1393,32 +1576,35 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Comment created */
+            /** @description The comment created, written by the authenticated user */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        id?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        message?: string;
-                        /** Format: date-time */
-                        createdAt?: string;
-                        /** Format: date-time */
-                        updatedAt?: string;
-                        articleId?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                    };
+                    "application/json": components["schemas"]["Comment"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
+            /** @description No article has this id, or it is a draft and the caller is not an editor */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The article is a draft: comments open once it is published */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     get_api_category_list: {
@@ -1476,6 +1662,35 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    get_api_results_clan: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many results that page holds, 10 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the settled fights of a clan's teams, newest first. `side` is the clan's team. `items` is empty when no team of the clan finished a fight, when the page is past the last one, and when no clan has this id. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettledResultPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
         };
     };
     get_api_fight: {
@@ -1635,6 +1850,35 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    get_api_results_player: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many results that page holds, 10 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Player profile ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the settled fights of a player profile, newest first: its 1v1 fights, and those of the teams whose lineup it belongs to. `side` is the profile or its team. `items` is empty when the profile never finished a fight, when the page is past the last one, and when no profile has this id. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettledResultPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
         };
     };
     patch_api_fight_results_patch: {

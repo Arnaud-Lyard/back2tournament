@@ -29,6 +29,21 @@ interface CompetitorRegistryProviderInterface
     public function representedBy(string $userId): array;
 
     /**
+     * Every competitor a player profile has played as: itself in 1v1, and the
+     * teams whose lineup it belongs to. Only competitors that already exist.
+     *
+     * @return list<string>
+     */
+    public function competitorsOfPlayer(string $playerId): array;
+
+    /**
+     * The competitors of a clan's teams. Only the teams that already competed.
+     *
+     * @return list<string>
+     */
+    public function competitorsOfClan(string $clanId): array;
+
+    /**
      * @param list<string> $competitorIds
      *
      * @return array<string, array{type: string, reference: string, name: ?string}> keyed by competitor id; an unknown id is left out

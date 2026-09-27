@@ -5,6 +5,7 @@ import { notFound } from "next/navigation"
 import { getFormatter, getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { PlayerAvatar } from "@/components/player-avatar"
+import { ResultHistory } from "@/components/result-history"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -18,6 +19,7 @@ import { Separator } from "@/components/ui/separator"
 import { getCurrentUser } from "@/features/auth/server/get-current-user"
 import { activeClanIn } from "@/features/clans/lib/membership"
 import { loadClan, loadMyClans } from "@/features/clans/server/clans"
+import { loadPlayerHistory } from "@/features/fights/server/history"
 import { loadGame } from "@/features/games/server/games"
 import { loadPlayer } from "@/features/players/server/players"
 import { readUuidSegment } from "@/libs/search-params"
@@ -45,13 +47,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const playerId = readUuidSegment(rawPlayerId)
   if (!gameId || !playerId) notFound()
 
-  const [t, format, player, game, user, myClans] = await Promise.all([
+  const [t, format, player, game, user, myClans, history] = await Promise.all([
     getTranslations("games.player"),
     getFormatter(),
     loadPlayer(playerId),
     loadGame(gameId),
     getCurrentUser(),
     loadMyClans(),
+    loadPlayerHistory(playerId),
   ])
 
   if (!player.ok) {
@@ -135,6 +138,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           )}
         </CardContent>
       </Card>
+
+      <ResultHistory history={history} subject="player" />
     </PageContainer>
   )
 }

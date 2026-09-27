@@ -1,25 +1,39 @@
+import { ExternalLinkIcon, PencilIcon } from "lucide-react"
+import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { isPublished } from "@/features/blog/lib/publication"
 import { loadArticle, loadArticleComments } from "@/features/blog/server/blog"
 import type { Category } from "@/features/blog/types"
+import { cn } from "@/libs/utils"
+import { ArticleStatusBadge } from "./article-status-badge"
+import { ArticleStatusButton } from "./article-status-button"
 
 interface ArticlePreviewProps {
   articleId: string
   categories: Category[]
+  /** Where the "Edit" button leads; none when the caller may not edit. */
+  editHref?: string
+  canPublish: boolean
 }
 
 /** Server Component: reads one article, then its comments, straight from the API. */
 export async function ArticlePreview({
   articleId,
   categories,
+  editHref,
+  canPublish,
 }: ArticlePreviewProps) {
   const [t, format, loaded, comments] = await Promise.all([
     getTranslations("backoffice.articles.preview"),
@@ -39,16 +53,18 @@ export async function ArticlePreview({
   }
 
   const article = loaded.data
+  const published = isPublished(article)
   const categoryId = article.category?.value
   const category = categories.find((candidate) => candidate.id === categoryId)
+  const dated = published ? article.publishedAt : article.createdAt
 
   return (
     <Card>
       <CardHeader>
-        {article.createdAt && (
+        {dated && (
           <CardDescription>
-            {t("publishedAt", {
-              date: format.dateTime(new Date(article.createdAt), {
+            {t(published ? "publishedAt" : "writtenAt", {
+              date: format.dateTime(new Date(dated), {
                 dateStyle: "long",
                 timeStyle: "short",
               }),
@@ -56,6 +72,9 @@ export async function ArticlePreview({
           </CardDescription>
         )}
         <CardTitle>{article.title}</CardTitle>
+        <CardAction>
+          <ArticleStatusBadge article={article} />
+        </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="whitespace-pre-line">{article.body}</p>
@@ -67,9 +86,7 @@ export async function ArticlePreview({
             )}
           </dd>
           <dt>{t("author")}</dt>
-          <dd className="truncate font-mono text-xs leading-5">
-            {article.author?.value}
-          </dd>
+          <dd className="truncate">{article.authorName ?? t("noAuthor")}</dd>
         </dl>
         <Separator />
         <section className="flex flex-col gap-3">
@@ -85,14 +102,20 @@ export async function ArticlePreview({
                       key={comment.id?.value ?? index}
                       className="flex flex-col gap-0.5"
                     >
-                      {comment.createdAt && (
-                        <span className="text-xs text-muted-foreground">
-                          {format.dateTime(new Date(comment.createdAt), {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })}
+                      <span className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                          {comment.authorName ?? t("anonymous")}
                         </span>
-                      )}
+                        {comment.createdAt && (
+                          <>
+                            {" · "}
+                            {format.dateTime(new Date(comment.createdAt), {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </>
+                        )}
+                      </span>
                       <p>{comment.message}</p>
                     </li>
                   ))}
@@ -104,6 +127,35 @@ export async function ArticlePreview({
           )}
         </section>
       </CardContent>
+      {(editHref || canPublish || published) && (
+        <CardFooter className="flex-wrap gap-2">
+          {canPublish && article.status && (
+            <ArticleStatusButton
+              articleId={articleId}
+              status={article.status}
+            />
+          )}
+          {editHref && (
+            <Link
+              href={editHref}
+              scroll={false}
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
+              <PencilIcon data-icon="inline-start" />
+              {t("edit")}
+            </Link>
+          )}
+          {published && (
+            <Link
+              href={`/blog/${encodeURIComponent(articleId)}`}
+              className={cn(buttonVariants({ variant: "ghost" }))}
+            >
+              <ExternalLinkIcon data-icon="inline-start" />
+              {t("viewOnBlog")}
+            </Link>
+          )}
+        </CardFooter>
+      )}
     </Card>
   )
 }

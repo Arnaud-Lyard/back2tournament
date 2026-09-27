@@ -12,7 +12,9 @@
         <field name="createdAt" type="datetime_immutable" column="created_at"  />
         <field name="updatedAt" type="datetime_immutable" column="updated_at" />
 
-        <field name="author" type="guid" column="author" length="36" />
+        <field name="author" type="guid" column="author" length="36" nullable="true" />
+        <field name="status" type="string" column="status" length="16" enum-type="App\Blog\Article\Domain\Enum\ArticleStatus" />
+        <field name="publishedAt" type="datetime_immutable" column="published_at" nullable="true" />
         <field name="category" type="guid" column="category" length="36" />
     </entity>
 

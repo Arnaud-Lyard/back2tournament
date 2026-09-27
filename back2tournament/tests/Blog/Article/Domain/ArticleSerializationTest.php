@@ -8,6 +8,8 @@ use App\Blog\Article\Domain\Entity\Article;
 use App\Blog\Article\Domain\Entity\ArticleId;
 use App\Blog\Article\Domain\Entity\AuthorId;
 use App\Blog\Shared\Domain\Entity\ValueObject\CategoryId;
+use App\Shared\ValueObject\ArticleBodyValueObject;
+use App\Shared\ValueObject\ArticleTitleValueObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -20,9 +22,28 @@ final class ArticleSerializationTest extends KernelTestCase
     public function test_exposes_exactly_the_fields_the_article_schema_documents(): void
     {
         self::assertSame(
-            ['category', 'id', 'createdAt', 'updatedAt', 'body', 'title', 'author'],
+            ['category', 'id', 'createdAt', 'updatedAt', 'body', 'title', 'author', 'status', 'publishedAt'],
             array_keys($this->normalized($this->article()))
         );
+    }
+
+    public function test_a_draft_has_neither_author_nor_publication_date(): void
+    {
+        $payload = $this->normalized($this->draft());
+
+        self::assertSame('draft', $payload['status']);
+        self::assertNull($payload['author']);
+        self::assertNull($payload['publishedAt']);
+    }
+
+    public function test_the_publisher_is_the_author_of_a_published_article(): void
+    {
+        $article = $this->article();
+        $payload = $this->normalized($article);
+
+        self::assertSame('published', $payload['status']);
+        self::assertSame(['value' => self::AUTHOR_ID], $payload['author']);
+        self::assertSame($article->getPublishedAt()?->format(\DateTimeInterface::RFC3339), $payload['publishedAt']);
     }
 
     public function test_identifiers_are_serialized_as_value_objects(): void
@@ -53,14 +74,24 @@ final class ArticleSerializationTest extends KernelTestCase
         return $normalizer->normalize($article);
     }
 
-    private function article(): Article
+    private function draft(): Article
     {
         return Article::create(
             new ArticleId(self::ARTICLE_ID),
-            'My article',
-            'Article content...',
-            new AuthorId(self::AUTHOR_ID),
+            new ArticleTitleValueObject('My article'),
+            new ArticleBodyValueObject('Article content...'),
             new CategoryId(self::CATEGORY_ID),
         );
+    }
+
+    /**
+     * Published by the user of AUTHOR_ID, who thereby becomes its author.
+     */
+    private function article(): Article
+    {
+        $article = $this->draft();
+        Article::publish($article, new AuthorId(self::AUTHOR_ID));
+
+        return $article;
     }
 }

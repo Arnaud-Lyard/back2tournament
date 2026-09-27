@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace App\Blog\Article\Infrastructure\Repository;
 
 use App\Blog\Article\Domain\Entity\Article;
+use App\Blog\Article\Domain\Enum\ArticleStatus;
 use App\Blog\Article\Domain\Repository\ArticleRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -27,10 +28,12 @@ class ArticleRepository extends ServiceEntityRepository implements ArticleReposi
         $this->getEntityManager()->flush();
     }
 
-    public function findPage(?string $search, ?string $categoryId, int $limit, int $offset): array
+    public function findPage(?string $search, ?string $categoryId, ?ArticleStatus $status, int $limit, int $offset): array
     {
-        return $this->filtered($search, $categoryId)
-            ->orderBy('article.createdAt', 'DESC')
+        // Published articles by publication date; a draft by the day it was written.
+        return $this->filtered($search, $categoryId, $status)
+            ->addSelect('COALESCE(article.publishedAt, article.createdAt) AS HIDDEN listedAt')
+            ->orderBy('listedAt', 'DESC')
             ->addOrderBy('article.id', 'DESC')
             ->setMaxResults($limit)
             ->setFirstResult($offset)
@@ -38,17 +41,23 @@ class ArticleRepository extends ServiceEntityRepository implements ArticleReposi
             ->getResult();
     }
 
-    public function countPage(?string $search, ?string $categoryId): int
+    public function countPage(?string $search, ?string $categoryId, ?ArticleStatus $status): int
     {
-        return (int) $this->filtered($search, $categoryId)
+        return (int) $this->filtered($search, $categoryId, $status)
             ->select('COUNT(article.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }
 
-    private function filtered(?string $search, ?string $categoryId): QueryBuilder
+    private function filtered(?string $search, ?string $categoryId, ?ArticleStatus $status): QueryBuilder
     {
         $queryBuilder = $this->createQueryBuilder('article');
+
+        if (null !== $status) {
+            $queryBuilder
+                ->andWhere('article.status = :status')
+                ->setParameter('status', $status);
+        }
 
         if (null !== $search) {
             $queryBuilder
