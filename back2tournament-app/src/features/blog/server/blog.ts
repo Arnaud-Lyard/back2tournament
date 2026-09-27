@@ -2,13 +2,19 @@ import "server-only"
 
 import { createApiClient, getServerApiClient } from "@/libs/api/client"
 import { loadApiResult } from "@/libs/api/load"
-import { ARTICLES_PER_PAGE, type ArticleSummary } from "../types"
+import {
+  ARTICLES_PER_PAGE,
+  type ArticleStatusFilter,
+  type ArticleSummary,
+} from "../types"
 
 interface ArticlesQuery {
   page?: number
   search?: string
   category?: string
   limit?: number
+  /** The public blog by default; the drafts are for the editors. */
+  status?: ArticleStatusFilter
 }
 
 export async function loadCategories() {
@@ -21,6 +27,7 @@ export async function loadArticles({
   search = "",
   category = "",
   limit = ARTICLES_PER_PAGE,
+  status = "published",
 }: ArticlesQuery = {}) {
   const client = await getServerApiClient()
   return loadApiResult(
@@ -29,6 +36,7 @@ export async function loadArticles({
         query: {
           page,
           limit,
+          status,
           ...(search ? { q: search } : {}),
           ...(category ? { category } : {}),
         },

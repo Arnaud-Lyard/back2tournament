@@ -7,7 +7,7 @@ function NativeSelect({ className, ...props }: React.ComponentProps<"select">) {
   return (
     <div
       data-slot="native-select-wrapper"
-      className="relative w-full has-disabled:opacity-50"
+      className="relative w-full has-[select:disabled]:opacity-50"
     >
       <select
         data-slot="native-select"

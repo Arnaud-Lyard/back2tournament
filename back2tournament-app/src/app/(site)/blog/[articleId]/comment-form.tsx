@@ -62,6 +62,7 @@ export function CommentForm({ articleId }: { articleId: string }) {
           description: describeError(error, {
             401: t("errors.signedOut"),
             404: t("errors.gone"),
+            409: t("errors.closed"),
           }),
         })
       },

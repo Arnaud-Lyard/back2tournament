@@ -64,7 +64,12 @@
     "title": "Blog",
     "description": "News about the platform, the tournaments and the players.",
     "readMore": "Read more",
+    "byAuthor": "By {author}",
     "back": "Back to the blog",
+    "draft": {
+      "title": "Draft",
+      "description": "This article is not published: only editors can read it."
+    },
     "searchPlaceholder": "Search articles…",
     "searchLabel": "Search the articles",
     "filterLabel": "Filter by category",
@@ -82,6 +87,7 @@
     },
     "comments": {
       "title": "{count, plural, =0 {Comments} one {# comment} other {# comments}}",
+      "anonymous": "Anonymous",
       "label": "Your comment",
       "placeholder": "Share your thoughts…",
       "submit": "Post",
@@ -89,9 +95,11 @@
       "postError": "Comment could not be posted",
       "signInPrompt": "Sign in to comment on this article.",
       "signIn": "Sign in",
+      "closed": "Comments open once the article is published.",
       "errors": {
         "signedOut": "Your session has expired: sign in again to comment.",
-        "gone": "This article no longer exists."
+        "gone": "This article no longer exists.",
+        "closed": "Comments open once the article is published."
       }
     }
   },
@@ -501,9 +509,9 @@
     },
     "articles": {
       "title": "Articles",
-      "description": "Write the site's articles and read them back with their comments.",
+      "description": "Write the site's articles, read them back with their comments and publish them.",
       "formTitle": "New article",
-      "formDescription": "The article is published under your name.",
+      "formDescription": "The article is saved as a draft: its author will be the editor who publishes it.",
       "titleLabel": "Title",
       "titlePlaceholder": "Spring tournament results",
       "category": "Category",
@@ -511,21 +519,55 @@
       "categoryDescription": "Categories are managed from the Categories section.",
       "body": "Content",
       "bodyPlaceholder": "Write your article…",
-      "submit": "Publish the article",
-      "success": "Article published",
-      "successDescription": "It is visible on the site.",
-      "error": "The article could not be published",
+      "submit": "Save the draft",
+      "success": "Draft saved",
+      "successDescription": "It is not on the site yet: publish it from its preview.",
+      "error": "The article could not be saved",
       "errors": {
-        "forbidden": "Publishing articles is reserved to editors.",
+        "forbidden": "Writing articles is reserved to editors.",
         "categoryNotFound": "This category no longer exists."
       },
       "view": "View the article",
       "writeAnother": "Write another article",
+      "status": {
+        "draft": "Draft",
+        "published": "Published"
+      },
+      "publication": {
+        "publish": "Publish",
+        "unpublish": "Back to draft",
+        "published": "Article published",
+        "publishedDescription": "It is on the site, under your name.",
+        "unpublished": "Article back to draft",
+        "unpublishedDescription": "It is no longer on the site.",
+        "publishError": "The article could not be published",
+        "unpublishError": "The article could not go back to draft",
+        "errors": {
+          "forbidden": "Publishing is reserved to editors.",
+          "gone": "This article no longer exists.",
+          "changed": "The status of the article has already changed: reload the page."
+        }
+      },
+      "edit": {
+        "title": "Edit the article",
+        "description": "The status and the author of the article stay as they are.",
+        "submit": "Save",
+        "cancel": "Cancel",
+        "success": "Article edited",
+        "error": "The article could not be edited",
+        "errors": {
+          "forbidden": "Editing articles is reserved to editors.",
+          "notFound": "This article or this category no longer exists."
+        }
+      },
       "preview": {
         "publishedAt": "Published on {date}",
+        "writtenAt": "Written on {date}",
         "category": "Category",
         "author": "Author",
+        "noAuthor": "None until the article is published",
         "comments": "{count, plural, =0 {No comments} one {# comment} other {# comments}}",
+        "anonymous": "Anonymous",
         "notFound": {
           "title": "Article not found",
           "description": "No article has this identifier."
@@ -534,20 +576,23 @@
           "title": "The article could not be loaded",
           "description": "The server did not answer. Try again in a moment."
         },
-        "commentsError": "The comments could not be loaded."
+        "commentsError": "The comments could not be loaded.",
+        "edit": "Edit",
+        "viewOnBlog": "View on the blog"
       },
       "noCategories": "No categories: create one first",
       "list": {
         "title": "All articles",
-        "description": "Newest first.",
+        "description": "Drafts and published articles, newest first.",
         "emptyTitle": "No articles",
-        "emptyDescription": "Published articles show up here.",
-        "view": "View",
+        "emptyDescription": "Written articles show up here.",
+        "noAuthor": "—",
         "columns": {
           "title": "Title",
+          "status": "Status",
+          "author": "Author",
           "category": "Category",
-          "publishedAt": "Published on",
-          "actions": "Actions"
+          "date": "Date"
         }
       }
     },
