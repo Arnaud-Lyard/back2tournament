@@ -35,6 +35,15 @@ services:
       - "5432"
 ###< doctrine/doctrine-bundle ###
 
+###> garage (S3 image storage) ###
+  garage:
+    ports:
+      # The S3 API, for an API run outside Docker (S3_ENDPOINT in .env).
+      - "3900:3900"
+      # The web endpoint S3_PUBLIC_URL points browsers to.
+      - "3902:3902"
+###< garage (S3 image storage) ###
+
 ###> symfony/mailer ###
   mailer:
     image: axllent/mailpit

@@ -9,6 +9,8 @@
         "php": ">=8.5.9",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-imagick": "*",
+        "aws/aws-sdk-php": "^3.356",
         "doctrine/doctrine-bundle": "^3.3.1",
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "3.6.7",

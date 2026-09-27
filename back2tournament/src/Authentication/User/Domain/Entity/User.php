@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Authentication\User\Domain\Entity;
 
+use App\Authentication\User\Domain\Event\UserAvatarChangedEvent;
 use App\Authentication\User\Domain\Event\UserCreatedEvent;
+use App\Media\Image\Domain\Attribute\StoredImage;
 use App\Shared\Aggregate\AggregateRoot;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -28,6 +30,12 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
 
     #[Ignore]
     private ?string $verificationToken = null;
+
+    /**
+     * The key of the user's picture in the image storage; null when they have none.
+     */
+    #[StoredImage]
+    private ?string $avatar = null;
 
     public function __construct(string $id)
     {
@@ -136,6 +144,22 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
         $this->verificationToken = $verificationToken;
 
         return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    /**
+     * Gives the user their picture, as the key of the stored image, or takes
+     * it away with null.
+     */
+    public static function changeAvatar(User $user, ?string $avatar): void
+    {
+        $user->avatar = $avatar;
+
+        $user->recordDomainEvent(new UserAvatarChangedEvent($user->id));
     }
 
     public function verifyEmail(): self

@@ -60,6 +60,12 @@ nelmio_api_doc:
                             type: string
                             nullable: true
                             description: 'The English body, null when the article is in French only.'
+                        image:
+                            type: string
+                            format: uri
+                            nullable: true
+                            example: 'http://localhost:3902/articles/0f8fad5b-d9cb-469f-a165-70867728950e.webp'
+                            description: 'Where its cover is read from: a WebP image of 1600 pixels at most a side. Null when it has none.'
                 Comment:
                     type: object
                     description: 'A comment on an article.'
@@ -99,6 +105,12 @@ nelmio_api_doc:
                             type: array
                             items: { type: string, example: ROLE_USER }
                         verified: { type: boolean }
+                        avatar:
+                            type: string
+                            format: uri
+                            nullable: true
+                            example: 'http://localhost:3902/avatars/0f8fad5b-d9cb-469f-a165-70867728950e.webp'
+                            description: 'Where their picture is read from: a square WebP image of 256 pixels at most. Null when they have none.'
                         players:
                             type: array
                             description: 'One entry per game the user holds a player profile in, oldest first. Empty when they hold none.'
@@ -120,8 +132,23 @@ nelmio_api_doc:
                             description: 'The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. Teams, fights and tournaments only use these.'
                             items: { type: integer, minimum: 1, maximum: 64 }
                             example: [1, 2, 3]
+                        image:
+                            type: string
+                            format: uri
+                            nullable: true
+                            example: 'http://localhost:3902/games/0f8fad5b-d9cb-469f-a165-70867728950e.webp'
+                            description: 'Where its picture is read from: a WebP image of 1200 pixels at most a side. Null when it has none.'
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
+                ImageUpload:
+                    type: object
+                    description: 'An image sent as multipart/form-data. Its type is read from its content, whatever its name or declared type.'
+                    required: [image]
+                    properties:
+                        image:
+                            type: string
+                            format: binary
+                            description: 'A JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most, 16 pixels a side at least. An animation keeps its first frame.'
                 Player:
                     type: object
                     description: 'One user in one game. `user` names the account, `game` the game.'

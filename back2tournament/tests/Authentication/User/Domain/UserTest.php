@@ -9,6 +9,7 @@ use App\Authentication\User\Domain\Entity\Locale;
 use App\Authentication\User\Domain\Entity\Password;
 use App\Authentication\User\Domain\Entity\User;
 use App\Authentication\User\Domain\Entity\Username;
+use App\Authentication\User\Domain\Event\UserAvatarChangedEvent;
 use App\Authentication\User\Domain\Event\UserCreatedEvent;
 use PHPUnit\Framework\TestCase;
 
@@ -49,6 +50,20 @@ final class UserTest extends TestCase
 
         self::assertTrue($user->isVerified());
         self::assertNull($user->getVerificationToken());
+    }
+
+    public function test_a_user_is_given_a_picture_and_loses_it_and_both_are_announced(): void
+    {
+        $user = new User('11111111-1111-4111-8111-111111111111');
+        self::assertNull($user->getAvatar());
+
+        User::changeAvatar($user, 'avatars/me.webp');
+        self::assertSame('avatars/me.webp', $user->getAvatar());
+        self::assertInstanceOf(UserAvatarChangedEvent::class, $user->pullDomainEvents()[0]);
+
+        User::changeAvatar($user, null);
+        self::assertNull($user->getAvatar());
+        self::assertSame('11111111-1111-4111-8111-111111111111', $user->pullDomainEvents()[0]->getUserId());
     }
 
     public function test_the_created_event_carries_the_signup_language(): void

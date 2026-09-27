@@ -26,6 +26,7 @@ RUN <<-EOF
 	install-php-extensions \
 		@composer \
 		apcu \
+		imagick \
 		intl \
 		opcache \
 		zip
@@ -105,10 +106,18 @@ EOF
 RUN <<-'EOF'
 	apt-get update
 	apt-get install -y --no-install-recommends libtree
-	mkdir -p /tmp/libs
+	mkdir -p /tmp/libs /tmp/imagemagick
+	# Imagick loads ImageMagick's coders (JPEG, PNG, WebP, GIF…) and reads its
+	# configuration at run time: keep them where ImageMagick looks for them.
+	IMAGEMAGICK_DIRS=$(find /usr/lib /usr/share /etc -maxdepth 2 -type d -name 'ImageMagick-*')
+	test -n "$IMAGEMAGICK_DIRS"
+	for dir in $IMAGEMAGICK_DIRS; do
+		cp -a --parents "$dir" /tmp/imagemagick/
+	done
 	BINARIES=(frankenphp php file)
 	for target in $(printf '%s\n' "${BINARIES[@]}" | xargs -I{} which {}) \
-		$(find "$(php -r 'echo ini_get("extension_dir");')" -maxdepth 2 -name "*.so"); do
+		$(find "$(php -r 'echo ini_get("extension_dir");')" -maxdepth 2 -name "*.so") \
+		$(find $IMAGEMAGICK_DIRS -name "*.so"); do
 		libtree -pv "$target" 2>/dev/null | grep -oP '(?:── )\K/\S+(?= \[)' | while IFS= read -r lib; do
 			[ -f "$lib" ] && cp -n "$lib" /tmp/libs/
 		done
@@ -135,6 +144,9 @@ COPY --from=frankenphp_prod_builder /usr/local/etc/php/php.ini /usr/local/etc/ph
 COPY --from=frankenphp_prod_builder /usr/local/etc/php/app.conf.d /usr/local/etc/php/app.conf.d
 
 COPY --from=frankenphp_prod_builder /etc/frankenphp/Caddyfile /etc/frankenphp/Caddyfile
+
+# ImageMagick's coders and configuration, for Imagick
+COPY --from=frankenphp_prod_builder /tmp/imagemagick/ /
 
 # CA certificates for TLS, file/libmagic for Symfony MIME type detection
 COPY --from=frankenphp_prod_builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
