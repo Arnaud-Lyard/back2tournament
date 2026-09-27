@@ -1,7 +1,8 @@
 import { z } from "zod"
 import { message } from "@/libs/validation"
 
-function score() {
+/** A score: a whole number, zero or more. */
+export function score() {
   return z
     .number(message("invalidScore"))
     .int(message("invalidScore"))

@@ -8,6 +8,11 @@ export type CreatedFight =
 
 export type FightSummary = components["schemas"]["FightSummary"]
 
+/** Which fights the backoffice lists: the disputes are among the `reporting` ones. */
+export type FightStatusFilter = "reporting" | "pending" | "finished" | "all"
+
+export const ADMIN_FIGHTS_PER_PAGE = 20
+
 export const FIGHTS_PER_PAGE = 10
 
 export type SettledResultPage = components["schemas"]["SettledResultPage"]

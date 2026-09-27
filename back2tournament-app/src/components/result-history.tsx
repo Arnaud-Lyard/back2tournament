@@ -75,6 +75,11 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
                     <Badge variant={OUTCOME_VARIANT[result.outcome]}>
                       {t(`outcome.${result.outcome}`)}
                     </Badge>
+                    {result.arbitrated && (
+                      <Badge variant="outline" title={t("arbitratedHint")}>
+                        {t("arbitrated")}
+                      </Badge>
+                    )}
                     <span className="truncate text-sm">
                       {team && (
                         <span className="font-medium">
