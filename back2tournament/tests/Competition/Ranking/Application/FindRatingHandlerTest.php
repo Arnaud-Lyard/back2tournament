@@ -5,18 +5,23 @@ declare(strict_types=1);
 namespace App\Tests\Competition\Ranking\Application;
 
 use App\Competition\Fight\Domain\Entity\FightId;
+use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
+use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Ranking\Application\Model\FindRatingQuery;
 use App\Competition\Ranking\Application\Service\FindRatingHandler;
 use App\Competition\Ranking\Domain\Entity\Rating;
 use App\Competition\Ranking\Domain\Entity\RatingChangeId;
 use App\Competition\Ranking\Domain\Entity\RatingId;
+use App\Competition\Ranking\Domain\Enum\FightOutcome;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\ClanTagProvider;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
 use PHPUnit\Framework\TestCase;
@@ -32,41 +37,49 @@ final class FindRatingHandlerTest extends TestCase
     private const USER_ID = '33333333-3333-4333-8333-333333333333';
     private const CLAN_ID = '44444444-4444-4444-8444-444444444444';
 
-    public function test_a_ranked_player_profile_reads_its_rating_its_record_and_its_rank(): void
+    public function test_a_player_profile_reads_one_rating_per_format_of_its_game(): void
     {
-        $rating = $this->rating(RankingSubject::PLAYER, self::PLAYER_ID);
+        $in2v2 = $this->rating(RankingSubject::PLAYER, self::PLAYER_ID, teamSize: 2);
 
-        $read = $this->read($this->handler([$rating], above: 2, total: 9)(FindRatingQuery::ofPlayer(self::PLAYER_ID)));
+        $read = $this->read($this->handler([$in2v2], above: [2 => 2], total: [1 => 9, 2 => 4])(FindRatingQuery::ofPlayer(self::PLAYER_ID)));
 
         $this->assertSame(
             [
-                'subject' => ['type' => 'player', 'id' => ['value' => self::PLAYER_ID], 'name' => 'Leader#0001', 'tag' => null],
+                'subject' => ['type' => 'player', 'id' => ['value' => self::PLAYER_ID], 'name' => 'Leader#0001', 'tag' => 'B2T'],
                 'game' => ['value' => self::GAME_ID],
-                'rank' => 3,
-                'total' => 9,
-                'rating' => 1016,
-                'fights' => 1,
-                'wins' => 1,
-                'draws' => 0,
-                'losses' => 0,
+                'ratings' => [
+                    ['teamSize' => 1, 'rank' => null, 'total' => 9, 'rating' => 1000, 'fights' => 0, 'wins' => 0, 'draws' => 0, 'losses' => 0],
+                    ['teamSize' => 2, 'rank' => 3, 'total' => 4, 'rating' => 1016, 'fights' => 1, 'wins' => 1, 'draws' => 0, 'losses' => 0],
+                ],
             ],
             $read,
         );
     }
 
-    public function test_a_profile_with_no_settled_fight_stands_at_1000_unranked(): void
+    public function test_a_clan_reads_its_ratings_under_its_name_and_tag(): void
     {
-        $read = $this->read($this->handler([], above: 0, total: 9)(FindRatingQuery::ofPlayer(self::PLAYER_ID)));
-
-        $this->assertSame([1000, 0, null, 9], [$read['rating'], $read['fights'], $read['rank'], $read['total']]);
-    }
-
-    public function test_a_clan_reads_its_rating_under_its_name_and_tag(): void
-    {
-        $read = $this->read($this->handler([$this->rating(RankingSubject::CLAN, self::CLAN_ID)], above: 0, total: 2)(FindRatingQuery::ofClan(self::CLAN_ID)));
+        $read = $this->read($this->handler(
+            [$this->rating(RankingSubject::CLAN, self::CLAN_ID, teamSize: 1)],
+            above: [1 => 0],
+            total: [1 => 2, 2 => 0],
+        )(FindRatingQuery::ofClan(self::CLAN_ID)));
 
         $this->assertSame(['type' => 'clan', 'id' => ['value' => self::CLAN_ID], 'name' => 'Back to Tournament', 'tag' => 'B2T'], $read['subject']);
-        $this->assertSame([1, 1016], [$read['rank'], $read['rating']]);
+        $this->assertSame([[1, 1, 1016], [2, null, 1000]], array_map(
+            static fn (array $rating): array => [$rating['teamSize'], $rating['rank'], $rating['rating']],
+            $read['ratings'],
+        ));
+    }
+
+    public function test_a_rating_of_another_subject_or_player_is_not_read(): void
+    {
+        $someoneElse = $this->rating(RankingSubject::PLAYER, '55555555-5555-4555-8555-555555555555', teamSize: 1);
+        // A clan and a player profile never share an id, but a rating reads by both.
+        $sameIdAsClan = $this->rating(RankingSubject::CLAN, self::PLAYER_ID, teamSize: 1);
+
+        $read = $this->read($this->handler([$someoneElse, $sameIdAsClan], above: [], total: [])(FindRatingQuery::ofPlayer(self::PLAYER_ID)));
+
+        $this->assertSame([null, null], array_column($read['ratings'], 'rank'));
     }
 
     public function test_an_unknown_player_profile_is_not_found(): void
@@ -74,7 +87,7 @@ final class FindRatingHandlerTest extends TestCase
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessageIsOrContains('player profile not found');
 
-        $this->handler([], above: 0, total: 0)(FindRatingQuery::ofPlayer('55555555-5555-4555-8555-555555555555'));
+        $this->handler([], above: [], total: [])(FindRatingQuery::ofPlayer('55555555-5555-4555-8555-555555555555'));
     }
 
     public function test_an_unknown_clan_is_not_found(): void
@@ -82,40 +95,60 @@ final class FindRatingHandlerTest extends TestCase
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessageIsOrContains('clan not found');
 
-        $this->handler([], above: 0, total: 0)(FindRatingQuery::ofClan('55555555-5555-4555-8555-555555555555'));
+        $this->handler([], above: [], total: [])(FindRatingQuery::ofClan('55555555-5555-4555-8555-555555555555'));
     }
 
     public function test_an_id_that_is_no_uuid_is_refused(): void
     {
         $this->expectException(ValidationException::class);
 
-        $this->handler([], above: 0, total: 0)(FindRatingQuery::ofClan('nope'));
+        $this->handler([], above: [], total: [])(FindRatingQuery::ofClan('nope'));
     }
 
     /**
-     * @param list<Rating> $ratings
+     * @param list<Rating>     $ratings
+     * @param array<int, int> $above   per format, how many rate higher
+     * @param array<int, int> $total   per format, how many are ranked
      */
-    private function handler(array $ratings, int $above, int $total): FindRatingHandler
+    private function handler(array $ratings, array $above, array $total): FindRatingHandler
     {
         $ratingRepository = $this->repositoryStub(RatingRepositoryInterface::class, $ratings);
-        $ratingRepository->method('countAbove')->willReturn($above);
-        $ratingRepository->method('countRanking')->willReturn($total);
+        $ratingRepository->method('countAbove')->willReturnCallback(
+            static fn (RankingSubject $subjectType, string $gameId, int $teamSize, int $value): int => $above[$teamSize] ?? 0
+        );
+        $ratingRepository->method('countRanking')->willReturnCallback(
+            static fn (RankingSubject $subjectType, string $gameId, int $teamSize): int => $total[$teamSize] ?? 0
+        );
+
+        // The profile leads the clan: its tag is the clan's.
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID);
 
         return new FindRatingHandler(
             $ratingRepository,
+            $this->repositoryStub(GameRepositoryInterface::class, [self::aGame(self::GAME_ID, [1, 2])]),
             $this->repositoryStub(PlayerRepositoryInterface::class, [self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001')]),
-            $this->repositoryStub(ClanRepositoryInterface::class, [self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID)]),
+            $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            new ClanTagProvider(
+                $this->repositoryStub(ClanMemberRepositoryInterface::class, [self::leadership($clan)]),
+                $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            ),
         );
     }
 
     /**
      * One win against a newcomer: 1016.
      */
-    private function rating(RankingSubject $subjectType, string $subject): Rating
+    private function rating(RankingSubject $subjectType, string $subject, int $teamSize): Rating
     {
-        $rating = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, new GameId(self::GAME_ID));
-        $opponent = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, Uuid::v4()->toString(), new GameId(self::GAME_ID));
-        Rating::settle($rating, $opponent, $rating, new FightId(Uuid::v4()->toString()), new RatingChangeId(Uuid::v4()->toString()), new RatingChangeId(Uuid::v4()->toString()));
+        $rating = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
+        $newcomer = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, Uuid::v4()->toString(), new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
+        Rating::settle(
+            [$rating],
+            [$newcomer],
+            FightOutcome::SIDE_ONE_WON,
+            new FightId(Uuid::v4()->toString()),
+            [new RatingChangeId(Uuid::v4()->toString()), new RatingChangeId(Uuid::v4()->toString())],
+        );
 
         return $rating;
     }

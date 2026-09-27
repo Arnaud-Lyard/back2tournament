@@ -75,14 +75,20 @@ make user           # seed a dev user via app:create-user
 - `Competition/Tournament/` — single-elimination tournaments: registrations, the
   bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
   winners moving on as `FightSettledEvent` comes in.
-- `Competition/Ranking/` — Elo ratings, one per player profile and one per clan, in the
-  ranking of their game. A `Rating` starts at 1000 on its first settled fight and moves
-  by up to `K_FACTOR` (32) points per fight, zero-sum between the two sides: player
-  profiles rate on their 1v1 fights, clans on the fights of their teams (two teams of
-  one clan leave it as it is). Moved as `FightSettledEvent` comes in; a `RatingChange`
-  per rating and fight records the move and keeps a fight from counting twice.
+- `Competition/Ranking/` — Elo ratings of player profiles and clans, one per format of
+  their game (1v1, 2v2…, as `Game.teamSizes` lists them): each format is a ranking of
+  its own. A `Rating` starts at 1000 on its first settled fight in its format and moves
+  by up to `K_FACTOR` (32) points per fight, zero-sum between the two sides. A side
+  rates as the average of its ratings, and each of them moves by what the fight was
+  worth to that average: in a team fight, every player of both lineups moves in the
+  ranking of that format. A clan rates on the fights of its teams and, in 1v1, on the
+  duels of its active members, against another clan only (two sides of one clan leave
+  it as it is). Moved as `FightSettledEvent` comes in; a `RatingChange` per rating and
+  fight records the move and keeps a fight from counting twice.
   `bin/console app:rankings:rebuild` empties the rankings and replays every settled
-  fight in the order it was settled — run it once after deploying the rankings.
+  fight in the order it was settled — run it after a migration that creates or empties
+  the rankings, as `Version20260927160000` (ratings per format) does. A replayed duel
+  counts for the clans its players are members of when it is replayed.
 - `Competition/Shared/` — `CompetitorId` and the contracts every
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,

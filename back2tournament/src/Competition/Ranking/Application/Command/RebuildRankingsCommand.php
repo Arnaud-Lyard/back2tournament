@@ -13,7 +13,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:rankings:rebuild',
-    description: 'Counts every settled fight again into the Elo rankings of the players and the clans.',
+    description: 'Counts every settled fight again into the Elo rankings of the players and the clans, format by format.',
 )]
 final class RebuildRankingsCommand extends Command
 {
@@ -29,9 +29,11 @@ final class RebuildRankingsCommand extends Command
     protected function configure(): void
     {
         $this->setHelp(<<<'HELP'
-            Empties the rankings, then replays every settled fight in the order it was settled.
-            Run it once after the migration that creates the rankings, so that the fights
-            settled before it count; running it again gives the same rankings.
+            Empties the rankings, then replays every settled fight in the order it was settled,
+            each in the rankings of its format. Run it once after a migration that creates the
+            rankings or empties them, as the one splitting them by format does, so that the
+            fights settled before it count; running it again gives the same rankings. A duel
+            counts for the clans its two players are active members of when it is replayed.
             HELP);
     }
 
@@ -42,7 +44,7 @@ final class RebuildRankingsCommand extends Command
         $rebuilt = $this->rebuildRankingsService->rebuild();
 
         $io->success(\sprintf(
-            '%d settled fights replayed: %d player profiles and clans are ranked.',
+            '%d settled fights replayed into %d ratings, one per player profile or clan and format played.',
             $rebuilt['fights'],
             $rebuilt['ratings'],
         ));

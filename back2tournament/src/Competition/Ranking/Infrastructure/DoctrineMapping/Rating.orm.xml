@@ -6,10 +6,10 @@
 
     <entity name="App\Competition\Ranking\Domain\Entity\Rating" table="rating" repository-class="App\Competition\Ranking\Infrastructure\Repository\RatingRepository">
         <unique-constraints>
-            <unique-constraint columns="subject_type,subject" name="uniq_rating_subject" />
+            <unique-constraint columns="subject_type,subject,team_size" name="uniq_rating_subject" />
         </unique-constraints>
         <indexes>
-            <index columns="subject_type,game,value" name="idx_rating_ranking" />
+            <index columns="subject_type,game,team_size,value" name="idx_rating_ranking" />
         </indexes>
 
         <id name="id" type="guid" column="id" length="36" />
@@ -17,6 +17,7 @@
         <field name="subjectType" type="string" column="subject_type" length="16" enum-type="App\Competition\Ranking\Domain\Enum\RankingSubject" />
         <field name="subject" type="guid" column="subject" length="36" />
         <field name="game" type="guid" column="game" length="36" />
+        <field name="teamSize" type="integer" column="team_size" />
         <field name="value" type="integer" column="value" />
         <field name="fights" type="integer" column="fights" />
         <field name="wins" type="integer" column="wins" />

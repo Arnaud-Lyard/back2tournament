@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Player profile ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(
     response: 200,
-    description: 'The Elo rating of a player profile and its rank in its game. A profile that has not settled a 1v1 fight yet stands at the initial 1000, with `rank` null.',
+    description: 'The Elo ratings of a player profile, one per format of its game, and its rank in each. In a format where the profile has not settled a fight yet, it stands at the initial 1000, with `rank` null.',
     content: new OA\JsonContent(ref: '#/components/schemas/SubjectRating'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]

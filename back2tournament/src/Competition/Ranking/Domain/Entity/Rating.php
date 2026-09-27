@@ -6,14 +6,16 @@ namespace App\Competition\Ranking\Domain\Entity;
 
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
+use App\Competition\Ranking\Domain\Enum\FightOutcome;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Event\RatingCreatedEvent;
 use App\Competition\Ranking\Domain\Event\RatingUpdatedEvent;
 use App\Shared\Aggregate\AggregateRoot;
+use App\Shared\ValueObject\TeamSizeValueObject;
 
 /**
- * The Elo rating of a player profile or a clan in one game, and the record of
- * the settled fights that made it.
+ * The Elo rating of a player profile or a clan in one game and one format
+ * (1v1, 2v2…), and the record of the settled fights that made it.
  */
 class Rating extends AggregateRoot
 {
@@ -34,6 +36,11 @@ class Rating extends AggregateRoot
     private string $subject;
 
     private string $game;
+
+    /**
+     * The format this rating is about, as the number of players per side.
+     */
+    private int $teamSize;
 
     private int $value = self::INITIAL;
 
@@ -77,6 +84,11 @@ class Rating extends AggregateRoot
         return new GameId($this->game);
     }
 
+    public function getTeamSize(): int
+    {
+        return $this->teamSize;
+    }
+
     public function getValue(): int
     {
         return $this->value;
@@ -113,15 +125,17 @@ class Rating extends AggregateRoot
     }
 
     /**
-     * A player profile or a clan enters the ranking of its game on its first
-     * settled fight, at the initial rating.
+     * A player profile or a clan enters the ranking of its game in a format on
+     * its first settled fight in that format, at the initial rating. Each
+     * format is a ranking of its own.
      */
-    public static function start(RatingId $ratingId, RankingSubject $subjectType, string $subject, GameId $gameId): self
+    public static function start(RatingId $ratingId, RankingSubject $subjectType, string $subject, GameId $gameId, TeamSizeValueObject $teamSize): self
     {
         $rating = new self($ratingId);
         $rating->subjectType = $subjectType;
         $rating->subject = $subject;
         $rating->game = $gameId->getValue();
+        $rating->teamSize = $teamSize->getValue();
         $rating->createdAt = new \DateTimeImmutable('now');
         $rating->updatedAt = $rating->createdAt;
 
@@ -131,42 +145,56 @@ class Rating extends AggregateRoot
     }
 
     /**
-     * A settled fight between the two. Both ratings move by the same number of
-     * points, in opposite directions: the winner takes what the win was worth,
-     * more when it was not expected, less when it was, and a draw lifts the
-     * lower rating. `$winner` is null for a draw.
+     * A settled fight between two sides: a clan per side, or the player
+     * profiles of each side, one per player. A side rates as the average of
+     * its ratings, and every rating of a side moves by what the fight was
+     * worth to that average: the winners take what the win was worth, more
+     * when it was not expected, less when it was, and a draw lifts the lower
+     * side. Both sides move by the same points, in opposite directions.
      *
-     * @return array{RatingChange, RatingChange} the change of $one, then of $two
+     * @param list<Rating>         $sideOne
+     * @param list<Rating>         $sideTwo
+     * @param list<RatingChangeId> $changeIds one per rating, side one's first
+     *
+     * @return list<RatingChange> the change of each rating, in the order of $changeIds
      */
-    public static function settle(
-        Rating $one,
-        Rating $two,
-        ?Rating $winner,
-        FightId $fightId,
-        RatingChangeId $changeOfOne,
-        RatingChangeId $changeOfTwo,
-    ): array {
-        if ($one->id === $two->id) {
-            throw new \InvalidArgumentException('a rating cannot fight itself');
-        }
-        if ($one->subjectType !== $two->subjectType || $one->game !== $two->game) {
-            throw new \InvalidArgumentException('both ratings must belong to the same ranking');
-        }
-        if (null !== $winner && $winner !== $one && $winner !== $two) {
-            throw new \InvalidArgumentException('the winner must be one of the two sides');
+    public static function settle(array $sideOne, array $sideTwo, FightOutcome $outcome, FightId $fightId, array $changeIds): array
+    {
+        if ([] === $sideOne || [] === $sideTwo) {
+            throw new \InvalidArgumentException('each side needs at least one rating');
         }
 
-        $scoreOfOne = match ($winner) {
-            null => 0.5,
-            $one => 1.0,
-            default => 0.0,
-        };
-        $points = self::points($one->value, $two->value, $scoreOfOne);
+        $ratings = [...$sideOne, ...$sideTwo];
+        if (\count($changeIds) !== \count($ratings)) {
+            throw new \InvalidArgumentException('each rating needs a change of its own');
+        }
 
-        return [
-            $one->move($points, $scoreOfOne, $fightId, $changeOfOne),
-            $two->move(-$points, 1.0 - $scoreOfOne, $fightId, $changeOfTwo),
-        ];
+        $seen = [];
+        foreach ($ratings as $rating) {
+            if (isset($seen[$rating->id])) {
+                throw new \InvalidArgumentException('a rating cannot stand twice in one fight');
+            }
+            $seen[$rating->id] = true;
+
+            if ($rating->subjectType !== $ratings[0]->subjectType
+                || $rating->game !== $ratings[0]->game
+                || $rating->teamSize !== $ratings[0]->teamSize) {
+                throw new \InvalidArgumentException('every rating must belong to the same ranking');
+            }
+        }
+
+        $scoreOfOne = $outcome->scoreOfSideOne();
+        $points = self::points(self::average($sideOne), self::average($sideTwo), $scoreOfOne);
+
+        $changes = [];
+        foreach ($sideOne as $rating) {
+            $changes[] = $rating->move($points, $scoreOfOne, $fightId, $changeIds[\count($changes)]);
+        }
+        foreach ($sideTwo as $rating) {
+            $changes[] = $rating->move(-$points, 1.0 - $scoreOfOne, $fightId, $changeIds[\count($changes)]);
+        }
+
+        return $changes;
     }
 
     /**
@@ -174,11 +202,19 @@ class Rating extends AggregateRoot
      * made (1 for a win, 0.5 for a draw, 0 for a loss) and the score it was
      * expected to make against that opponent.
      */
-    public static function points(int $rating, int $opponentRating, float $score): int
+    public static function points(float $rating, float $opponentRating, float $score): int
     {
         $expected = 1 / (1 + 10 ** (($opponentRating - $rating) / 400));
 
         return (int) round(self::K_FACTOR * ($score - $expected));
+    }
+
+    /**
+     * @param list<Rating> $side
+     */
+    private static function average(array $side): float
+    {
+        return array_sum(array_map(static fn (Rating $rating): int => $rating->value, $side)) / \count($side);
     }
 
     private function move(int $points, float $score, FightId $fightId, RatingChangeId $changeId): RatingChange

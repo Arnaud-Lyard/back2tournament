@@ -27,10 +27,12 @@ import {
 import { getCurrentUser } from "@/features/auth/server/get-current-user"
 import { activeClanIn } from "@/features/clans/lib/membership"
 import { loadMyClans } from "@/features/clans/server/clans"
+import { formatLabel } from "@/features/fights/lib/challenge"
 import { loadGame } from "@/features/games/server/games"
 import {
   rankedSubjectHref,
   rankingHref,
+  readRankingSize,
   readRankingView,
 } from "@/features/rankings/lib/ranking"
 import { loadRanking } from "@/features/rankings/server/rankings"
@@ -44,6 +46,7 @@ interface RankingsPageProps {
   searchParams: Promise<{
     page?: string | string[]
     view?: string | string[]
+    size?: string | string[]
   }>
 }
 
@@ -73,14 +76,21 @@ export default async function RankingsPage({
   const page = readPageParam(query.page)
   const view = readRankingView(query.view)
 
+  // One ranking per format the game is played in: 1v1, 2v2…
+  const game = await loadGame(gameId)
+  if (!game.ok && game.status === 404) notFound()
+  const formats = game.ok ? (game.data.teamSizes ?? []) : []
+  const size = readRankingSize(query.size, formats)
+
   const [t, ranking, user, myClans] = await Promise.all([
     getTranslations("rankings"),
-    loadRanking(gameId, view, page),
+    loadRanking(gameId, view, size, page),
     getCurrentUser(),
     loadMyClans(),
   ])
 
   if (!ranking.ok && ranking.status === 404) notFound()
+  const format = formatLabel(ranking.ok ? ranking.data.teamSize : size)
 
   // The caller's own place stands out: their profile, or their clan.
   const mine =
@@ -94,26 +104,26 @@ export default async function RankingsPage({
     <PageContainer>
       <PageHeader title={t("title")} description={t("description")} />
 
-      <nav
-        aria-label={t("views.label")}
-        className="flex w-fit items-center gap-1 rounded-lg bg-muted p-1"
-      >
-        {VIEWS.map((candidate) => (
-          <Link
-            key={candidate}
-            href={rankingHref(gameId, candidate)}
-            aria-current={candidate === view ? "page" : undefined}
-            className={cn(
-              "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-              candidate === view
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {t(`views.${candidate}`)}
-          </Link>
-        ))}
-      </nav>
+      <div className="flex flex-wrap items-center gap-2">
+        <TabNav
+          label={t("views.label")}
+          tabs={VIEWS.map((candidate) => ({
+            href: rankingHref(gameId, candidate, size),
+            label: t(`views.${candidate}`),
+            current: candidate === view,
+          }))}
+        />
+        {formats.length > 1 && (
+          <TabNav
+            label={t("formats.label")}
+            tabs={formats.map((candidate) => ({
+              href: rankingHref(gameId, view, candidate),
+              label: formatLabel(candidate),
+              current: candidate === size,
+            }))}
+          />
+        )}
+      </div>
 
       <p className="text-sm text-muted-foreground">{t("howItWorks")}</p>
 
@@ -128,7 +138,7 @@ export default async function RankingsPage({
             <EmptyMedia variant="icon">
               <TrophyIcon />
             </EmptyMedia>
-            <EmptyTitle>{t("empty.title")}</EmptyTitle>
+            <EmptyTitle>{t("empty.title", { format })}</EmptyTitle>
             <EmptyDescription>{t(`empty.${view}`)}</EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -144,7 +154,8 @@ export default async function RankingsPage({
                 <TableHead className="text-right">
                   {t("columns.rating")}
                 </TableHead>
-                <TableHead className="text-right">
+                {/* On a phone, the record says as much. */}
+                <TableHead className="hidden text-right sm:table-cell">
                   {t("columns.fights")}
                 </TableHead>
                 <TableHead className="text-right">
@@ -182,7 +193,8 @@ export default async function RankingsPage({
                         entry.rank
                       )}
                     </TableCell>
-                    <TableCell>
+                    {/* Takes what the other columns leave: a long name is cut short. */}
+                    <TableCell className="w-full max-w-0">
                       <span className="flex min-w-0 items-center gap-2">
                         <ClanTag tag={entry.subject.tag} />
                         {href ? (
@@ -195,13 +207,17 @@ export default async function RankingsPage({
                         ) : (
                           <span className="truncate font-medium">{name}</span>
                         )}
-                        {isMine && <Badge variant="outline">{t("you")}</Badge>}
+                        {isMine && (
+                          <Badge variant="outline" className="shrink-0">
+                            {t("you")}
+                          </Badge>
+                        )}
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-mono font-semibold tabular-nums">
                       {entry.rating}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="hidden text-right tabular-nums sm:table-cell">
                       {entry.fights}
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap text-muted-foreground tabular-nums">
@@ -216,10 +232,42 @@ export default async function RankingsPage({
             page={ranking.data.page}
             pages={ranking.data.pages}
             pathname={pathname}
-            params={{ view: view === "clans" ? "clans" : undefined }}
+            params={{ view: view === "clans" ? "clans" : undefined, size }}
           />
         </>
       )}
     </PageContainer>
+  )
+}
+
+/** A row of links that reads as tabs: the current one stands out. */
+function TabNav({
+  label,
+  tabs,
+}: {
+  label: string
+  tabs: { href: string; label: string; current: boolean }[]
+}) {
+  return (
+    <nav
+      aria-label={label}
+      className="flex w-fit items-center gap-1 rounded-lg bg-muted p-1"
+    >
+      {tabs.map((tab) => (
+        <Link
+          key={tab.href}
+          href={tab.href}
+          aria-current={tab.current ? "page" : undefined}
+          className={cn(
+            "rounded-md px-3 py-1 text-sm font-medium transition-colors",
+            tab.current
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {tab.label}
+        </Link>
+      ))}
+    </nav>
   )
 }

@@ -882,12 +882,15 @@
   },
   "rankings": {
     "title": "Rankings",
-    "description": "The Elo rankings of this game's players and clans.",
-    "howItWorks": "Everyone starts at 1000 points. Each confirmed fight wins or loses up to 32: beating a higher-rated opponent is worth more. Players are ranked on their duels, clans on their teams' fights.",
+    "description": "The Elo rankings of this game's players and clans, format by format.",
+    "howItWorks": "Each format has its own ranking, where everyone starts at 1000 points. Each confirmed fight wins or loses up to 32: beating a higher-rated opponent is worth more. In a team, every player wins or loses what the fight was worth to the team. A clan is ranked on its teams' fights and, in 1v1, on its members' duels against other clans' members.",
     "views": {
       "label": "Ranking to show",
       "players": "Players",
       "clans": "Clans"
+    },
+    "formats": {
+      "label": "Ranking format"
     },
     "columns": {
       "rank": "Rank",
@@ -900,9 +903,9 @@
     "you": "You",
     "unknown": "Unknown",
     "empty": {
-      "title": "Nobody is ranked yet",
-      "players": "The ranking fills up with every confirmed duel.",
-      "clans": "Clans enter the ranking with their teams' confirmed fights."
+      "title": "Nobody is ranked in {format} yet",
+      "players": "The ranking of this format fills up with every confirmed fight.",
+      "clans": "A clan enters the ranking with a confirmed fight against another clan: one of its teams', or in 1v1 one of its members' duels."
     },
     "loadError": {
       "title": "The rankings could not be loaded",
@@ -911,8 +914,8 @@
     "card": {
       "title": "Elo rating",
       "description": {
-        "player": "Worked out from its confirmed duels.",
-        "clan": "Worked out from its teams' confirmed fights."
+        "player": "One rating per format: its duels in 1v1, its teams' fights in the other formats.",
+        "clan": "One rating per format: its teams' fights, and in 1v1 its members' duels against other clans."
       },
       "viewRanking": "View the rankings",
       "rating": "Elo",

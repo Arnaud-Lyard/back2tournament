@@ -14,11 +14,13 @@ use App\Competition\Ranking\Application\Model\RateFightCommand;
 use App\Competition\Ranking\Domain\Entity\Rating;
 use App\Competition\Ranking\Domain\Entity\RatingChangeId;
 use App\Competition\Ranking\Domain\Entity\RatingId;
+use App\Competition\Ranking\Domain\Enum\FightOutcome;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Repository\RatingChangeRepositoryInterface;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Shared\Exception\NotFoundException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -76,56 +78,84 @@ final class RateFightHandler
             return;
         }
 
-        // A player profile rates on its 1v1 fights, a clan on the fights of its
-        // teams. Two teams of one clan leave its rating as it is.
-        $sides = $this->competitorRegistryProvider->rankedAs([$one, $two]);
-        if (!isset($sides[$one], $sides[$two])
-            || $sides[$one]['type'] !== $sides[$two]['type']
-            || $sides[$one]['id'] === $sides[$two]['id']) {
+        $lineups = $this->competitorRegistryProvider->lineups([$one, $two]);
+        if (!isset($lineups[$one], $lineups[$two])) {
             return;
         }
 
-        $subjectType = RankingSubject::from($sides[$one]['type']);
-        $ratingOne = $this->ratingOf($subjectType, $sides[$one]['id'], $fight->getGame());
-        $ratingTwo = $this->ratingOf($subjectType, $sides[$two]['id'], $fight->getGame());
-
-        $winner = match (true) {
-            ResultStatus::WIN === $outcomes[$one] => $ratingOne,
-            ResultStatus::WIN === $outcomes[$two] => $ratingTwo,
-            default => null,
+        $outcome = match (true) {
+            ResultStatus::WIN === $outcomes[$one] => FightOutcome::SIDE_ONE_WON,
+            ResultStatus::WIN === $outcomes[$two] => FightOutcome::SIDE_TWO_WON,
+            default => FightOutcome::DRAW,
         };
 
-        $changes = Rating::settle(
-            $ratingOne,
-            $ratingTwo,
-            $winner,
-            $fightId,
-            new RatingChangeId(Uuid::v4()->toString()),
-            new RatingChangeId(Uuid::v4()->toString()),
-        );
+        // Every format is a ranking of its own: a 2v2 counts in the 2v2 rankings.
+        $gameId = $fight->getGame();
+        $teamSize = new TeamSizeValueObject($fight->getTeamSize());
 
-        $this->ratingRepository->save($ratingOne);
-        $this->ratingRepository->save($ratingTwo);
-        foreach ($changes as $change) {
-            $this->ratingChangeRepository->save($change);
+        $sides = [];
+
+        // Every player profile of a side moves, by what the fight was worth
+        // to its side. Nobody stands on both sides: fights refuse it.
+        $playersOne = $lineups[$one]['players'];
+        $playersTwo = $lineups[$two]['players'];
+        if ([] !== $playersOne && [] !== $playersTwo && [] === array_intersect($playersOne, $playersTwo)) {
+            $sides[] = [
+                array_map(fn (string $player): Rating => $this->ratingOf(RankingSubject::PLAYER, $player, $gameId, $teamSize), $playersOne),
+                array_map(fn (string $player): Rating => $this->ratingOf(RankingSubject::PLAYER, $player, $gameId, $teamSize), $playersTwo),
+            ];
         }
 
-        foreach ([$ratingOne, $ratingTwo] as $rating) {
-            foreach ($rating->pullDomainEvents() as $domainEvent) {
-                $this->eventDispatcher->dispatch($domainEvent);
+        // A clan rates on the fights of its teams, and on the duels of its
+        // members, against another clan: two sides of one clan leave it as it is.
+        $clanOne = $lineups[$one]['clan'];
+        $clanTwo = $lineups[$two]['clan'];
+        if (null !== $clanOne && null !== $clanTwo && $clanOne !== $clanTwo) {
+            $sides[] = [
+                [$this->ratingOf(RankingSubject::CLAN, $clanOne, $gameId, $teamSize)],
+                [$this->ratingOf(RankingSubject::CLAN, $clanTwo, $gameId, $teamSize)],
+            ];
+        }
+
+        foreach ($sides as [$sideOne, $sideTwo]) {
+            $ratings = [...$sideOne, ...$sideTwo];
+            $changes = Rating::settle(
+                $sideOne,
+                $sideTwo,
+                $outcome,
+                $fightId,
+                array_map(static fn (): RatingChangeId => new RatingChangeId(Uuid::v4()->toString()), $ratings),
+            );
+
+            foreach ($ratings as $rating) {
+                $this->ratingRepository->save($rating);
+            }
+            foreach ($changes as $change) {
+                $this->ratingChangeRepository->save($change);
+            }
+
+            foreach ($ratings as $rating) {
+                foreach ($rating->pullDomainEvents() as $domainEvent) {
+                    $this->eventDispatcher->dispatch($domainEvent);
+                }
             }
         }
     }
 
     /**
-     * The rating of a player profile or a clan, started on its first fight.
+     * The rating of a player profile or a clan in one format, started on its
+     * first fight in that format.
      */
-    private function ratingOf(RankingSubject $subjectType, string $subject, GameId $gameId): Rating
+    private function ratingOf(RankingSubject $subjectType, string $subject, GameId $gameId, TeamSizeValueObject $teamSize): Rating
     {
-        $rating = $this->ratingRepository->findOneBy(['subjectType' => $subjectType, 'subject' => $subject]);
+        $rating = $this->ratingRepository->findOneBy([
+            'subjectType' => $subjectType,
+            'subject' => $subject,
+            'teamSize' => $teamSize->getValue(),
+        ]);
 
         return $rating instanceof Rating
             ? $rating
-            : Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, $gameId);
+            : Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, $gameId, $teamSize);
     }
 }

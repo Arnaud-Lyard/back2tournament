@@ -138,21 +138,24 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame([], $registry->competitorsOfClan(self::GAME_ID));
     }
 
-    public function test_a_player_ranks_as_itself_and_a_team_as_its_clan(): void
+    public function test_a_player_plays_alone_for_its_clan_and_a_team_fields_its_lineup_for_its_clan(): void
     {
         $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
             self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
             self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
+            self::aCompetitor(self::MATE_COMPETITOR, CompetitorType::PLAYER, self::MATE_PLAYER),
         ]));
 
         $this->assertSame(
             [
-                self::PLAYER_COMPETITOR => ['type' => 'player', 'id' => self::PLAYER_ID],
-                self::TEAM_COMPETITOR => ['type' => 'clan', 'id' => self::CLAN_ID],
+                self::PLAYER_COMPETITOR => ['players' => [self::PLAYER_ID], 'clan' => self::CLAN_ID],
+                self::TEAM_COMPETITOR => ['players' => [self::PLAYER_ID, self::MATE_PLAYER], 'clan' => self::CLAN_ID],
+                // In no clan: it ranks alone.
+                self::MATE_COMPETITOR => ['players' => [self::MATE_PLAYER], 'clan' => null],
             ],
-            $registry->rankedAs([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR, self::GAME_ID]),
+            $registry->lineups([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR, self::MATE_COMPETITOR, self::GAME_ID]),
         );
-        $this->assertSame([], $registry->rankedAs([]));
+        $this->assertSame([], $registry->lineups([]));
     }
 
     public function test_a_name_finds_the_competitors_of_the_profiles_and_teams_bearing_it(): void

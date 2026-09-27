@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { rankedSubjectHref, rankingHref, readRankingView } from "./ranking"
+import {
+  rankedSubjectHref,
+  rankingHref,
+  readRankingSize,
+  readRankingView,
+} from "./ranking"
 
 const GAME_ID = "11111111-1111-4111-8111-111111111111"
 const SUBJECT_ID = "22222222-2222-4222-8222-222222222222"
@@ -11,6 +16,24 @@ describe("readRankingView", () => {
     expect(readRankingView("players")).toBe("players")
     expect(readRankingView("teams")).toBe("players")
     expect(readRankingView(undefined)).toBe("players")
+  })
+})
+
+describe("readRankingSize", () => {
+  it("ranks the format asked for when the game is played in it", () => {
+    expect(readRankingSize("2", [1, 2, 3])).toBe(2)
+    expect(readRankingSize(["3", "1"], [1, 2, 3])).toBe(3)
+  })
+
+  it("falls back on the smallest format of the game", () => {
+    expect(readRankingSize(undefined, [2, 3])).toBe(2)
+    expect(readRankingSize("4", [1, 2, 3])).toBe(1)
+    expect(readRankingSize("2v2", [1, 2])).toBe(1)
+    expect(readRankingSize("-2", [1, 2])).toBe(1)
+  })
+
+  it("leaves the choice to the API when the formats are unknown", () => {
+    expect(readRankingSize("2", [])).toBeUndefined()
   })
 })
 
@@ -35,6 +58,15 @@ describe("rankingHref", () => {
     expect(rankingHref(GAME_ID, "players")).toBe(`/games/${GAME_ID}/rankings`)
     expect(rankingHref(GAME_ID, "clans")).toBe(
       `/games/${GAME_ID}/rankings?view=clans`
+    )
+  })
+
+  it("opens it on the format asked for", () => {
+    expect(rankingHref(GAME_ID, "players", 2)).toBe(
+      `/games/${GAME_ID}/rankings?size=2`
+    )
+    expect(rankingHref(GAME_ID, "clans", 3)).toBe(
+      `/games/${GAME_ID}/rankings?view=clans&size=3`
     )
   })
 })

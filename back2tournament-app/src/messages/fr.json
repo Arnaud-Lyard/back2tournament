@@ -882,12 +882,15 @@
   },
   "rankings": {
     "title": "Classement",
-    "description": "Le classement Elo des joueurs et des clans de ce jeu.",
-    "howItWorks": "Tout le monde démarre à 1000 points. Chaque combat confirmé en fait gagner ou perdre jusqu'à 32 : battre mieux classé que soi rapporte davantage. Les joueurs sont classés sur leurs duels, les clans sur les combats de leurs équipes.",
+    "description": "Le classement Elo des joueurs et des clans de ce jeu, format par format.",
+    "howItWorks": "Chaque format a son classement, où tout le monde démarre à 1000 points. Chaque combat confirmé en fait gagner ou perdre jusqu'à 32 : battre mieux classé que soi rapporte davantage. En équipe, chaque joueur gagne ou perd ce que le combat valait pour son équipe. Un clan est classé sur les combats de ses équipes et, en 1v1, sur les duels de ses membres contre ceux d'autres clans.",
     "views": {
       "label": "Classement à afficher",
       "players": "Joueurs",
       "clans": "Clans"
+    },
+    "formats": {
+      "label": "Format du classement"
     },
     "columns": {
       "rank": "Rang",
@@ -900,9 +903,9 @@
     "you": "Vous",
     "unknown": "Inconnu",
     "empty": {
-      "title": "Personne n'est encore classé",
-      "players": "Le classement se remplit à chaque duel confirmé.",
-      "clans": "Les clans entrent au classement avec les combats confirmés de leurs équipes."
+      "title": "Personne n'est encore classé en {format}",
+      "players": "Le classement de ce format se remplit à chaque combat confirmé.",
+      "clans": "Un clan entre au classement avec un combat confirmé contre un autre clan : celui d'une de ses équipes, ou en 1v1 le duel d'un de ses membres."
     },
     "loadError": {
       "title": "Impossible de charger le classement",
@@ -911,8 +914,8 @@
     "card": {
       "title": "Classement Elo",
       "description": {
-        "player": "Calculé sur ses duels confirmés.",
-        "clan": "Calculé sur les combats confirmés de ses équipes."
+        "player": "Une note par format : ses duels en 1v1, les combats de ses équipes dans les autres formats.",
+        "clan": "Une note par format : les combats de ses équipes, et en 1v1 les duels de ses membres contre d'autres clans."
       },
       "viewRanking": "Voir le classement",
       "rating": "Elo",

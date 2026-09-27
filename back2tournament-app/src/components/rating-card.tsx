@@ -1,6 +1,7 @@
 import { TrophyIcon } from "lucide-react"
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
+import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { formatLabel } from "@/features/fights/lib/challenge"
 import { rankingHref } from "@/features/rankings/lib/ranking"
 import type { SubjectRating } from "@/features/rankings/types"
 import type { Loaded } from "@/libs/api/load"
@@ -18,13 +20,17 @@ import { cn } from "@/libs/utils"
 interface RatingCardProps {
   rating: Loaded<SubjectRating>
   gameId: string
-  /** A player profile rates on its duels, a clan on its teams' fights. */
+  /** A player profile rates on its own fights, a clan on its members' and teams'. */
   subject: "player" | "clan"
 }
 
-/** The Elo rating of a player profile or a clan, its rank and its record. */
+/**
+ * The Elo ratings of a player profile or a clan, one per format of its game:
+ * the rating, the rank in the ranking of that format, and the record.
+ */
 export async function RatingCard({ rating, gameId, subject }: RatingCardProps) {
   const t = await getTranslations("rankings.card")
+  const view = subject === "clan" ? "clans" : "players"
 
   return (
     <Card>
@@ -36,7 +42,7 @@ export async function RatingCard({ rating, gameId, subject }: RatingCardProps) {
         <CardDescription>{t(`description.${subject}`)}</CardDescription>
         <CardAction>
           <Link
-            href={rankingHref(gameId, subject === "clan" ? "clans" : "players")}
+            href={rankingHref(gameId, view)}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             {t("viewRanking")}
@@ -47,45 +53,59 @@ export async function RatingCard({ rating, gameId, subject }: RatingCardProps) {
         {!rating.ok ? (
           <p className="text-sm text-muted-foreground">{t("loadError")}</p>
         ) : (
-          <dl className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col gap-1">
-              <dt className="text-xs text-muted-foreground">{t("rating")}</dt>
-              <dd className="font-mono text-2xl font-semibold tabular-nums">
-                {rating.data.rating}
-              </dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-xs text-muted-foreground">{t("rank")}</dt>
-              <dd className="text-2xl font-semibold tabular-nums">
-                {rating.data.rank === null ? (
-                  <span className="text-base font-normal text-muted-foreground">
-                    {t("unranked")}
-                  </span>
-                ) : (
-                  <>
-                    #{rating.data.rank}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      {" "}
-                      {t("outOf", { total: rating.data.total })}
+          <ul className="flex flex-col divide-y">
+            {rating.data.ratings.map((format) => (
+              <li
+                key={format.teamSize}
+                className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
+              >
+                <Badge
+                  variant="outline"
+                  className="mt-1 w-12 shrink-0 justify-center"
+                >
+                  {formatLabel(format.teamSize)}
+                </Badge>
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <span className="font-mono text-xl font-semibold tabular-nums">
+                      {format.rating}
+                      <span className="ml-1 text-xs font-normal text-muted-foreground">
+                        {t("rating")}
+                      </span>
                     </span>
-                  </>
-                )}
-              </dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-xs text-muted-foreground">{t("record")}</dt>
-              <dd className="text-sm tabular-nums">
-                {t("recordValue", {
-                  wins: rating.data.wins,
-                  draws: rating.data.draws,
-                  losses: rating.data.losses,
-                })}
-                <span className="block text-xs text-muted-foreground">
-                  {t("fights", { count: rating.data.fights })}
-                </span>
-              </dd>
-            </div>
-          </dl>
+                    <Link
+                      href={rankingHref(gameId, view, format.teamSize)}
+                      className="text-sm underline-offset-4 hover:underline"
+                    >
+                      {format.rank === null ? (
+                        <span className="text-muted-foreground">
+                          {t("unranked")}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="font-semibold tabular-nums">
+                            #{format.rank}
+                          </span>{" "}
+                          <span className="text-muted-foreground">
+                            {t("outOf", { total: format.total })}
+                          </span>
+                        </>
+                      )}
+                    </Link>
+                  </div>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {t("recordValue", {
+                      wins: format.wins,
+                      draws: format.draws,
+                      losses: format.losses,
+                    })}
+                    {" · "}
+                    {t("fights", { count: format.fights })}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </CardContent>
     </Card>
