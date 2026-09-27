@@ -17,6 +17,7 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
 {
     private const ADMIN_ID = '22222222-2222-2222-2222-222222222222';
     private const PLAIN_ID = '11111111-1111-1111-1111-111111111111';
+    private const CREATED_GAME = '{"title":"Game"}';
 
     public function test_dispatch_on_right_privilege(): void
     {
@@ -24,14 +25,15 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
         $eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->isInstanceOf(OnGameCreationAdminVerifiedEvent::class));
+            ->with($this->isInstanceOf(OnGameCreationAdminVerifiedEvent::class))
+            ->willReturnCallback(self::createsTheGame(...));
 
         $subscriber = new GameCreationRequestedEventSubscriber(
             $this->currentUserProvider($this->admin()),
             $eventDispatcher,
         );
 
-        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game'));
+        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game', [1]));
     }
 
     public function test_throw_on_invalid_privilege(): void
@@ -47,7 +49,7 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
         $this->expectException(PermissionDeniedException::class);
         $this->expectExceptionMessageIsOrContains('the user does not have the necessary permissions');
 
-        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game'));
+        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game', [1]));
     }
 
     public function test_the_authenticated_caller_is_the_one_carried_downstream(): void
@@ -59,7 +61,7 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
             static function (object $event) use (&$dispatched): object {
                 $dispatched = $event;
 
-                return $event;
+                return self::createsTheGame($event);
             }
         );
 
@@ -68,10 +70,32 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
             $eventDispatcher,
         );
 
-        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game'));
+        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game', [1, 2, 3]));
 
         $this->assertInstanceOf(OnGameCreationAdminVerifiedEvent::class, $dispatched);
         $this->assertSame(self::ADMIN_ID, $dispatched->getUser());
+        $this->assertSame('Game', $dispatched->getTitle());
+        $this->assertSame([1, 2, 3], $dispatched->getTeamSizes());
+    }
+
+    /**
+     * The created game goes back to the controller on the event it dispatched,
+     * not through the session.
+     */
+    public function test_the_created_game_travels_back_on_the_requested_event(): void
+    {
+        $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
+        $eventDispatcher->method('dispatch')->willReturnCallback(self::createsTheGame(...));
+
+        $subscriber = new GameCreationRequestedEventSubscriber(
+            $this->currentUserProvider($this->admin()),
+            $eventDispatcher,
+        );
+
+        $event = new OnGameCreationRequestedEvent('Game', [1]);
+        $subscriber->validateUser($event);
+
+        $this->assertSame(self::CREATED_GAME, $event->getCreatedGame());
     }
 
     public function test_an_unauthenticated_caller_stops_the_chain(): void
@@ -88,7 +112,20 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
 
         $this->expectException(PermissionDeniedException::class);
 
-        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game'));
+        $subscriber->validateUser(new OnGameCreationRequestedEvent('Game', [1]));
+    }
+
+    /**
+     * What the Game context does with the verified event: it creates the game
+     * and hands its JSON back on the event.
+     */
+    private static function createsTheGame(object $event): object
+    {
+        if ($event instanceof OnGameCreationAdminVerifiedEvent) {
+            $event->setCreatedGame(self::CREATED_GAME);
+        }
+
+        return $event;
     }
 
     private function admin(): User

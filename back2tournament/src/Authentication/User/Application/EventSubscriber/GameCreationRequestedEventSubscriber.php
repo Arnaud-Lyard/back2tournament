@@ -39,9 +39,12 @@ final class GameCreationRequestedEventSubscriber implements EventSubscriberInter
             throw new PermissionDeniedException('the user does not have the necessary permissions');
         }
 
-        $this->eventDispatcher->dispatch(new OnGameCreationAdminVerifiedEvent(
+        $verifiedEvent = $this->eventDispatcher->dispatch(new OnGameCreationAdminVerifiedEvent(
             $event->getTitle(),
             (string) $user->getId(),
+            $event->getTeamSizes(),
         ));
+
+        $event->setCreatedGame($verifiedEvent->getCreatedGame());
     }
 }

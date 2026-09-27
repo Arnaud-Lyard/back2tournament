@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace App\Competition\Fight\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
-use App\Competition\Competitor\Domain\Entity\Competitor;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
-use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use App\Competition\Fight\Application\Model\FindPendingUserFightResultsQuery;
-use App\Competition\Fight\Domain\Entity\Fight;
 use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
-use App\Competition\Profile\Player\Domain\Entity\Player;
-use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -23,23 +19,20 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 final class FindPendingUserFightResultsHandler
 {
     private CurrentUserProviderInterface $currentUserProvider;
-    private PlayerRepositoryInterface $playerRepository;
-    private CompetitorRepositoryInterface $competitorRepository;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private FightRepositoryInterface $fightRepository;
     private ResultRepositoryInterface $resultRepository;
     private NormalizerInterface $serializer;
 
     public function __construct(
         CurrentUserProviderInterface $currentUserProvider,
-        PlayerRepositoryInterface $playerRepository,
-        CompetitorRepositoryInterface $competitorRepository,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         FightRepositoryInterface $fightRepository,
         ResultRepositoryInterface $resultRepository,
         NormalizerInterface $serializer,
     ) {
         $this->currentUserProvider = $currentUserProvider;
-        $this->playerRepository = $playerRepository;
-        $this->competitorRepository = $competitorRepository;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->fightRepository = $fightRepository;
         $this->resultRepository = $resultRepository;
         $this->serializer = $serializer;
@@ -50,14 +43,15 @@ final class FindPendingUserFightResultsHandler
         $page = $findPendingUserFightResultsQuery->getPage();
         $limit = $findPendingUserFightResultsQuery->getLimit();
 
-        $playersByCompetitor = $this->playersByCompetitor($this->currentUserProvider->getUser()->getId());
+        // The caller's own player profiles, and the teams one of them leads.
+        $represented = $this->competitorRegistryProvider->representedBy((string) $this->currentUserProvider->getUser()->getId());
 
-        if ([] === $playersByCompetitor) {
+        if ([] === $represented) {
             return $this->page([], 0, $page, $limit);
         }
 
         $criteria = [
-            'competitor' => array_keys($playersByCompetitor),
+            'competitor' => $represented,
             'status' => [ResultStatus::PENDING, ResultStatus::REPORTING],
         ];
 
@@ -68,17 +62,45 @@ final class FindPendingUserFightResultsHandler
             $findPendingUserFightResultsQuery->getOffset(),
         );
 
-        $opponents = $this->opponentsByResult($results);
+        $fights = [];
+        $scores = [];
+        if ([] !== $results) {
+            $fightIds = array_values(array_unique(array_map(static fn (Result $result): string => $result->getFight()->getValue(), $results)));
+            foreach ($this->fightRepository->findBy(['id' => $fightIds]) as $fight) {
+                $fights[$fight->getId()->getValue()] = $fight;
+            }
+            // Both sides' results, so that each item can tell what the other side scored.
+            foreach ($this->resultRepository->findBy(['fight' => $fightIds]) as $sideResult) {
+                $scores[$sideResult->getFight()->getValue()][$sideResult->getCompetitor()->getValue()] = $sideResult->getScore();
+            }
+        }
+
+        $competitorIds = [];
+        foreach ($fights as $fight) {
+            $competitorIds[] = $fight->getCompetitorOne()->getValue();
+            $competitorIds[] = $fight->getCompetitorTwo()->getValue();
+        }
+        $described = $this->competitorRegistryProvider->describe($competitorIds);
 
         $items = [];
         foreach ($results as $result) {
             /** @var array<string, mixed> $item */
             $item = $this->serializer->normalize($result);
 
-            $player = $playersByCompetitor[$result->getCompetitor()->getValue()] ?? null;
-            $item['game'] = null === $player ? null : ['value' => $player->getGame()->getValue()];
-            $item['player'] = null === $player ? null : $this->profile($player);
-            $item['opponent'] = $opponents[$result->getId()->getValue()] ?? null;
+            $fight = $fights[$result->getFight()->getValue()] ?? null;
+            $mine = $result->getCompetitor();
+            $opponent = $fight?->opponentOf($mine);
+
+            $item['game'] = null === $fight ? null : ['value' => $fight->getGame()->getValue()];
+            $item['teamSize'] = $fight?->getTeamSize() ?? 1;
+            $item['tournament'] = null === $fight?->getTournament() ? null : ['value' => $fight->getTournament()->getValue()];
+            $item['declaredBy'] = null === $fight?->getDeclaredBy() ? null : ['value' => $fight->getDeclaredBy()->getValue()];
+            $item['side'] = self::side($mine->getValue(), $described);
+            $item['player'] = self::profile($described[$mine->getValue()] ?? null);
+            $item['opponent'] = null === $opponent ? null : self::side($opponent->getValue(), $described) + [
+                'player' => self::profile($described[$opponent->getValue()] ?? null),
+                'score' => $scores[$result->getFight()->getValue()][$opponent->getValue()] ?? 0,
+            ];
 
             $items[] = $item;
         }
@@ -101,126 +123,35 @@ final class FindPendingUserFightResultsHandler
     }
 
     /**
-     * @return array<string, Player> the caller's players, keyed by the id of the competitor each plays as
-     */
-    private function playersByCompetitor(string $userId): array
-    {
-        $players = $this->playerRepository->findBy(['user' => $userId]);
-        if ([] === $players) {
-            return [];
-        }
-
-        $playersById = [];
-        foreach ($players as $player) {
-            $playersById[$player->getId()->getValue()] = $player;
-        }
-
-        /** @var list<Competitor> $competitors */
-        $competitors = $this->competitorRepository->findBy([
-            'type' => CompetitorType::PLAYER,
-            'reference' => array_keys($playersById),
-        ]);
-
-        $byCompetitor = [];
-        foreach ($competitors as $competitor) {
-            $byCompetitor[$competitor->getId()->getValue()] = $playersById[$competitor->getReference()];
-        }
-
-        return $byCompetitor;
-    }
-
-    /**
-     * @param list<Result> $results
+     * @param array<string, array{type: string, reference: string, name: ?string}> $described
      *
-     * @return array<string, array<string, mixed>> the other side of each result's fight, keyed by result id
-     */
-    private function opponentsByResult(array $results): array
-    {
-        if ([] === $results) {
-            return [];
-        }
-
-        $fightIds = [];
-        foreach ($results as $result) {
-            $fightIds[$result->getFight()->getValue()] = true;
-        }
-
-        /** @var list<Fight> $fights */
-        $fights = $this->fightRepository->findBy(['id' => array_keys($fightIds)]);
-
-        $fightsById = [];
-        foreach ($fights as $fight) {
-            $fightsById[$fight->getId()->getValue()] = $fight;
-        }
-
-        $opponentByResult = [];
-        foreach ($results as $result) {
-            $fight = $fightsById[$result->getFight()->getValue()] ?? null;
-            if (null === $fight) {
-                continue;
-            }
-
-            $one = $fight->getCompetitorOne()->getValue();
-            $two = $fight->getCompetitorTwo()->getValue();
-            $opponentByResult[$result->getId()->getValue()] = $result->getCompetitor()->getValue() === $one ? $two : $one;
-        }
-
-        return $this->describe($opponentByResult);
-    }
-
-    /**
-     * @param array<string, string> $opponentByResult the opponent's competitor id, keyed by result id
-     *
-     * @return array<string, array<string, mixed>>
-     */
-    private function describe(array $opponentByResult): array
-    {
-        if ([] === $opponentByResult) {
-            return [];
-        }
-
-        /** @var list<Competitor> $competitors */
-        $competitors = $this->competitorRepository->findBy(['id' => array_values(array_unique($opponentByResult))]);
-
-        $referenceByCompetitor = [];
-        $playerReferences = [];
-        foreach ($competitors as $competitor) {
-            $referenceByCompetitor[$competitor->getId()->getValue()] = $competitor;
-
-            if (CompetitorType::PLAYER === $competitor->getType()) {
-                $playerReferences[] = $competitor->getReference();
-            }
-        }
-
-        $playersById = [];
-        if ([] !== $playerReferences) {
-            foreach ($this->playerRepository->findBy(['id' => $playerReferences]) as $player) {
-                $playersById[$player->getId()->getValue()] = $player;
-            }
-        }
-
-        $described = [];
-        foreach ($opponentByResult as $resultId => $competitorId) {
-            $competitor = $referenceByCompetitor[$competitorId] ?? null;
-            $player = null === $competitor ? null : ($playersById[$competitor->getReference()] ?? null);
-
-            $described[$resultId] = [
-                'competitor' => ['value' => $competitorId],
-                'player' => null === $player ? null : $this->profile($player),
-            ];
-        }
-
-        return $described;
-    }
-
-    /**
      * @return array<string, mixed>
      */
-    private function profile(Player $player): array
+    private static function side(string $competitorId, array $described): array
     {
         return [
-            'id' => ['value' => $player->getId()->getValue()],
-            'battletag' => $player->getBattletag(),
+            'competitor' => ['value' => $competitorId],
+            'type' => $described[$competitorId]['type'] ?? null,
+            'name' => $described[$competitorId]['name'] ?? null,
+        ];
+    }
+
+    /**
+     * The player profile behind a 1v1 side; null for a team.
+     *
+     * @param array{type: string, reference: string, name: ?string}|null $description
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function profile(?array $description): ?array
+    {
+        if (null === $description || CompetitorType::PLAYER->value !== $description['type']) {
+            return null;
+        }
+
+        return [
+            'id' => ['value' => $description['reference']],
+            'battletag' => $description['name'],
         ];
     }
 }

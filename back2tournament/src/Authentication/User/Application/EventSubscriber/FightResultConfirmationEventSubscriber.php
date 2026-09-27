@@ -7,7 +7,6 @@ namespace App\Authentication\User\Application\EventSubscriber;
 use App\Authentication\User\Application\Event\OnFightResultsConfirmationUserVerified;
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Fight\Application\Event\OnFightResultConfirmationEvent;
-use App\Competition\Fight\Application\Event\OnUpdateFightResultsEvent;
 use App\Shared\Exception\PermissionDeniedException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -40,10 +39,11 @@ class FightResultConfirmationEventSubscriber implements EventSubscriberInterface
             throw new PermissionDeniedException('the user does not have the necessary permissions');
         }
 
-        $this->eventDispatcher->dispatch(new OnFightResultsConfirmationUserVerified(
+        $verifiedEvent = $this->eventDispatcher->dispatch(new OnFightResultsConfirmationUserVerified(
             $event->getFight(),
             (string) $user->getId(),
-            $event->getGame(),
         ));
+
+        $event->setConfirmedFight($verifiedEvent->getConfirmedFight());
     }
 }

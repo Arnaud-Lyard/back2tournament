@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -32,11 +33,13 @@ import {
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { useCreateGame } from "@/features/games/hooks/use-create-game"
+import { parseTeamSizes } from "@/features/games/lib/team-sizes"
 import { createGameSchema } from "@/features/games/schemas/create-game.schema"
 import type { Game } from "@/features/games/types"
 import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 import { useFieldErrors } from "@/hooks/use-field-errors"
 import { ListCard } from "../list-card"
+import { GameFormatsEditor } from "./game-formats-editor"
 import { LoadError } from "../load-error"
 
 /** `games` is null when the list could not be loaded. */
@@ -47,8 +50,12 @@ export function GamesManager({ games }: { games: Game[] | null }) {
   const describeError = useApiErrorMessage()
   const createGame = useCreateGame()
   const [title, setTitle] = useState("")
-  const parsed = createGameSchema.safeParse({ title })
-  const fieldErrors = useFieldErrors<"title">(parsed)
+  const [formats, setFormats] = useState("1")
+  const parsed = createGameSchema.safeParse({
+    title,
+    teamSizes: parseTeamSizes(formats),
+  })
+  const fieldErrors = useFieldErrors<"title" | "teamSizes">(parsed)
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -67,6 +74,7 @@ export function GamesManager({ games }: { games: Game[] | null }) {
           }),
         })
         setTitle("")
+        setFormats("1")
         router.refresh()
         fieldErrors.hide()
       },
@@ -101,6 +109,18 @@ export function GamesManager({ games }: { games: Game[] | null }) {
                 />
                 <FieldError errors={fieldErrors.messagesFor("title")} />
               </Field>
+              <Field data-invalid={fieldErrors.isInvalid("teamSizes")}>
+                <FieldLabel htmlFor="game-formats">{t("formats")}</FieldLabel>
+                <Input
+                  id="game-formats"
+                  value={formats}
+                  onChange={(event) => setFormats(event.target.value)}
+                  placeholder="1, 2, 3"
+                  aria-invalid={fieldErrors.isInvalid("teamSizes")}
+                />
+                <FieldDescription>{t("formatsDescription")}</FieldDescription>
+                <FieldError errors={fieldErrors.messagesFor("teamSizes")} />
+              </Field>
             </FieldGroup>
           </form>
         </CardContent>
@@ -133,6 +153,7 @@ export function GamesManager({ games }: { games: Game[] | null }) {
             <TableHeader>
               <TableRow>
                 <TableHead>{t("columns.name")}</TableHead>
+                <TableHead>{t("columns.formats")}</TableHead>
                 <TableHead>{t("columns.id")}</TableHead>
                 <TableHead>{t("columns.createdAt")}</TableHead>
               </TableRow>
@@ -145,6 +166,13 @@ export function GamesManager({ games }: { games: Game[] | null }) {
                 return (
                   <TableRow key={id}>
                     <TableCell className="font-medium">{game.title}</TableCell>
+                    <TableCell>
+                      <GameFormatsEditor
+                        gameId={id}
+                        title={game.title ?? ""}
+                        teamSizes={game.teamSizes ?? [1]}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <code className="font-mono text-xs">

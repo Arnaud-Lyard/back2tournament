@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Competition\Profile\Player\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
+use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Player\Application\Model\DeletePlayerCommand;
 use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
@@ -23,6 +24,7 @@ final class DeletePlayerHandler
     private PlayerRepositoryInterface $playerRepository;
     private CurrentUserProviderInterface $currentUserProvider;
     private CompetitorIdProviderInterface $competitorIdProvider;
+    private ClanMemberRepositoryInterface $clanMemberRepository;
     private EventDispatcherInterface $eventDispatcher;
     private SerializerInterface $serializer;
 
@@ -30,12 +32,14 @@ final class DeletePlayerHandler
         PlayerRepositoryInterface $playerRepository,
         CurrentUserProviderInterface $currentUserProvider,
         CompetitorIdProviderInterface $competitorIdProvider,
+        ClanMemberRepositoryInterface $clanMemberRepository,
         EventDispatcherInterface $eventDispatcher,
         SerializerInterface $serializer,
     ) {
         $this->playerRepository = $playerRepository;
         $this->currentUserProvider = $currentUserProvider;
         $this->competitorIdProvider = $competitorIdProvider;
+        $this->clanMemberRepository = $clanMemberRepository;
         $this->eventDispatcher = $eventDispatcher;
         $this->serializer = $serializer;
     }
@@ -55,6 +59,10 @@ final class DeletePlayerHandler
 
         if ($this->competitorIdProvider->takesPartInFights($playerId->getValue())) {
             throw new ConflictException('this player profile takes part in fights and cannot be deleted');
+        }
+
+        if (null !== $this->clanMemberRepository->findOneBy(['player' => $playerId->getValue()])) {
+            throw new ConflictException('this player profile belongs to a clan, or is invited to one: leave it or decline first');
         }
 
         Player::delete($player);

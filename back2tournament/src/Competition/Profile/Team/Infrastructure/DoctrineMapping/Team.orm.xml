@@ -9,6 +9,10 @@
 
         <field name="name" column="name" length="255" />
 
+        <field name="clan" type="guid" column="clan" length="36" />
+        <field name="game" type="guid" column="game" length="36" />
+        <field name="size" type="integer" column="size" />
+
         <field name="createdAt" type="datetime_immutable" column="created_at"  />
         <field name="updatedAt" type="datetime_immutable" column="updated_at" />
 

@@ -6,13 +6,21 @@ namespace App\Competition\Profile\Game\Domain\Entity;
 
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Event\GameCreatedEvent;
+use App\Competition\Profile\Game\Domain\Event\GameUpdatedEvent;
 use App\Shared\Aggregate\AggregateRoot;
+use App\Shared\Exception\ValidationException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 
 class Game extends AggregateRoot
 {
     private string $id;
 
     private string $title;
+
+    /**
+     * @var list<int> the formats this game is played in: 1 for 1v1, 5 for 5v5
+     */
+    private array $teamSizes = [1];
 
     private \DateTimeImmutable $createdAt;
 
@@ -40,6 +48,39 @@ class Game extends AggregateRoot
         return $this;
     }
 
+    /**
+     * @return list<int>
+     */
+    public function getTeamSizes(): array
+    {
+        return $this->teamSizes;
+    }
+
+    /**
+     * @param list<TeamSizeValueObject> $teamSizes
+     */
+    public function setTeamSizes(array $teamSizes): self
+    {
+        if ([] === $teamSizes) {
+            throw new ValidationException('A game must be played in at least one format');
+        }
+
+        $sizes = array_values(array_unique(array_map(
+            static fn (TeamSizeValueObject $teamSize): int => $teamSize->getValue(),
+            $teamSizes,
+        )));
+        sort($sizes);
+
+        $this->teamSizes = $sizes;
+
+        return $this;
+    }
+
+    public function supportsTeamSize(int $teamSize): bool
+    {
+        return \in_array($teamSize, $this->teamSizes, true);
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -64,16 +105,48 @@ class Game extends AggregateRoot
         return $this;
     }
 
+    /**
+     * @param list<TeamSizeValueObject> $teamSizes
+     */
     public static function create(
         GameId $gameId,
         string $title,
+        array $teamSizes,
     ): self {
+        if ('' === trim($title)) {
+            throw new ValidationException('A game title cannot be empty');
+        }
+
         $game = new self($gameId);
         $game->setTitle($title);
+        $game->setTeamSizes($teamSizes);
         $game->setCreatedAt(new \DateTimeImmutable('now'));
         $game->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $game->recordDomainEvent(new GameCreatedEvent($gameId));
+
+        return $game;
+    }
+
+    /**
+     * @param list<TeamSizeValueObject>|null $teamSizes null keeps the formats as they are
+     */
+    public static function update(Game $game, ?string $title, ?array $teamSizes): self
+    {
+        if (null !== $title) {
+            if ('' === trim($title)) {
+                throw new ValidationException('A game title cannot be empty');
+            }
+            $game->setTitle($title);
+        }
+
+        if (null !== $teamSizes) {
+            $game->setTeamSizes($teamSizes);
+        }
+
+        $game->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $game->recordDomainEvent(new GameUpdatedEvent(new GameId($game->id)));
 
         return $game;
     }

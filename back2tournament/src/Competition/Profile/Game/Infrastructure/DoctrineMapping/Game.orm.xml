@@ -8,6 +8,7 @@
         <id name="id" type="guid" column="id" length="36" />
 
         <field name="title" column="title" length="255" />
+        <field name="teamSizes" type="json" column="team_sizes" />
 
         <field name="createdAt" type="datetime_immutable" column="created_at"  />
         <field name="updatedAt" type="datetime_immutable" column="updated_at" />

@@ -23,13 +23,30 @@ use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Entity\ResultId;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
+use App\Competition\Profile\Clan\Domain\Entity\Clan;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
+use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
 use App\Competition\Profile\Game\Domain\Entity\Game;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\GameId as PlayerGameId;
 use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Player\Domain\Entity\UserId;
+use App\Competition\Profile\Team\Domain\Entity\Team;
+use App\Competition\Profile\Team\Domain\Entity\TeamId;
+use App\Competition\Profile\Team\Domain\Entity\TeamPlayerId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
+use App\Competition\Tournament\Domain\Entity\MatchupId;
+use App\Competition\Tournament\Domain\Entity\OrganizerId;
+use App\Competition\Tournament\Domain\Entity\Participant;
+use App\Competition\Tournament\Domain\Entity\ParticipantId;
+use App\Competition\Tournament\Domain\Entity\Tournament;
+use App\Competition\Tournament\Domain\Entity\TournamentId;
+use App\Shared\ValueObject\ClanNameValueObject;
+use App\Shared\ValueObject\ClanTagValueObject;
+use App\Shared\ValueObject\TeamNameValueObject;
+use App\Shared\ValueObject\TeamSizeValueObject;
+use App\Shared\ValueObject\TournamentNameValueObject;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -41,7 +58,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[AsCommand(
     name: 'app:seed',
-    description: 'Seeds games, players, fights, articles and comments, sized so every paginated list spans several pages.',
+    description: 'Seeds games, players, clans and their teams, fights, tournaments, articles and comments, sized so every paginated list spans several pages.',
 )]
 final class SeedCommand extends Command
 {
@@ -73,7 +90,18 @@ final class SeedCommand extends Command
 
     private const RANDOM_SEED = 20260922;
 
-    private const GAMES = ['Street Fighter 6', 'Rocket League', 'Valorant'];
+    /**
+     * Each game and the formats it is played in, as players per side.
+     */
+    private const GAMES = [
+        'Street Fighter 6' => [1],
+        'Rocket League' => [1, 2, 3],
+        'Valorant' => [1, 5],
+    ];
+
+    private const TOURNAMENT_REGISTERED = 5;
+
+    private const TOURNAMENT_BRACKET = 4;
 
     private const CATEGORIES = [
         'esport-news' => 'Esport news',
@@ -98,7 +126,8 @@ final class SeedCommand extends Command
     ];
 
     private const TABLES = [
-        'result', 'fight', 'competitor', 'team_player', 'team',
+        'tournament_matchup', 'tournament_participant', 'tournament',
+        'result', 'fight', 'competitor', 'team_player', 'team', 'clan_member', 'clan',
         'player', 'comment', 'article', 'category', 'game', 'users',
     ];
 
@@ -157,8 +186,18 @@ final class SeedCommand extends Command
         $rivals = $this->seedRivals($password);
 
         $fights = 0;
+        $clans = 0;
         foreach ($games as $index => $game) {
-            $fights += $this->seedGamePlayground($game, $index, $mine, $rivals);
+            [$me, $opponents] = $this->seedGamePlayers($game, $index, $mine, $rivals);
+            $fights += $this->seedGamePlayground($game, $me, $opponents);
+            [$teamClans, $teamFights] = $this->seedClans($game, $me, $opponents);
+            $clans += $teamClans;
+            $fights += $teamFights;
+
+            // The tournaments are played in the first game, between its seeded players.
+            if (0 === $index) {
+                $fights += $this->seedTournaments($game, $mine, $me, $opponents);
+            }
         }
 
         $this->seedArticles($mine, $categories);
@@ -174,15 +213,17 @@ final class SeedCommand extends Command
             ['Categories' => \count($categories)],
             ['Users' => 1 + \count($rivals)],
             ['Players' => \count($games) * (1 + self::PLAYERS_PER_GAME)],
+            ['Clans' => $clans],
             ['Fights' => $fights],
+            ['Tournaments' => 2],
             ['Articles' => self::ARTICLES],
             ['Comments' => self::COMMENTED_ARTICLES * self::COMMENTS_PER_ARTICLE],
         );
         $io->listing([
-            \sprintf('GET /api/challenges/ — %d waiting, %d pages', $challenges, $this->pages($challenges)),
-            \sprintf('GET /api/games/%s/fights?status=pending — %d pages', $firstGame, $this->pages(self::MINE_PENDING + self::MINE_REPORTING + self::RIVAL_PENDING)),
-            \sprintf('GET /api/games/%s/fights?status=finished — %d pages', $firstGame, $this->pages(self::MINE_FINISHED + self::RIVAL_FINISHED)),
-            \sprintf('GET /api/games/%s/players — %d pages', $firstGame, $this->pages(1 + self::PLAYERS_PER_GAME)),
+            \sprintf('GET /api/results/users/fights — at least %d waiting, %d pages', $challenges, $this->pages($challenges)),
+            \sprintf('GET /api/players/%s/games — %d pages', $firstGame, $this->pages(1 + self::PLAYERS_PER_GAME)),
+            \sprintf('GET /api/games/%s/clans', $firstGame),
+            'GET /api/tournaments/ — one upcoming, one ongoing',
             \sprintf('GET /api/articles/ — %d pages', $this->pages(self::ARTICLES)),
         ]);
 
@@ -195,15 +236,17 @@ final class SeedCommand extends Command
     private function seedGames(): array
     {
         $games = [];
-        foreach (self::GAMES as $title) {
+        foreach (self::GAMES as $title => $sizes) {
+            $teamSizes = array_map(static fn (int $size): TeamSizeValueObject => new TeamSizeValueObject($size), $sizes);
+
             $existing = $this->entityManager->getRepository(Game::class)->findOneBy(['title' => $title]);
             if ($existing instanceof Game) {
-                $games[] = $existing;
+                $games[] = Game::update($existing, null, $teamSizes);
 
                 continue;
             }
 
-            $game = Game::create(new GameId(Uuid::v4()->toString()), $title);
+            $game = Game::create(new GameId(Uuid::v4()->toString()), $title, $teamSizes);
             $this->entityManager->persist($game);
             $games[] = $game;
         }
@@ -279,43 +322,233 @@ final class SeedCommand extends Command
     }
 
     /**
+     * The demo account's profile in the game, and its rivals'.
+     *
      * @param list<User> $rivals
+     *
+     * @return array{Player, list<Player>}
      */
-    private function seedGamePlayground(Game $game, int $gameIndex, User $mine, array $rivals): int
+    private function seedGamePlayers(Game $game, int $gameIndex, User $mine, array $rivals): array
     {
         $gameId = (string) $game->getId();
 
-        $me = $this->seedCompetitor($mine, $gameId, \sprintf('Demo#%04d', 1000 + $gameIndex));
+        $me = $this->seedPlayer($mine, $gameId, \sprintf('Demo#%04d', 1000 + $gameIndex));
 
         $opponents = [];
         for ($slot = 0; $slot < self::PLAYERS_PER_GAME; ++$slot) {
             $rival = $rivals[($gameIndex * 7 + $slot) % \count($rivals)];
             $nickname = self::NICKNAMES[($gameIndex * 7 + $slot) % \count(self::NICKNAMES)];
 
-            $opponents[] = $this->seedCompetitor(
+            $opponents[] = $this->seedPlayer(
                 $rival,
                 $gameId,
                 \sprintf('%s#%04d', $nickname, 1000 + $gameIndex * 100 + $slot),
             );
         }
 
+        return [$me, $opponents];
+    }
+
+    /**
+     * @param list<Player> $opponents
+     */
+    private function seedGamePlayground(Game $game, Player $mePlayer, array $opponents): int
+    {
+        $gameId = (string) $game->getId();
+
+        $me = $this->enlist(CompetitorType::PLAYER, (string) $mePlayer->getId());
+        $opponents = array_map(fn (Player $player): CompetitorId => $this->enlist(CompetitorType::PLAYER, (string) $player->getId()), $opponents);
+
         $fights = 0;
 
         foreach ($this->states(self::MINE_PENDING, self::MINE_REPORTING, self::MINE_FINISHED) as $slot => $state) {
-            $this->seedFight($me, $opponents[$slot], $state);
+            $this->seedFight($me, $opponents[$slot], $gameId, 1, $state);
             ++$fights;
         }
 
         foreach ($this->states(self::RIVAL_PENDING, 0, self::RIVAL_FINISHED) as $slot => $state) {
             $left = $slot < self::RIVAL_PENDING ? 2 * $slot : 2 * ($slot - self::RIVAL_PENDING) + 1;
 
-            $this->seedFight($opponents[$left], $opponents[$left + 1], $state);
+            $this->seedFight($opponents[$left], $opponents[$left + 1], $gameId, 1, $state);
             ++$fights;
         }
 
         $this->entityManager->flush();
 
         return $fights;
+    }
+
+    /**
+     * Two clans per game: the demo account leads one, a rival the other. Each
+     * fields a team in every format of the game above 1v1, and the two teams
+     * of a format meet in a fight the rivals declared, for the demo to confirm.
+     *
+     * @param list<Player> $opponents
+     *
+     * @return array{int, int} how many clans and team fights were seeded
+     */
+    private function seedClans(Game $game, Player $me, array $opponents): array
+    {
+        $gameId = (string) $game->getId();
+        $largest = max($game->getTeamSizes());
+        $squad = max(3, $largest);
+
+        if (null !== $this->entityManager->getRepository(Clan::class)->findOneBy(['game' => $gameId, 'tag' => 'DMO'])) {
+            return [0, 0];
+        }
+
+        $mine = $this->seedClan($game, 'Demo Squad', 'DMO', $me, \array_slice($opponents, 0, $squad - 1));
+        $theirs = $this->seedClan($game, 'Rival Crew', 'RIV', $opponents[$squad], \array_slice($opponents, $squad + 1, $squad - 1));
+
+        // One invitation left for the demo account to see pending.
+        $invited = $opponents[\count($opponents) - 1];
+        $this->entityManager->persist(Clan::invite($mine, new ClanMemberId(Uuid::v4()->toString()), $invited->getId()));
+
+        $fights = 0;
+        foreach ($game->getTeamSizes() as $size) {
+            if (1 === $size) {
+                continue;
+            }
+
+            $myTeam = $this->seedTeam($mine, \sprintf('Demo %1$dv%1$d', $size), array_merge([$me], \array_slice($opponents, 0, $size - 1)));
+            $theirTeam = $this->seedTeam($theirs, \sprintf('Rival %1$dv%1$d', $size), array_merge([$opponents[$squad]], \array_slice($opponents, $squad + 1, $size - 1)));
+
+            // The rivals declared: the demo account, leading its team, confirms.
+            $this->seedFight(
+                $this->enlist(CompetitorType::TEAM, (string) $theirTeam->getId()),
+                $this->enlist(CompetitorType::TEAM, (string) $myTeam->getId()),
+                $gameId,
+                $size,
+                ResultStatus::REPORTING,
+            );
+            ++$fights;
+        }
+
+        $this->entityManager->flush();
+
+        return [2, $fights];
+    }
+
+    /**
+     * @param list<Player> $members
+     */
+    private function seedClan(Game $game, string $name, string $tag, Player $leader, array $members): Clan
+    {
+        $clan = Clan::create(new ClanId(Uuid::v4()->toString()), new ClanNameValueObject($name), new ClanTagValueObject($tag), $game->getId(), $leader->getId());
+        $this->entityManager->persist($clan);
+        $this->entityManager->persist(Clan::createLeaderMembership($clan, new ClanMemberId(Uuid::v4()->toString())));
+
+        foreach ($members as $member) {
+            $membership = Clan::invite($clan, new ClanMemberId(Uuid::v4()->toString()), $member->getId());
+            $this->entityManager->persist(Clan::join($clan, $membership));
+        }
+
+        return $clan;
+    }
+
+    /**
+     * @param list<Player> $lineup the leader first
+     */
+    private function seedTeam(Clan $clan, string $name, array $lineup): Team
+    {
+        $team = Team::create(
+            new TeamId(Uuid::v4()->toString()),
+            new TeamNameValueObject($name),
+            $clan->getId(),
+            $clan->getGame(),
+            new TeamSizeValueObject(\count($lineup)),
+            $lineup[0]->getId(),
+            array_map(static fn (Player $player): PlayerId => $player->getId(), $lineup),
+        );
+        $this->entityManager->persist($team);
+
+        foreach ($lineup as $player) {
+            $this->entityManager->persist(Team::createTeamPlayer($team, new TeamPlayerId(Uuid::v4()->toString()), $player->getId()));
+        }
+
+        $this->entityManager->flush();
+
+        return $team;
+    }
+
+    /**
+     * Two 1v1 tournaments organized by the demo account: one open for
+     * registrations, one whose bracket is drawn and first round under way.
+     *
+     * @param list<Player> $opponents
+     *
+     * @return int how many fights the bracket opened
+     */
+    private function seedTournaments(Game $game, User $organizer, Player $me, array $opponents): int
+    {
+        if (null !== $this->entityManager->getRepository(Tournament::class)->findOneBy(['name' => 'Seed Cup'])) {
+            return 0;
+        }
+
+        $players = array_merge([$me], $opponents);
+
+        $this->seedTournament($game, $organizer, 'Seed Cup', \array_slice($players, 0, self::TOURNAMENT_REGISTERED));
+
+        $masters = $this->seedTournament($game, $organizer, 'Seed Masters', \array_slice($players, 0, self::TOURNAMENT_BRACKET));
+        $participants = $this->entityManager->getRepository(Participant::class)->findBy(['tournament' => (string) $masters->getId()]);
+
+        $matchupIds = [];
+        for ($count = Tournament::bracketSize(\count($participants)) - 1; $count > 0; --$count) {
+            $matchupIds[] = new MatchupId(Uuid::v4()->toString());
+        }
+
+        $bracket = Tournament::start($masters, $participants, $matchupIds);
+
+        $fights = 0;
+        foreach (Tournament::readyForFight($bracket) as $matchup) {
+            $fight = $this->seedFight(
+                $matchup->getCompetitorOne(),
+                $matchup->getCompetitorTwo(),
+                (string) $game->getId(),
+                1,
+                ResultStatus::PENDING,
+                $masters->getId(),
+            );
+            Tournament::attachFight($masters, $matchup, $fight->getId());
+            ++$fights;
+        }
+
+        foreach ($bracket as $matchup) {
+            $this->entityManager->persist($matchup);
+        }
+        $this->entityManager->flush();
+
+        return $fights;
+    }
+
+    /**
+     * @param list<Player> $players registered in this order
+     */
+    private function seedTournament(Game $game, User $organizer, string $name, array $players): Tournament
+    {
+        $tournament = Tournament::create(
+            new TournamentId(Uuid::v4()->toString()),
+            new TournamentNameValueObject($name),
+            $game->getId(),
+            new TeamSizeValueObject(1),
+            8,
+            new OrganizerId((string) $organizer->getId()),
+            $this->now->modify('+3 days'),
+        );
+        $this->entityManager->persist($tournament);
+
+        foreach ($players as $registered => $player) {
+            $this->entityManager->persist(Tournament::register(
+                $tournament,
+                new ParticipantId(Uuid::v4()->toString()),
+                $this->enlist(CompetitorType::PLAYER, (string) $player->getId()),
+                $registered,
+            ));
+        }
+
+        $this->entityManager->flush();
+
+        return $tournament;
     }
 
     /**
@@ -330,7 +563,7 @@ final class SeedCommand extends Command
         );
     }
 
-    private function seedCompetitor(User $user, string $gameId, string $battletag): CompetitorId
+    private function seedPlayer(User $user, string $gameId, string $battletag): Player
     {
         $userId = (string) $user->getId();
 
@@ -346,15 +579,18 @@ final class SeedCommand extends Command
             $this->entityManager->flush();
         }
 
-        $playerId = (string) $player->getId();
+        return $player;
+    }
 
+    private function enlist(CompetitorType $type, string $reference): CompetitorId
+    {
         $competitor = $this->entityManager->getRepository(Competitor::class)->findOneBy([
-            'type' => CompetitorType::PLAYER,
-            'reference' => $playerId,
+            'type' => $type,
+            'reference' => $reference,
         ]);
 
         if (!$competitor instanceof Competitor) {
-            $competitor = Competitor::create(new CompetitorId(Uuid::v4()->toString()), CompetitorType::PLAYER, $playerId);
+            $competitor = Competitor::create(new CompetitorId(Uuid::v4()->toString()), $type, $reference);
             $this->entityManager->persist($competitor);
             $this->entityManager->flush();
         }
@@ -362,11 +598,27 @@ final class SeedCommand extends Command
         return new CompetitorId((string) $competitor->getId());
     }
 
-    private function seedFight(CompetitorId $one, CompetitorId $two, ResultStatus $state): void
-    {
+    /**
+     * $one declares whatever is past pending.
+     */
+    private function seedFight(
+        CompetitorId $one,
+        CompetitorId $two,
+        string $gameId,
+        int $teamSize,
+        ResultStatus $state,
+        ?TournamentId $tournamentId = null,
+    ): Fight {
         $at = $this->nextMoment();
 
-        $fight = Fight::create(new FightId(Uuid::v4()->toString()), $one, $two);
+        $fight = Fight::create(
+            new FightId(Uuid::v4()->toString()),
+            $one,
+            $two,
+            new GameId($gameId),
+            new TeamSizeValueObject($teamSize),
+            $tournamentId,
+        );
         $fight->setCreatedAt($at);
         $fight->setUpdatedAt($at);
 
@@ -376,6 +628,9 @@ final class SeedCommand extends Command
         if (ResultStatus::PENDING !== $state) {
             $scoreOne = mt_rand(0, 3);
             $scoreTwo = mt_rand(0, 3);
+            if (null !== $tournamentId && $scoreOne === $scoreTwo) {
+                ++$scoreOne;
+            }
 
             $outcomeOne = $this->outcome($scoreOne, $scoreTwo);
             $outcomeTwo = $this->outcome($scoreTwo, $scoreOne);
@@ -396,6 +651,8 @@ final class SeedCommand extends Command
         $this->entityManager->persist($fight);
         $this->entityManager->persist($resultOne);
         $this->entityManager->persist($resultTwo);
+
+        return $fight;
     }
 
     private function outcome(int $score, int $against): ResultStatus

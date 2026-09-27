@@ -6,6 +6,8 @@ import {
   LogOutIcon,
   ShieldIcon,
   SwordsIcon,
+  TrophyIcon,
+  UsersRoundIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
@@ -62,6 +64,14 @@ export function UserMenu() {
           <DropdownMenuItem render={<Link href="/challenges" />}>
             <SwordsIcon />
             {t("challenges")}
+          </DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/clans" />}>
+            <UsersRoundIcon />
+            {t("myClans")}
+          </DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/tournaments/new" />}>
+            <TrophyIcon />
+            {t("organizeTournament")}
           </DropdownMenuItem>
           {hasPermission("backoffice:access") && (
             <DropdownMenuItem render={<Link href="/backoffice" />}>

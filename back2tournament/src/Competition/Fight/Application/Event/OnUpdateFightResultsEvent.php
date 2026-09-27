@@ -10,30 +10,20 @@ class OnUpdateFightResultsEvent extends Event
 {
     private string $fight;
 
-    private string $game;
+    private int $score;
 
-    private string $competitorOneStatus;
+    private int $opponentScore;
 
-    private int $competitorOneScore;
-
-    private string $competitorTwoStatus;
-
-    private int $competitorTwoScore;
+    private string $updatedFight;
 
     public function __construct(
         string $fight,
-        string $game,
-        string $competitorOneStatus,
-        int $competitorOneScore,
-        string $competitorTwoStatus,
-        int $competitorTwoScore
-    ){
+        int $score,
+        int $opponentScore,
+    ) {
         $this->fight = $fight;
-        $this->game = $game;
-        $this->competitorOneStatus = $competitorOneStatus;
-        $this->competitorOneScore = $competitorOneScore;
-        $this->competitorTwoStatus = $competitorTwoStatus;
-        $this->competitorTwoScore = $competitorTwoScore;
+        $this->score = $score;
+        $this->opponentScore = $opponentScore;
     }
 
     public function getFight(): string
@@ -41,28 +31,26 @@ class OnUpdateFightResultsEvent extends Event
         return $this->fight;
     }
 
-    public function getGame(): string
+    public function getScore(): int
     {
-        return $this->game;
+        return $this->score;
     }
 
-    public function getCompetitorOneStatus(): string
+    public function getOpponentScore(): int
     {
-        return $this->competitorOneStatus;
+        return $this->opponentScore;
     }
 
-    public function getCompetitorOneScore(): int
+    /**
+     * The fight once declared, as the handler serialized it, handed back to the controller.
+     */
+    public function getUpdatedFight(): string
     {
-        return $this->competitorOneScore;
+        return $this->updatedFight;
     }
 
-    public function getCompetitorTwoStatus(): string
+    public function setUpdatedFight(string $updatedFight): void
     {
-        return $this->competitorTwoStatus;
-    }
-
-    public function getCompetitorTwoScore(): int
-    {
-        return $this->competitorTwoScore;
+        $this->updatedFight = $updatedFight;
     }
 }

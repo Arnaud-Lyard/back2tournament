@@ -10,6 +10,10 @@
         <field name="competitorOne" type="guid" column="competitor_one" length="36" />
         <field name="competitorTwo" type="guid" column="competitor_two" length="36" />
 
+        <field name="game" type="guid" column="game" length="36" />
+        <field name="teamSize" type="integer" column="team_size" />
+        <field name="tournament" type="guid" column="tournament" length="36" nullable="true" />
+
         <field name="declaredBy" type="guid" column="declared_by" length="36" nullable="true" />
 
         <field name="createdAt" type="datetime_immutable" column="created_at" />

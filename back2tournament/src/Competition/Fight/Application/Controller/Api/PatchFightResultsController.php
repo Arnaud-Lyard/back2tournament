@@ -7,49 +7,41 @@ namespace App\Competition\Fight\Application\Controller\Api;
 use App\Competition\Fight\Application\Event\OnUpdateFightResultsEvent;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Messenger\HandleTrait;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Route('/api/fights/{id}/results', name: 'api_fight_results_patch', methods: ['PATCH'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Fight ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(
     required: true,
-    description: 'The outcome for each side, in the order the fight holds its competitors — `GET /api/fights/{id}/results/{gameid}` returns them in that same order. The two statuses must agree: a win against a loss, or two draws. The declaring side is the authenticated user, never a field of the body.',
+    description: 'The scores, seen from the side of the caller, who declares them: the side is the player profile they own, or the team they lead, in this fight. The outcome follows from the scores: the higher one wins, equal scores draw — and a tournament fight cannot end in a draw. Until the other side confirms, the declaring side may declare again to correct itself; the other side cannot overwrite the declaration.',
     content: new OA\JsonContent(
-        required: ['fight', 'game', 'competitorOneStatus', 'competitorOneScore', 'competitorTwoStatus', 'competitorTwoScore'],
+        required: ['score', 'opponentScore'],
         properties: [
-            new OA\Property(property: 'fight', type: 'string', format: 'uuid', description: 'Fight being declared. Repeat the `id` of the path here.'),
-            new OA\Property(property: 'game', type: 'string', format: 'uuid', description: 'Game of the fight: with the authenticated user it names the competitor declaring the results'),
-            new OA\Property(property: 'competitorOneStatus', type: 'string', enum: ['win', 'loss', 'draw'], description: 'Outcome claimed for the first competitor of the fight'),
-            new OA\Property(property: 'competitorOneScore', type: 'integer', minimum: 0, example: 3),
-            new OA\Property(property: 'competitorTwoStatus', type: 'string', enum: ['win', 'loss', 'draw'], description: 'Outcome claimed for the second competitor of the fight'),
-            new OA\Property(property: 'competitorTwoScore', type: 'integer', minimum: 0, example: 1),
+            new OA\Property(property: 'score', type: 'integer', minimum: 0, example: 3, description: 'Points of the caller\'s side'),
+            new OA\Property(property: 'opponentScore', type: 'integer', minimum: 0, example: 1, description: 'Points of the other side'),
         ],
     ),
 )]
 #[OA\Response(
     response: 200,
-    description: 'Results declared, waiting for the other side to confirm them. Both results move to `reporting`, carrying the claimed score in `score` and the claimed outcome in `reportedStatus`. The fight is returned, with `declaredBy` naming the side that just declared.',
-    content: new OA\JsonContent(ref: '#/components/schemas/Fight'),
+    description: 'Scores declared, waiting for the other side to confirm them: both sides are `reporting`, each with its claimed `score` and `reportedStatus`, and `declaredBy` names the caller\'s side.',
+    content: new OA\JsonContent(ref: '#/components/schemas/FightSummary'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
+#[OA\Response(response: 403, description: 'The caller stands on neither side of the fight')]
 #[OA\Response(response: 404, description: 'The fight, or a result for one of its two sides, does not exist')]
+#[OA\Response(response: 409, description: 'The fight is settled, or the other side already declared')]
 final class PatchFightResultsController extends AbstractController
 {
-    use HandleTrait;
-
     private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(MessageBusInterface $messageBus, EventDispatcherInterface $eventDispatcher)
+    public function __construct(EventDispatcherInterface $eventDispatcher)
     {
-        $this->messageBus = $messageBus;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -61,17 +53,12 @@ final class PatchFightResultsController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $this->eventDispatcher->dispatch(new OnUpdateFightResultsEvent(
-            $parameters['fight'],
-            $parameters['game'],
-            $parameters['competitorOneStatus'],
-            $parameters['competitorOneScore'],
-            $parameters['competitorTwoStatus'],
-            $parameters['competitorTwoScore'],
+        $event = $this->eventDispatcher->dispatch(new OnUpdateFightResultsEvent(
+            $id,
+            $parameters['score'],
+            $parameters['opponentScore'],
         ));
 
-        return JsonResponse::fromJsonString(
-            $request->getSession()->get('last_fight_result_updated')
-        );
+        return JsonResponse::fromJsonString($event->getUpdatedFight());
     }
 }

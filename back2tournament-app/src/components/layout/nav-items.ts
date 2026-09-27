@@ -1,9 +1,14 @@
-import { HouseIcon, NewspaperIcon, type LucideIcon } from "lucide-react"
+import {
+  HouseIcon,
+  NewspaperIcon,
+  TrophyIcon,
+  type LucideIcon,
+} from "lucide-react"
 import type { AuthPermission } from "@/features/auth/types"
 
 export interface NavItem {
   href: string
-  labelKey: "home" | "blog"
+  labelKey: "home" | "blog" | "tournaments"
   icon: LucideIcon
   match: "exact" | "prefix"
   requiresAuth: boolean
@@ -16,6 +21,13 @@ export const siteNavItems: readonly NavItem[] = [
     labelKey: "home",
     icon: HouseIcon,
     match: "exact",
+    requiresAuth: false,
+  },
+  {
+    href: "/tournaments",
+    labelKey: "tournaments",
+    icon: TrophyIcon,
+    match: "prefix",
     requiresAuth: false,
   },
   {

@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace App\Tests\Competition\Shared\Domain;
 
 use App\Competition\Competitor\Domain\Entity\Competitor;
-use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use App\Competition\Fight\Domain\Entity\Fight;
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
+use App\Competition\Profile\Game\Domain\Entity\GameId as FightGameId;
 use App\Competition\Profile\Player\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Competition\Profile\Player\Domain\Entity\UserId;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
+use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Provider\CompetitorIdProvider;
 use App\Shared\Exception\NotFoundException;
+use App\Shared\ValueObject\TeamSizeValueObject;
 use PHPUnit\Framework\TestCase;
 
 final class CompetitorIdProviderTest extends TestCase
@@ -82,30 +84,6 @@ final class CompetitorIdProviderTest extends TestCase
         $provider->byUserAndGame(self::USER_ID, self::GAME_ID);
     }
 
-    public function test_a_fight_names_the_other_side_of_a_competitor(): void
-    {
-        $provider = $this->opponentProvider(self::fight(), self::COMPETITOR_ID);
-
-        $this->assertSame(self::OPPONENT_ID, $provider->byOpponentInFight(self::USER_ID, self::GAME_ID, self::FIGHT_ID));
-    }
-
-    public function test_the_other_side_is_read_whichever_side_asks(): void
-    {
-        $provider = $this->opponentProvider(self::fight(), self::OPPONENT_ID);
-
-        $this->assertSame(self::COMPETITOR_ID, $provider->byOpponentInFight(self::USER_ID, self::GAME_ID, self::FIGHT_ID));
-    }
-
-    public function test_an_unknown_fight_has_no_other_side(): void
-    {
-        $provider = $this->opponentProvider(null, self::COMPETITOR_ID);
-
-        $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessageIsOrContains('not found');
-
-        $provider->byOpponentInFight(self::USER_ID, self::GAME_ID, self::FIGHT_ID);
-    }
-
     public function test_a_profile_that_was_never_enrolled_takes_part_in_no_fight(): void
     {
         $competitorRepository = $this->createStub(CompetitorRepositoryInterface::class);
@@ -163,28 +141,14 @@ final class CompetitorIdProviderTest extends TestCase
         );
     }
 
-    private function opponentProvider(?Fight $fight, string $mine): CompetitorIdProvider
-    {
-        $fightRepository = $this->createStub(FightRepositoryInterface::class);
-        $fightRepository->method('findOneBy')->willReturn($fight);
-
-        $playerRepository = $this->createStub(PlayerRepositoryInterface::class);
-        $playerRepository->method('findOneBy')->willReturn(self::player());
-
-        $competitorRepository = $this->createStub(CompetitorRepositoryInterface::class);
-        $competitorRepository->method('findOneBy')->willReturn(
-            Competitor::create(new CompetitorId($mine), CompetitorType::PLAYER, self::PLAYER_ID)
-        );
-
-        return new CompetitorIdProvider($competitorRepository, $playerRepository, $fightRepository);
-    }
-
     private static function fight(): Fight
     {
         return Fight::create(
             new FightId(self::FIGHT_ID),
             new CompetitorId(self::COMPETITOR_ID),
             new CompetitorId(self::OPPONENT_ID),
+            new FightGameId(self::GAME_ID),
+            new TeamSizeValueObject(1),
         );
     }
 

@@ -47,18 +47,28 @@ make user           # seed a dev user via app:create-user
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
   any context to learn who the caller is.
 - `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy.
-- `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Team/`
-  — competition profiles. A `Player` is one user in one game; `TeamPlayer` joins players
-  to teams.
+- `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
+  `Competition/Profile/Team/` — competition profiles. A `Game` lists the formats it is
+  played in (`teamSizes`: 1 for 1v1, 5 for 5v5, up to 64). A `Player` is one user in one
+  game. A `Clan` groups players of one game under a leader; players join by invitation
+  and belong to one clan at most. A `Team` is a lineup a clan fields in one format:
+  exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
-  Created lazily when a fight is opened; never through an endpoint of its own.
-- `Competition/Fight/` — fights and their results, including the declare-then-confirm
-  workflow.
-- `Competition/Shared/` — `CompetitorId` and `CompetitorIdProviderInterface`, shared by
-  every Competition module.
-- `Competition/Tournament/` — **three empty files, nothing else.** No entity, no mapping,
-  no Deptrac layer. Creating this context means declaring its layers before the first
-  class compiles, because `make ddd` runs with `--fail-on-uncovered`.
+  Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is
+  opened or a tournament registration made; never through an endpoint of its own.
+- `Competition/Fight/` — fights between two competitors of the same game and format,
+  and their results: one side declares the scores, the other confirms them. A settled
+  fight records `FightSettledEvent`.
+- `Competition/Tournament/` — single-elimination tournaments: registrations, the
+  bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
+  winners moving on as `FightSettledEvent` comes in.
+- `Competition/Shared/` — `CompetitorId` and the contracts every
+  Competition module reads directly, in `Domain/Provider/`:
+  `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
+  `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
+  for, name the sides) and `FightSchedulerProviderInterface` (open a fight with its
+  two pending results). Each `…ProviderInterface` has its `…Provider` implementation
+  next to it, in the same folder.
 
 Each context (except `Shared`) has three layers:
 
@@ -119,7 +129,7 @@ deptrac.yaml                                                          # layers +
 ```
 
 Names line up across the four files: `PostFightResultsConfirmationController` →
-`ConfirmFightResultsCommand` → `ConfirmFightResultsHandler` → `Fight::confirmResult()`.
+`ConfirmFightResultsCommand` → `ConfirmFightResultsHandler` → `Fight::confirmOutcome()`.
 
 ## 2. Controller rules
 
@@ -134,8 +144,10 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   request payload is always a bug and usually a privilege escalation.
 - **Never read a handler's output back from the session.** A query handler returns its
   payload through `HandleTrait::handle()`; a command handler that must answer with the
-  written resource returns it the same way. Both firewalls under `^/api` are
-  `stateless: true`, so session round-trips also raise a Symfony warning.
+  written resource returns it the same way, or on the events of a User verification
+  chain (§5). Do not count on Symfony to catch a session round-trip: the
+  `stateless: true` firewalls under `^/api` keep the token out of the session, but they
+  do not mark the request stateless, so nothing warns.
 - No `try`/`catch`. Handlers throw the typed exceptions from `App\Shared\Exception\*`
   and `DomainExceptionListener` maps them to 400 / 403 / 404 / 409.
 - Controllers hold no business logic and touch no repository.
@@ -157,11 +169,15 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   load, call the domain method, save, dispatch the recorded domain events.
 - A scalar that carries a business rule gets a value object, built at the top of the
   handler before any repository read, so an invalid payload costs no query. Follow the
-  house shape: an abstract `<Concept>ValueObject` in `Shared/ValueObject/` doing the
-  checking in `ensureIsValid<Concept>()`, and a `final class <Concept>` extending it in
-  the owning context. Keep the entity's getter returning the raw scalar unless you mean
-  to change the JSON: a getter that returns the value object serializes as
-  `{"value": …}` and rewrites the published contract.
+  house shape: one `final class <Concept>ValueObject` per concept in
+  `Shared/ValueObject/`, doing the checking in `ensureIsValid<Concept>()`, and used as
+  is by every context — never subclassed in the owning context. Two concepts with
+  different rules get two value objects, even when they look alike
+  (`TeamNameValueObject`, `TournamentNameValueObject`). The older value objects
+  (`EmailValueObject`, `BattletagValueObject`, `ScoreValueObject`…) are still abstract,
+  with a `final class <Concept>` in their context. Keep the entity's getter returning
+  the raw scalar unless you mean to change the JSON: a getter that returns the value
+  object serializes as `{"value": …}` and rewrites the published contract.
 - Authorisation happens before any write: resolve which side of the aggregate the
   current user is, and throw `PermissionDeniedException` when they are on neither.
   A resolver that silently falls back to "the first one" is a security hole.
@@ -172,6 +188,9 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   through `SerializerInterface` / `NormalizerInterface`.
 - Value objects serialize as `{"value": "<uuid>"}`. Document that shape in the OpenAPI
   response schema.
+- The handler builds the response it returns: normalize the entity, or, when the
+  response combines several aggregates, build the array in a private method of the
+  handler itself. No shared view class between handlers.
 - POST create endpoints answer **200**, not 201, and carry only the primary resource —
   no secondary entities padded in.
 - Request bodies are read with `json_decode($content, true)`, so a JSON number arrives
@@ -186,16 +205,28 @@ Two mechanisms, and they are not interchangeable.
 **A contract in `<BC>/Shared/`, read directly.** This is the default when the current
 request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
-the caller injects the interface. `CurrentUserProviderInterface` and
-`CompetitorIdProviderInterface` are the two in place. Prefer this over chaining finder
-services, and over events.
+the caller injects the interface. `CurrentUserProviderInterface`,
+`CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
+`CompetitorRegistryProviderInterface` and `FightSchedulerProviderInterface` are the
+ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
-something that already happened — sending a mail after a user registers, creating a
-competitor after players are verified. Do not use an event chain to assemble the data
-one request needs: each hop adds an event class, a subscriber, a constructor signature
-and a silent `ArgumentCountError` when one of them drifts, and the response then has
-nowhere to go but the session.
+something that already happened — sending a mail after a user registers, moving a
+tournament winner on once its fight is settled (`FightSettledEvent`). Do not use an
+event chain to assemble the data one request needs: each hop adds an event class, a
+subscriber, a constructor signature and a silent `ArgumentCountError` when one of them
+drifts, and the response then has nowhere to go but the session.
+
+**The User context's verification chain** is the one sanctioned exception, kept on
+purpose: creating a player profile, a game or a team, publishing an article, and
+declaring or confirming a fight result go through the User context. The controller dispatches `On<Thing>RequestedEvent` (owning
+context); a subscriber of the User context checks the role and dispatches
+`On<Thing>…VerifiedEvent` carrying the verified user id; a subscriber of the owning
+context runs the command for that user through `HandleTrait`. The handler's JSON goes
+back the same way: the owning subscriber sets it on the verified event, the User
+subscriber copies it onto the requested event, and the controller reads it from the
+event `dispatch()` returned — never from the session. Player creation and article
+publication still read theirs from the session: align them when they are next touched.
 
 Naming, when an event really is warranted: `On<Thing><PastParticiple>Event` in
 `Application/Event/`, subscriber `<Thing><PastParticiple>EventSubscriber` in

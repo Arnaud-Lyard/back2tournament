@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Competition\Fight\Application\EventSubscriber;
 
-use App\Competition\Competitor\Application\Event\OnFightCompetitorResolvedEvent;
+use App\Authentication\User\Application\Event\OnUpdateFightResultsVerifiedEvent;
 use App\Competition\Fight\Application\Model\UpdateFightResultsCommand;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final class UpdateFightResultsVerifiedEventSubscriber implements EventSubscriberInterface
 {
-    private MessageBusInterface $messageBus;
+    use HandleTrait;
 
     public function __construct(MessageBusInterface $messageBus)
     {
@@ -21,22 +22,17 @@ final class UpdateFightResultsVerifiedEventSubscriber implements EventSubscriber
     public static function getSubscribedEvents(): array
     {
         return [
-            OnFightCompetitorResolvedEvent::class => 'onFightCompetitorResolved',
+            OnUpdateFightResultsVerifiedEvent::class => 'updateFightResults',
         ];
     }
 
-    public function onFightCompetitorResolved(OnFightCompetitorResolvedEvent $event): void
+    public function updateFightResults(OnUpdateFightResultsVerifiedEvent $event): void
     {
-        $updateFightResultsCommand = new UpdateFightResultsCommand();
-        $updateFightResultsCommand->setFight($event->getFight());
-        $updateFightResultsCommand->setUser($event->getUser());
-        $updateFightResultsCommand->setCompetitorOne($event->getCompetitorOne());
-        $updateFightResultsCommand->setCompetitorTwo($event->getCompetitorTwo());
-        $updateFightResultsCommand->setCompetitorOneStatus($event->getCompetitorOneStatus());
-        $updateFightResultsCommand->setCompetitorOneScore($event->getCompetitorOneScore());
-        $updateFightResultsCommand->setCompetitorTwoStatus($event->getCompetitorTwoStatus());
-        $updateFightResultsCommand->setCompetitorTwoScore($event->getCompetitorTwoScore());
-
-        $this->messageBus->dispatch($updateFightResultsCommand);
+        $event->setUpdatedFight($this->handle(new UpdateFightResultsCommand(
+            $event->getFight(),
+            $event->getUser(),
+            $event->getScore(),
+            $event->getOpponentScore(),
+        )));
     }
 }

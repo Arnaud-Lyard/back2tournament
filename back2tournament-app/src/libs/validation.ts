@@ -23,6 +23,15 @@ export function requiredText(maxLength = MAX_TEXT_LENGTH) {
     .max(maxLength, message("tooLong"))
 }
 
+/** A name shown in lists: a clan or a team (50 characters), a tournament (100). */
+export function requiredName(maxLength: 50 | 100 = 50) {
+  return z
+    .string()
+    .trim()
+    .min(1, message("required"))
+    .max(maxLength, message(maxLength === 50 ? "tooLong50" : "tooLong100"))
+}
+
 /** Backend identifiers are v4 UUIDs; pasted values are trimmed and lowercased. */
 export function uuid() {
   return z

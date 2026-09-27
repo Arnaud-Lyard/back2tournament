@@ -6,99 +6,42 @@ namespace App\Competition\Fight\Application\Model;
 
 final class UpdateFightResultsCommand
 {
-    private string $fight;
+    private string $fightId;
 
     private string $user;
 
-    private string $competitorOne;
+    private int $score;
 
-    private string $competitorTwo;
+    private int $opponentScore;
 
-    private string $competitorOneStatus;
-
-    private int $competitorOneScore;
-
-    private string $competitorTwoStatus;
-
-    private int $competitorTwoScore;
-
-    public function getFight(): string
+    public function __construct(string $fightId, string $user, int $score, int $opponentScore)
     {
-        return $this->fight;
+        $this->fightId = $fightId;
+        $this->user = $user;
+        $this->score = $score;
+        $this->opponentScore = $opponentScore;
     }
 
-    public function setFight(string $fight): void
+    public function getFightId(): string
     {
-        $this->fight = $fight;
+        return $this->fightId;
     }
 
+    /**
+     * The caller, as the User context verified it.
+     */
     public function getUser(): string
     {
         return $this->user;
     }
 
-    public function setUser(string $user): void
+    public function getScore(): int
     {
-        $this->user = $user;
+        return $this->score;
     }
 
-    public function getCompetitorOne(): string
+    public function getOpponentScore(): int
     {
-        return $this->competitorOne;
-    }
-
-    public function setCompetitorOne(string $competitorOne): void
-    {
-        $this->competitorOne = $competitorOne;
-    }
-
-    public function getCompetitorTwo(): string
-    {
-        return $this->competitorTwo;
-    }
-
-    public function setCompetitorTwo(string $competitorTwo): void
-    {
-        $this->competitorTwo = $competitorTwo;
-    }
-
-    public function getCompetitorOneStatus(): string
-    {
-        return $this->competitorOneStatus;
-    }
-
-    public function setCompetitorOneStatus(string $competitorOneStatus): void
-    {
-        $this->competitorOneStatus = $competitorOneStatus;
-    }
-
-    public function getCompetitorOneScore(): int
-    {
-        return $this->competitorOneScore;
-    }
-
-    public function setCompetitorOneScore(int $competitorOneScore): void
-    {
-        $this->competitorOneScore = $competitorOneScore;
-    }
-
-    public function getCompetitorTwoStatus(): string
-    {
-        return $this->competitorTwoStatus;
-    }
-
-    public function setCompetitorTwoStatus(string $competitorTwoStatus): void
-    {
-        $this->competitorTwoStatus = $competitorTwoStatus;
-    }
-
-    public function getCompetitorTwoScore(): int
-    {
-        return $this->competitorTwoScore;
-    }
-
-    public function setCompetitorTwoScore(int $competitorTwoScore): void
-    {
-        $this->competitorTwoScore = $competitorTwoScore;
+        return $this->opponentScore;
     }
 }

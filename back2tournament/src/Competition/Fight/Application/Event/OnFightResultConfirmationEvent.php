@@ -8,23 +8,30 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class OnFightResultConfirmationEvent extends Event
 {
-    private string $game;
-
     private string $fight;
 
-    public function __construct(string $game, string $fight)
-    {
-        $this->game = $game;
-        $this->fight = $fight;
-    }
+    private string $confirmedFight;
 
-    public function getGame(): string
+    public function __construct(string $fight)
     {
-        return $this->game;
+        $this->fight = $fight;
     }
 
     public function getFight(): string
     {
         return $this->fight;
+    }
+
+    /**
+     * The fight once confirmed, as the handler serialized it, handed back to the controller.
+     */
+    public function getConfirmedFight(): string
+    {
+        return $this->confirmedFight;
+    }
+
+    public function setConfirmedFight(string $confirmedFight): void
+    {
+        $this->confirmedFight = $confirmedFight;
     }
 }

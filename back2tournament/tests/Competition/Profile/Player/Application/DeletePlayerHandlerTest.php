@@ -6,6 +6,8 @@ namespace App\Tests\Competition\Profile\Player\Application;
 
 use App\Authentication\User\Domain\Entity\User;
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
+use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
+use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Player\Application\Model\DeletePlayerCommand;
 use App\Competition\Profile\Player\Application\Service\DeletePlayerHandler;
 use App\Competition\Profile\Player\Domain\Entity\GameId;
@@ -82,6 +84,21 @@ final class DeletePlayerHandlerTest extends TestCase
         $this->handler($playerRepository, self::OWNER_ID, competes: true)($this->command());
     }
 
+    public function test_a_profile_with_a_place_in_a_clan_is_kept(): void
+    {
+        $playerRepository = $this->createMock(PlayerRepositoryInterface::class);
+        $playerRepository->method('findOneBy')->willReturn($this->player());
+        $playerRepository->expects($this->never())->method('remove');
+
+        $clanMemberRepository = $this->createStub(ClanMemberRepositoryInterface::class);
+        $clanMemberRepository->method('findOneBy')->willReturn($this->createStub(ClanMember::class));
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('belongs to a clan');
+
+        $this->handler($playerRepository, self::OWNER_ID, competes: false, clanMemberRepository: $clanMemberRepository)($this->command());
+    }
+
     public function test_the_deletion_is_announced_once_the_profile_is_gone(): void
     {
         $dispatched = [];
@@ -102,6 +119,7 @@ final class DeletePlayerHandlerTest extends TestCase
             $playerRepository,
             $this->currentUserProvider(self::OWNER_ID),
             $this->competitorIdProvider(false),
+            $this->createStub(ClanMemberRepositoryInterface::class),
             $eventDispatcher,
             $this->createStub(SerializerInterface::class),
         )($this->command());
@@ -129,11 +147,13 @@ final class DeletePlayerHandlerTest extends TestCase
         string $currentUserId,
         bool $competes,
         ?SerializerInterface $serializer = null,
+        ?ClanMemberRepositoryInterface $clanMemberRepository = null,
     ): DeletePlayerHandler {
         return new DeletePlayerHandler(
             $playerRepository,
             $this->currentUserProvider($currentUserId),
             $this->competitorIdProvider($competes),
+            $clanMemberRepository ?? $this->createStub(ClanMemberRepositoryInterface::class),
             $this->createStub(EventDispatcherInterface::class),
             $serializer ?? $this->createStub(SerializerInterface::class),
         );

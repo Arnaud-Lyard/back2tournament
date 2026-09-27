@@ -1,9 +1,12 @@
+import { TrophyIcon } from "lucide-react"
 import { getFormatter, getTranslations } from "next-intl/server"
 import { PlayerAvatar } from "@/components/player-avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
+import { challengeStage, formatLabel } from "@/features/fights/lib/challenge"
 import type { PendingResult } from "@/features/fights/types"
 import { cn } from "@/libs/utils"
+import { ChallengeActions } from "./challenge-actions"
 
 interface ChallengeRowProps {
   result: PendingResult
@@ -11,8 +14,9 @@ interface ChallengeRowProps {
 }
 
 const BADGE_VARIANT = {
-  pending: "outline",
-  reporting: "default",
+  declare: "outline",
+  awaiting: "secondary",
+  confirm: "default",
 } as const
 
 export async function ChallengeRow({ result, gameTitle }: ChallengeRowProps) {
@@ -21,17 +25,27 @@ export async function ChallengeRow({ result, gameTitle }: ChallengeRowProps) {
     getFormatter(),
   ])
 
-  const status = result.status === "reporting" ? "reporting" : "pending"
-  const reported = result.reportedStatus
+  const fightId = result.fight?.value
+  const stage = challengeStage(result)
+  const mine = result.side?.name ?? result.player?.battletag
+  const theirs = result.opponent?.name ?? result.opponent?.player?.battletag
+  const score = result.score ?? 0
+  const opponentScore = result.opponent?.score ?? 0
+  const opponentName = theirs ?? t("unknownOpponent")
 
   return (
     <li>
       <Card size="sm" className="gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2 px-(--card-spacing)">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={BADGE_VARIANT[status]}>
-              {t(`status.${status}`)}
-            </Badge>
+            <Badge variant={BADGE_VARIANT[stage]}>{t(`stage.${stage}`)}</Badge>
+            <Badge variant="outline">{formatLabel(result.teamSize)}</Badge>
+            {result.tournament && (
+              <Badge variant="secondary">
+                <TrophyIcon data-icon="inline-start" />
+                {t("tournament")}
+              </Badge>
+            )}
             {gameTitle && (
               <span className="text-xs text-muted-foreground">{gameTitle}</span>
             )}
@@ -48,38 +62,49 @@ export async function ChallengeRow({ result, gameTitle }: ChallengeRowProps) {
           )}
         </div>
         <div className="flex items-center gap-3 px-(--card-spacing)">
-          <Side
-            battletag={result.player?.battletag}
-            unknown={t("unknownPlayer")}
-          />
+          <Side name={mine} unknown={t("unknownPlayer")} />
           <span className="shrink-0 text-center font-mono text-sm text-muted-foreground">
-            {t("versus")}
+            {stage === "declare" ? t("versus") : `${score} – ${opponentScore}`}
           </span>
-          <Side
-            battletag={result.opponent?.player?.battletag}
-            unknown={t("unknownOpponent")}
-            align="end"
-          />
+          <Side name={theirs} unknown={t("unknownOpponent")} align="end" />
         </div>
         <p className="px-(--card-spacing) text-sm text-muted-foreground">
-          {reported
-            ? t("claimed", {
-                outcome: t(`outcome.${reported}`),
-                score: result.score ?? 0,
-              })
-            : t("awaitingDeclaration")}
+          {stage === "declare"
+            ? t("awaitingDeclaration")
+            : stage === "awaiting"
+              ? t("declaredByYou", {
+                  score,
+                  opponentScore,
+                  opponent: opponentName,
+                })
+              : t("declaredByOpponent", {
+                  opponent: opponentName,
+                  score,
+                  opponentScore,
+                  outcome: t(`outcome.${result.reportedStatus ?? "draw"}`),
+                })}
         </p>
+        {fightId && (
+          <div className="px-(--card-spacing)">
+            <ChallengeActions
+              fightId={fightId}
+              stage={stage}
+              score={score}
+              opponentScore={opponentScore}
+            />
+          </div>
+        )}
       </Card>
     </li>
   )
 }
 
 function Side({
-  battletag,
+  name,
   unknown,
   align = "start",
 }: {
-  battletag: string | null | undefined
+  name: string | null | undefined
   unknown: string
   align?: "start" | "end"
 }) {
@@ -90,8 +115,8 @@ function Side({
         align === "end" && "flex-row-reverse text-right"
       )}
     >
-      <PlayerAvatar battletag={battletag ?? "?"} size="sm" />
-      <span className="truncate text-sm">{battletag ?? unknown}</span>
+      <PlayerAvatar battletag={name ?? "?"} size="sm" />
+      <span className="truncate text-sm">{name ?? unknown}</span>
     </div>
   )
 }

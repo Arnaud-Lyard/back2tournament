@@ -39,11 +39,15 @@ final class TeamCreationRequestedEventSubscriber implements EventSubscriberInter
             throw new PermissionDeniedException('the user does not have the necessary permissions');
         }
 
-        $this->eventDispatcher->dispatch(new OnTeamCreationUserVerifiedEvent(
+        $verifiedEvent = $this->eventDispatcher->dispatch(new OnTeamCreationUserVerifiedEvent(
             $event->getName(),
             (string) $user->getId(),
-            $event->getPlayer(),
+            $event->getClan(),
+            $event->getSize(),
+            $event->getPlayers(),
             $event->getLeader(),
         ));
+
+        $event->setCreatedTeam($verifiedEvent->getCreatedTeam());
     }
 }

@@ -10,14 +10,28 @@ final class OnTeamCreationUserVerifiedEvent extends Event
 {
     private string $name;
     private string $user;
-    private string $player;
+    private string $clan;
+    private int $size;
+
+    /**
+     * @var list<string>
+     */
+    private array $players;
+
     private string $leader;
 
-    public function __construct(string $name, string $user, string $player, string $leader)
+    private string $createdTeam;
+
+    /**
+     * @param list<string> $players
+     */
+    public function __construct(string $name, string $user, string $clan, int $size, array $players, string $leader)
     {
         $this->name = $name;
         $this->user = $user;
-        $this->player = $player;
+        $this->clan = $clan;
+        $this->size = $size;
+        $this->players = $players;
         $this->leader = $leader;
     }
 
@@ -31,13 +45,36 @@ final class OnTeamCreationUserVerifiedEvent extends Event
         return $this->user;
     }
 
-    public function getPlayer(): string
+    public function getClan(): string
     {
-        return $this->player;
+        return $this->clan;
+    }
+
+    public function getSize(): int
+    {
+        return $this->size;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getPlayers(): array
+    {
+        return $this->players;
     }
 
     public function getLeader(): string
     {
         return $this->leader;
+    }
+
+    public function getCreatedTeam(): string
+    {
+        return $this->createdTeam;
+    }
+
+    public function setCreatedTeam(string $createdTeam): void
+    {
+        $this->createdTeam = $createdTeam;
     }
 }

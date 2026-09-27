@@ -39,14 +39,13 @@ class UpdateFightResultsEventSubscriber implements EventSubscriberInterface
             throw new PermissionDeniedException('the user does not have the necessary permissions');
         }
 
-        $this->eventDispatcher->dispatch(new OnUpdateFightResultsVerifiedEvent(
+        $verifiedEvent = $this->eventDispatcher->dispatch(new OnUpdateFightResultsVerifiedEvent(
             $event->getFight(),
             (string) $user->getId(),
-            $event->getGame(),
-            $event->getCompetitorOneStatus(),
-            $event->getCompetitorOneScore(),
-            $event->getCompetitorTwoStatus(),
-            $event->getCompetitorTwoScore()
+            $event->getScore(),
+            $event->getOpponentScore(),
         ));
+
+        $event->setUpdatedFight($verifiedEvent->getUpdatedFight());
     }
 }

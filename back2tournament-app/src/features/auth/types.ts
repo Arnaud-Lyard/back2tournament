@@ -13,6 +13,8 @@ export interface PlayerProfile {
 }
 
 export interface AuthUser {
+  /** The account id; unknown when only the JWT could be read. */
+  id?: string
   username: string
   role: UserRole
   permissions: AuthPermission[]

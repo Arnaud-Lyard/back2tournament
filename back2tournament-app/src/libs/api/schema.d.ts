@@ -165,14 +165,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/fights/{id}/results/{gameid}": {
+    "/api/fights/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["get_api_fight_results"];
+        get: operations["get_api_fight"];
         put?: never;
         post?: never;
         delete?: never;
@@ -245,7 +245,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/fights/results/confirmation": {
+    "/api/fights/{id}/results/confirmation": {
         parameters: {
             query?: never;
             header?: never;
@@ -255,6 +255,118 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["post_api_fight_results_confirmation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{id}/members/{playerid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_api_clan_member_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_clan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/games/{id}/clans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_clan_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/me/clans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_clan_mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_clan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{id}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_clan_invitation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clans/{id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_clan_member_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -275,6 +387,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/games/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patch_api_game_patch"];
         trace?: never;
     };
     "/api/players/{id}": {
@@ -325,6 +453,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/teams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_team"];
+        put?: never;
+        post?: never;
+        delete: operations["delete_api_team_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/teams/": {
         parameters: {
             query?: never;
@@ -335,6 +479,102 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["post_api_team_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/participants/{participantid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_api_tournament_participant_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_tournament"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_tournament_list"];
+        put?: never;
+        post: operations["post_api_tournament_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_tournament_cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/participants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_tournament_participant_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tournaments/{id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_tournament_start_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -409,6 +649,15 @@ export interface components {
         Game: {
             id?: components["schemas"]["Uuid"];
             title?: string;
+            /**
+             * @description The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. Teams, fights and tournaments only use these.
+             * @example [
+             *       1,
+             *       2,
+             *       3
+             *     ]
+             */
+            teamSizes?: number[];
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
@@ -424,21 +673,6 @@ export interface components {
             updatedAt?: string;
             game?: components["schemas"]["Uuid"];
             user?: components["schemas"]["Uuid"];
-        };
-        /** @description A fight between two competitors, in the order it holds them */
-        Fight: {
-            id?: components["schemas"]["Uuid"];
-            competitorOne?: components["schemas"]["Uuid"];
-            competitorTwo?: components["schemas"]["Uuid"];
-            /** @description The competitor that declared the outcome. Null while nothing has been declared. */
-            declaredBy?: {
-                /** Format: uuid */
-                value?: string;
-            } | null;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
         };
         /** @description What one side of a fight scored, and where that claim stands */
         Result: {
@@ -474,47 +708,51 @@ export interface components {
              */
             battletag?: string | null;
         };
-        /** @description One side of a fight: the competitor, the player profile behind it, and what that side claims. */
-        FightSide: {
+        /** @description A competitor, and what it stands for: a player profile in 1v1, a team in NvN. */
+        NamedSide: {
             competitor?: components["schemas"]["Uuid"];
-            /** @description The player profile this competitor stands for. Null for a team, and for a profile that no longer exists. */
-            player?: {
+            /** @enum {string|null} */
+            type?: "player" | "team" | null;
+            /** @description The player profile or the team this competitor stands for. */
+            reference?: {
                 /** Format: uuid */
                 value?: string;
             } | null;
             /**
-             * @description How this side is named in the game. Null whenever `player` is.
+             * @description The battletag of the profile, or the name of the team. Null when it no longer exists.
              * @example PlayerOne#1234
              */
-            battletag?: string | null;
+            name?: string | null;
+        };
+        /** @description One side of a fight, and what it claims or settled on. */
+        FightSide: components["schemas"]["NamedSide"] & {
             /**
              * @description Points this side scored. Zero until a declaration carries a real value.
              * @example 3
              */
             score?: number;
             /**
-             * @description Where this side stands, as `GET /api/fights/{id}/results/{gameid}` reports it.
+             * @description `pending` while nobody declared, `reporting` while the declaration waits for its confirmation, then the settled outcome.
              * @enum {string}
              */
             status?: "pending" | "reporting" | "win" | "loss" | "draw";
             /**
-             * @description The outcome the declaring side claims. Carried only while `status` is `reporting`.
+             * @description The outcome the declaration claims for this side. Carried only while `status` is `reporting`.
              * @enum {string|null}
              */
             reportedStatus?: "win" | "loss" | "draw" | null;
         };
-        /** @description A fight as a list shows it: the fight, where it stands as a whole, and its two sides named by battletag. */
+        /** @description A fight between two competitors of the same game and format, where it stands as a whole, and its two sides. */
         FightSummary: {
             id?: components["schemas"]["Uuid"];
-            competitorOne?: components["schemas"]["Uuid"];
-            competitorTwo?: components["schemas"]["Uuid"];
-            /** @description The competitor that declared the outcome. Null while nothing has been declared. */
-            declaredBy?: {
-                /** Format: uuid */
-                value?: string;
-            } | null;
-            /** @description The game both sides are registered in, read from their profiles. Null when neither side resolves to a player. */
-            game?: {
+            game?: components["schemas"]["Uuid"];
+            /**
+             * @description Players per side: 1 for a 1v1, 5 for a 5v5
+             * @example 1
+             */
+            teamSize?: number;
+            /** @description The tournament whose bracket holds this fight. Null for a challenge. */
+            tournament?: {
                 /** Format: uuid */
                 value?: string;
             } | null;
@@ -523,12 +761,160 @@ export interface components {
              * @enum {string}
              */
             status?: "pending" | "reporting" | "finished";
+            /** @description The competitor that declared the scores. Null while nothing has been declared. */
+            declaredBy?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            /** @description The competitor that won, once `finished`. Null before, and for a draw. */
+            winner?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            /** @description The competitor the authenticated user speaks for in this fight — their player profile, or the team they lead. Null for a bystander. */
+            mySide?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
             /** @description Both sides, in the order the fight holds them. */
             sides?: components["schemas"]["FightSide"][];
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+        };
+        /** @description A group of players of one game, run by its leader. `leader` names the leader's player profile. */
+        Clan: {
+            id?: components["schemas"]["Uuid"];
+            /** @example Back to Tournament */
+            name?: string;
+            /**
+             * @description 2 to 5 upper-case letters or digits, unique within the game
+             * @example B2T
+             */
+            tag?: string;
+            game?: components["schemas"]["Uuid"];
+            leader?: components["schemas"]["Uuid"];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        /** @description A clan as a list shows it. */
+        ClanSummary: components["schemas"]["Clan"] & {
+            /**
+             * @description Active members, the leader included; pending invitations are not counted
+             * @example 7
+             */
+            members?: number;
+        };
+        /** @description The place one player profile holds in one clan: `invited` until they accept, `active` after. */
+        ClanMember: {
+            id?: components["schemas"]["Uuid"];
+            clan?: components["schemas"]["Uuid"];
+            player?: components["schemas"]["PlayerProfile"];
+            /** @enum {string} */
+            role?: "leader" | "member";
+            /** @enum {string} */
+            status?: "invited" | "active";
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        /** @description A clan, its members and pending invitations (leader first), and the teams it fields. */
+        ClanDetail: components["schemas"]["Clan"] & {
+            members?: components["schemas"]["ClanMember"][];
+            teams?: components["schemas"]["Team"][];
+        };
+        /** @description A lineup a clan fields in one format: exactly `size` players, leader first. The leader speaks for the team in fights and tournaments. */
+        Team: {
+            id?: components["schemas"]["Uuid"];
+            /** @example Falcons Duo */
+            name?: string;
+            clan?: components["schemas"]["Uuid"];
+            game?: components["schemas"]["Uuid"];
+            /** @example 2 */
+            size?: number;
+            leader?: components["schemas"]["Uuid"];
+            players?: components["schemas"]["PlayerProfile"][];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        /** @description A single-elimination tournament of one game, in one format. */
+        TournamentSummary: {
+            id?: components["schemas"]["Uuid"];
+            /** @example Autumn Cup */
+            name?: string;
+            game?: components["schemas"]["Uuid"];
+            /**
+             * @description Players per side: 1 registers player profiles, more registers teams of that size
+             * @example 1
+             */
+            teamSize?: number;
+            /** @example 16 */
+            capacity?: number;
+            /** @example 5 */
+            participantCount?: number;
+            /**
+             * @description `upcoming` while registrations are open, `ongoing` once the bracket is drawn, `finished` when the final is settled.
+             * @enum {string}
+             */
+            status?: "upcoming" | "ongoing" | "finished" | "cancelled";
+            organizer?: components["schemas"]["Uuid"];
+            /** Format: date-time */
+            startsAt?: string;
+            /** @description The competitor that won the final. Null until then. */
+            winner?: components["schemas"]["NamedSide"] | null;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        /** @description A competitor registered in a tournament. The seed is its registration rank. */
+        TournamentParticipant: components["schemas"]["NamedSide"] & {
+            id?: components["schemas"]["Uuid"];
+            tournament?: components["schemas"]["Uuid"];
+            /** @example 1 */
+            seed?: number;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        /** @description One slot of the bracket. A side is null until the matchup feeding it is decided, or for good when a seed got a bye. */
+        TournamentMatchup: {
+            id?: components["schemas"]["Uuid"];
+            /**
+             * @description The last round is the final
+             * @example 1
+             */
+            round?: number;
+            /**
+             * @description From the top of the round
+             * @example 0
+             */
+            position?: number;
+            sides?: (components["schemas"]["NamedSide"] | null)[];
+            /** @description The fight both sides play, opened once both are known. Declared and confirmed like any other fight. */
+            fight?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+            winner?: {
+                /** Format: uuid */
+                value?: string;
+            } | null;
+        };
+        /** @description A tournament, its participants by seed and, once it started, its bracket round by round. */
+        TournamentDetail: components["schemas"]["TournamentSummary"] & {
+            participants?: components["schemas"]["TournamentParticipant"][];
+            /**
+             * @description 0 until the bracket is drawn
+             * @example 3
+             */
+            rounds?: number;
+            matchups?: components["schemas"]["TournamentMatchup"][];
         };
     };
     responses: {
@@ -1092,39 +1478,30 @@ export interface operations {
             403: components["responses"]["Forbidden"];
         };
     };
-    get_api_fight_results: {
+    get_api_fight: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /** @description Fight ID */
                 id: string;
-                /** @description Game the fight is played in. Together with the authenticated user it names which of the two sides is asking. */
-                gameid: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description The caller's own result in this fight. While it is `reporting`, `score` and `reportedStatus` hold what the declaring side claims — prefill the confirmation form with them. */
+            /** @description One fight and both its sides. `mySide` names the side the authenticated user speaks for, null for a bystander: with `declaredBy` it tells whether the caller may declare (`pending`), correct (`reporting`, declared by them) or confirm (`reporting`, declared by the other side). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Result"];
+                    "application/json": components["schemas"]["FightSummary"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            /** @description The game, the fight, or a result for the caller in it, does not exist */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            404: components["responses"]["NotFound"];
         };
     };
     get_api_results_pending_players: {
@@ -1174,7 +1551,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of the unsettled results of every competitor profile the authenticated user owns, whatever the game, oldest first: `pending` while nobody declared, `reporting` while one side waits for the other to confirm. Each item carries the caller's own side, the game it is played in, and the other side. `items` is empty when nothing is waiting, when the page is past the last one, and when the caller holds no player profile at all. */
+            /** @description One page of the unsettled results of every competitor the authenticated user speaks for — their player profiles, and the teams one of them leads — whatever the game, oldest first: `pending` while nobody declared, `reporting` while one side waits for the other to confirm. Each item carries the caller's own side, the fight it belongs to, and the other side. With `declaredBy` it tells what the caller may do: declare (`pending`), correct (`reporting`, declared by their side) or confirm (`reporting`, declared by the other side). `items` is empty when nothing is waiting, when the page is past the last one, and when the caller speaks for no competitor at all. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1182,12 +1559,38 @@ export interface operations {
                 content: {
                     "application/json": {
                         items: (components["schemas"]["Result"] & {
-                            /** @description The game the caller's profile is registered in. Null when that profile no longer exists. */
+                            /** @description The game the fight is played in. */
                             game?: {
                                 /** Format: uuid */
                                 value?: string;
                             } | null;
-                            /** @description The caller's own player profile, the one this result belongs to. */
+                            /**
+                             * @description Players per side: 1 for a 1v1
+                             * @example 1
+                             */
+                            teamSize?: number;
+                            /** @description The tournament whose bracket holds the fight. Null for a challenge. */
+                            tournament?: {
+                                /** Format: uuid */
+                                value?: string;
+                            } | null;
+                            /** @description The side that declared the scores. Null while nothing has been declared. */
+                            declaredBy?: {
+                                /** Format: uuid */
+                                value?: string;
+                            } | null;
+                            /** @description The caller's own side: the competitor this result belongs to. */
+                            side?: {
+                                competitor?: {
+                                    /** Format: uuid */
+                                    value?: string;
+                                };
+                                /** @enum {string|null} */
+                                type?: "player" | "team" | null;
+                                /** @description Battletag or team name */
+                                name?: string | null;
+                            };
+                            /** @description The caller's own player profile, for a 1v1. Null for a team. */
                             player?: components["schemas"]["PlayerProfile"] | null;
                             /** @description The other side of the fight. `player` is null for a team, and for a profile that no longer exists. */
                             opponent?: {
@@ -1195,7 +1598,16 @@ export interface operations {
                                     /** Format: uuid */
                                     value?: string;
                                 };
+                                /** @enum {string|null} */
+                                type?: "player" | "team" | null;
+                                /** @description Battletag or team name */
+                                name?: string | null;
                                 player?: components["schemas"]["PlayerProfile"] | null;
+                                /**
+                                 * @description Points the other side scored, as declared. Zero until a declaration.
+                                 * @example 1
+                                 */
+                                score?: number;
                             } | null;
                         })[];
                         /**
@@ -1235,52 +1647,51 @@ export interface operations {
             };
             cookie?: never;
         };
-        /** @description The outcome for each side, in the order the fight holds its competitors — `GET /api/fights/{id}/results/{gameid}` returns them in that same order. The two statuses must agree: a win against a loss, or two draws. The declaring side is the authenticated user, never a field of the body. */
+        /** @description The scores, seen from the side of the caller, who declares them: the side is the player profile they own, or the team they lead, in this fight. The outcome follows from the scores: the higher one wins, equal scores draw — and a tournament fight cannot end in a draw. Until the other side confirms, the declaring side may declare again to correct itself; the other side cannot overwrite the declaration. */
         requestBody: {
             content: {
                 "application/json": {
                     /**
-                     * Format: uuid
-                     * @description Fight being declared. Repeat the `id` of the path here.
+                     * @description Points of the caller's side
+                     * @example 3
                      */
-                    fight: string;
+                    score: number;
                     /**
-                     * Format: uuid
-                     * @description Game of the fight: with the authenticated user it names the competitor declaring the results
+                     * @description Points of the other side
+                     * @example 1
                      */
-                    game: string;
-                    /**
-                     * @description Outcome claimed for the first competitor of the fight
-                     * @enum {string}
-                     */
-                    competitorOneStatus: "win" | "loss" | "draw";
-                    /** @example 3 */
-                    competitorOneScore: number;
-                    /**
-                     * @description Outcome claimed for the second competitor of the fight
-                     * @enum {string}
-                     */
-                    competitorTwoStatus: "win" | "loss" | "draw";
-                    /** @example 1 */
-                    competitorTwoScore: number;
+                    opponentScore: number;
                 };
             };
         };
         responses: {
-            /** @description Results declared, waiting for the other side to confirm them. Both results move to `reporting`, carrying the claimed score in `score` and the claimed outcome in `reportedStatus`. The fight is returned, with `declaredBy` naming the side that just declared. */
+            /** @description Scores declared, waiting for the other side to confirm them: both sides are `reporting`, each with its claimed `score` and `reportedStatus`, and `declaredBy` names the caller's side. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Fight"];
+                    "application/json": components["schemas"]["FightSummary"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
+            /** @description The caller stands on neither side of the fight */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description The fight, or a result for one of its two sides, does not exist */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The fight is settled, or the other side already declared */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1295,93 +1706,388 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
+        /** @description Name either two player profiles, for a 1v1, or two teams of the same format, for an NvN. The caller stands on one side: they own one of the two profiles, or lead one of the two teams. The game must be played in that format. */
         requestBody: {
             content: {
                 "application/json": {
                     /**
                      * Format: uuid
-                     * @description ID of the first player
+                     * @description First player profile of a 1v1
                      */
-                    playerOne: string;
+                    playerOne?: string;
                     /**
                      * Format: uuid
-                     * @description ID of the second player
+                     * @description Second player profile of a 1v1
                      */
-                    playerTwo: string;
+                    playerTwo?: string;
+                    /**
+                     * Format: uuid
+                     * @description First team of an NvN
+                     */
+                    teamOne?: string;
+                    /**
+                     * Format: uuid
+                     * @description Second team of an NvN
+                     */
+                    teamTwo?: string;
                 };
             };
         };
         responses: {
-            /** @description Fight created */
+            /** @description Fight opened. Both sides are `pending` until one of them declares the scores. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        id?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        competitorOne?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        competitorTwo?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        /** Format: date-time */
-                        createdAt?: string;
-                        /** Format: date-time */
-                        updatedAt?: string;
-                    };
+                    "application/json": components["schemas"]["FightSummary"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
+            /** @description The caller stands on neither side */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A player profile or a team does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     post_api_fight_results_confirmation_post: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description Fight ID */
+                id: string;
+            };
             cookie?: never;
         };
-        /** @description Names the fight to settle. Confirming means agreeing with the results exactly as they were declared, so read them with `GET /api/fights/{id}/results/{gameid}` first. A side that disagrees does not confirm, and settles it with an admin. */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * Format: uuid
-                     * @description Fight whose declared results are being confirmed
-                     */
-                    fight: string;
-                    /**
-                     * Format: uuid
-                     * @description Game of the fight: with the authenticated user it names the competitor confirming the results
-                     */
-                    game: string;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description Both results are settled, each carrying its final `status` and `score`. The fight is returned, with `declaredBy` still naming the side that had declared. */
+            /** @description The side that did not declare agrees with the scores exactly as they were declared — read them with `GET /api/fights/{id}` first. No body is read. Both sides are settled on their final `status`; in a tournament, the winner moves on in the bracket. A side that disagrees does not confirm, and settles it with an admin. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Fight"];
+                    "application/json": components["schemas"]["FightSummary"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
+            /** @description The caller stands on neither side, or is the side that declared */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description The fight, or a result for one of its two sides, does not exist */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Nothing was declared yet, or the fight is already settled */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_clan_member_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+                /** @description Player profile whose membership or invitation ends */
+                playerid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Membership ended: the member left, the invitation was declined or withdrawn, or the leader let the member go. It is returned one last time, as it stood. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanMember"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller is neither this player nor the clan leader */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The clan does not exist, or the player has no place in it */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The leader cannot leave, and a member playing in a team of the clan stays until that team is disbanded */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_clan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One clan, its members and pending invitations (leader first), and the teams it fields. Public. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    get_api_clan_list: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many clans that page holds, 10 by default and 50 at most. */
+                limit?: number;
+                /** @description Keeps the clans whose name or tag contains this text, whatever the case. A blank value is no search. */
+                q?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Game ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the clans of this game, by name. `items` is empty when the game has no clan, when the search matches none, when the page is past the last one, and when no game has this id. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["ClanSummary"][];
+                        /** @example 12 */
+                        total: number;
+                        /** @example 1 */
+                        page: number;
+                        /** @example 10 */
+                        limit: number;
+                        /** @example 2 */
+                        pages: number;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    get_api_clan_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every place the authenticated user holds in a clan, whatever the game: memberships and invitations still to answer, oldest first. An empty array when there is none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        clan: components["schemas"]["Clan"];
+                        membership: components["schemas"]["ClanMember"];
+                    }[];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    post_api_clan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Founds a clan in a game. The founder is the player profile the authenticated user holds in that game: it becomes the leader and first member. A profile belongs to one clan at most. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description Game ID
+                     */
+                    game: string;
+                    /** @example Back to Tournament */
+                    name: string;
+                    /**
+                     * @description 2 to 5 letters or digits, stored upper-cased, unique within the game
+                     * @example B2T
+                     */
+                    tag: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Clan created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Clan"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The authenticated user holds no player profile in this game */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The founder already belongs to a clan, or the tag is taken in this game */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_clan_invitation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Only the clan leader invites. The player must play the game of the clan; they become a member once they accept with `POST /api/clans/{id}/members`. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description Player profile invited
+                     */
+                    player: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Invitation sent: the membership is `invited`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanMember"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not lead the clan */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The clan or the player does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The player already is a member of the clan, or invited to it */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_clan_member_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitation accepted: the player profile the authenticated user holds in the game of the clan is now an `active` member. No body is read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanMember"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The clan does not exist, the caller holds no profile in its game, or was not invited */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The caller already is a member of this clan, or of another one in the game */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1422,6 +2128,15 @@ export interface operations {
                 "application/json": {
                     /** @example Street Fighter 6 */
                     title: string;
+                    /**
+                     * @description The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. `[1]` when left out.
+                     * @example [
+                     *       1,
+                     *       2,
+                     *       3
+                     *     ]
+                     */
+                    teamSizes?: number[];
                 };
             };
         };
@@ -1432,17 +2147,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        id?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        title?: string | null;
-                        /** Format: date-time */
-                        createdAt?: string;
-                        /** Format: date-time */
-                        updatedAt?: string;
-                    };
+                    "application/json": components["schemas"]["Game"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    patch_api_game_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Game ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Requires a user with the administrator role. Every key is optional: a key left out keeps its current value. Dropping a format stops new teams, fights and tournaments from using it; what already exists in it is kept. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example Rocket League */
+                    title?: string;
+                    /**
+                     * @description The formats the game is played in, as the number of players per side. At least one.
+                     * @example [
+                     *       1,
+                     *       2,
+                     *       3
+                     *     ]
+                     */
+                    teamSizes?: number[];
+                };
+            };
+        };
+        responses: {
+            /** @description Game updated. It is returned as it now stands. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Game"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -1677,6 +2425,77 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
+    get_api_team: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Team ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One team and its lineup, leader first. Public. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    delete_api_team_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Team ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Team disbanded. It is returned one last time, as it stood. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not lead the clan of the team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No team has this id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The team has competed, in a fight or a tournament: it is kept for the record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_team_post: {
         parameters: {
             query?: never;
@@ -1684,19 +2503,27 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
+        /** @description A lineup the clan fields in one format. Only the clan leader composes teams, from the active members of the clan; the game of the clan must be played in that format. */
         requestBody: {
             content: {
                 "application/json": {
-                    /** @example Falcons */
+                    /**
+                     * Format: uuid
+                     * @description Clan the team plays for
+                     */
+                    clan: string;
+                    /** @example Falcons Duo */
                     name: string;
                     /**
-                     * Format: uuid
-                     * @description ID of the player added to the team
+                     * @description Players per side: 2 for a 2v2 team
+                     * @example 2
                      */
-                    player: string;
+                    size: number;
+                    /** @description The whole lineup, exactly `size` player profiles, the leader included */
+                    players: string[];
                     /**
                      * Format: uuid
-                     * @description ID of the player designated as team captain
+                     * @description The player of the lineup who opens fights, registers the team and declares or confirms its results
                      */
                     leader: string;
                 };
@@ -1709,28 +2536,338 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        id?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                        /** @example Falcons */
-                        name?: string | null;
-                        /** Format: date-time */
-                        createdAt?: string;
-                        /** Format: date-time */
-                        updatedAt?: string;
-                        leader?: {
-                            /** Format: uuid */
-                            value?: string;
-                        };
-                    };
+                    "application/json": components["schemas"]["Team"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
+            /** @description The caller does not lead the clan */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The clan does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_tournament_participant_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tournament ID */
+                id: string;
+                /** @description Participant ID, as the tournament lists it */
+                participantid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Registration withdrawn, by the participant or the organizer, before the tournament starts. Those registered after it move up one seed. It is returned one last time, as it stood. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentParticipant"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller is neither the participant nor the organizer */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The tournament does not exist, or this participant is not registered in it */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The tournament has already started */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_tournament: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tournament ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One tournament, its participants by seed and, once it started, its bracket round by round. Public. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    get_api_tournament_list: {
+        parameters: {
+            query?: {
+                /** @description Keeps the tournaments of this game */
+                game?: string;
+                /** @description Keeps the tournaments in this state */
+                status?: "upcoming" | "ongoing" | "finished" | "cancelled";
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many tournaments that page holds, 10 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of tournaments, soonest first. Public. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["TournamentSummary"][];
+                        /** @example 12 */
+                        total: number;
+                        /** @example 1 */
+                        page: number;
+                        /** @example 10 */
+                        limit: number;
+                        /** @example 2 */
+                        pages: number;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    post_api_tournament_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Organizes a single-elimination tournament. The authenticated user is its organizer: they start it once registrations are in, or cancel it. The game must be played in the format. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example Autumn Cup */
+                    name: string;
+                    /**
+                     * Format: uuid
+                     * @description Game ID
+                     */
+                    game: string;
+                    /**
+                     * @description Players per side: 1 registers player profiles, more registers teams of that size
+                     * @example 1
+                     */
+                    teamSize: number;
+                    /**
+                     * @description How many participants may register
+                     * @example 16
+                     */
+                    capacity: number;
+                    /**
+                     * Format: date-time
+                     * @description When the tournament is planned to start. Not in the past.
+                     * @example 2026-10-01T18:00:00+02:00
+                     */
+                    startsAt: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Tournament created, `upcoming`: registrations are open. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The game does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_tournament_cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tournament ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The organizer cancels the tournament, before or while it is played. Its bracket stops moving; fights already opened stay as they are. No body is read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not organize the tournament */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            /** @description The tournament is already finished or cancelled */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_tournament_participant_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tournament ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Name one of the two: a player profile the authenticated user owns, for a 1v1 tournament, or a team they lead, of the tournament's format. Registrations close when the tournament is full or starts. A player plays for one team per tournament. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description Player profile, for a 1v1 tournament
+                     */
+                    player?: string;
+                    /**
+                     * Format: uuid
+                     * @description Team, for an NvN tournament
+                     */
+                    team?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Registered. The seed is the registration rank. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentParticipant"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not own the profile, or does not lead the team */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The tournament, the profile or the team does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Registrations are closed, the tournament is full, or the participant is already registered */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_tournament_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tournament ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The organizer closes registrations and the bracket is drawn: seed 1 meets the last seed, and top seeds get a bye when the participants do not fill a power of two. The fights of the first round are opened; each later fight opens once both its sides are known. Each fight is then declared and confirmed like any other, and its winner moves on. No body is read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not organize the tournament */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            /** @description The tournament already started or is over, or fewer than two participants are registered */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
 }

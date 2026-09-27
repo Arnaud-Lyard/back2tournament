@@ -7,6 +7,7 @@ import type { AuthUser, CurrentUser } from "../types"
  */
 export function toAuthUser(me: CurrentUser): AuthUser {
   return {
+    id: me.id,
     username: me.username,
     ...mapSymfonyRoles(me.roles),
     verified: me.verified,

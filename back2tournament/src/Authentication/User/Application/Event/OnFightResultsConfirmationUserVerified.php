@@ -10,17 +10,14 @@ class OnFightResultsConfirmationUserVerified
 
     private string $user;
 
-    private string $game;
-
+    private string $confirmedFight;
 
     public function __construct(
         string $fight,
         string $user,
-        string $game,
     ) {
         $this->fight = $fight;
         $this->user = $user;
-        $this->game = $game;
     }
 
     public function getFight(): string
@@ -33,9 +30,13 @@ class OnFightResultsConfirmationUserVerified
         return $this->user;
     }
 
-    public function getGame(): string
+    public function getConfirmedFight(): string
     {
-        return $this->game;
+        return $this->confirmedFight;
     }
 
+    public function setConfirmedFight(string $confirmedFight): void
+    {
+        $this->confirmedFight = $confirmedFight;
+    }
 }

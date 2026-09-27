@@ -6,27 +6,34 @@ namespace App\Competition\Fight\Application\Model;
 
 final class CreateFightCommand
 {
-    private string $competitorOne;
+    private bool $betweenTeams;
 
-    private string $competitorTwo;
+    private string $sideOne;
 
-    public function getCompetitorOne(): string
+    private string $sideTwo;
+
+    /**
+     * @param bool $betweenTeams true when both sides name teams, false when they name player profiles
+     */
+    public function __construct(bool $betweenTeams, string $sideOne, string $sideTwo)
     {
-        return $this->competitorOne;
+        $this->betweenTeams = $betweenTeams;
+        $this->sideOne = $sideOne;
+        $this->sideTwo = $sideTwo;
     }
 
-    public function setCompetitorOne(string $competitorOne): void
+    public function isBetweenTeams(): bool
     {
-        $this->competitorOne = $competitorOne;
+        return $this->betweenTeams;
     }
 
-    public function getCompetitorTwo(): string
+    public function getSideOne(): string
     {
-        return $this->competitorTwo;
+        return $this->sideOne;
     }
 
-    public function setCompetitorTwo(string $competitorTwo): void
+    public function getSideTwo(): string
     {
-        $this->competitorTwo = $competitorTwo;
+        return $this->sideTwo;
     }
 }

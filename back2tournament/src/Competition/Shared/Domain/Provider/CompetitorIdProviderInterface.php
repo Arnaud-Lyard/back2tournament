@@ -8,7 +8,5 @@ interface CompetitorIdProviderInterface
 {
     public function byUserAndGame(string $userId, string $gameId): string;
 
-    public function byOpponentInFight(string $userId, string $gameId, string $fightId): string;
-
     public function takesPartInFights(string $playerId): bool;
 }

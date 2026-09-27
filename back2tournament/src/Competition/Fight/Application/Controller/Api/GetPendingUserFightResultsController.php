@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(
     response: 200,
-    description: 'One page of the unsettled results of every competitor profile the authenticated user owns, whatever the game, oldest first: `pending` while nobody declared, `reporting` while one side waits for the other to confirm. Each item carries the caller\'s own side, the game it is played in, and the other side. `items` is empty when nothing is waiting, when the page is past the last one, and when the caller holds no player profile at all.',
+    description: 'One page of the unsettled results of every competitor the authenticated user speaks for — their player profiles, and the teams one of them leads — whatever the game, oldest first: `pending` while nobody declared, `reporting` while one side waits for the other to confirm. Each item carries the caller\'s own side, the fight it belongs to, and the other side. With `declaredBy` it tells what the caller may do: declare (`pending`), correct (`reporting`, declared by their side) or confirm (`reporting`, declared by the other side). `items` is empty when nothing is waiting, when the page is past the last one, and when the caller speaks for no competitor at all.',
     content: new OA\JsonContent(
         required: ['items', 'total', 'page', 'limit', 'pages'],
         properties: [
@@ -44,14 +44,39 @@ use Symfony\Component\Routing\Attribute\Route;
                         new OA\Schema(properties: [
                             new OA\Property(
                                 property: 'game',
-                                description: 'The game the caller\'s profile is registered in. Null when that profile no longer exists.',
+                                description: 'The game the fight is played in.',
+                                properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')],
+                                type: 'object',
+                                nullable: true,
+                            ),
+                            new OA\Property(property: 'teamSize', type: 'integer', minimum: 1, example: 1, description: 'Players per side: 1 for a 1v1'),
+                            new OA\Property(
+                                property: 'tournament',
+                                description: 'The tournament whose bracket holds the fight. Null for a challenge.',
                                 properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')],
                                 type: 'object',
                                 nullable: true,
                             ),
                             new OA\Property(
+                                property: 'declaredBy',
+                                description: 'The side that declared the scores. Null while nothing has been declared.',
+                                properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')],
+                                type: 'object',
+                                nullable: true,
+                            ),
+                            new OA\Property(
+                                property: 'side',
+                                description: 'The caller\'s own side: the competitor this result belongs to.',
+                                properties: [
+                                    new OA\Property(property: 'competitor', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')], type: 'object'),
+                                    new OA\Property(property: 'type', type: 'string', enum: ['player', 'team'], nullable: true),
+                                    new OA\Property(property: 'name', type: 'string', nullable: true, description: 'Battletag or team name'),
+                                ],
+                                type: 'object',
+                            ),
+                            new OA\Property(
                                 property: 'player',
-                                description: 'The caller\'s own player profile, the one this result belongs to.',
+                                description: 'The caller\'s own player profile, for a 1v1. Null for a team.',
                                 ref: '#/components/schemas/PlayerProfile',
                                 nullable: true,
                             ),
@@ -60,7 +85,10 @@ use Symfony\Component\Routing\Attribute\Route;
                                 description: 'The other side of the fight. `player` is null for a team, and for a profile that no longer exists.',
                                 properties: [
                                     new OA\Property(property: 'competitor', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')], type: 'object'),
+                                    new OA\Property(property: 'type', type: 'string', enum: ['player', 'team'], nullable: true),
+                                    new OA\Property(property: 'name', type: 'string', nullable: true, description: 'Battletag or team name'),
                                     new OA\Property(property: 'player', ref: '#/components/schemas/PlayerProfile', nullable: true),
+                                    new OA\Property(property: 'score', type: 'integer', minimum: 0, example: 1, description: 'Points the other side scored, as declared. Zero until a declaration.'),
                                 ],
                                 type: 'object',
                                 nullable: true,
