@@ -11,7 +11,7 @@ use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -19,20 +19,20 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 final class FindPendingUserFightResultsHandler
 {
     private CurrentUserProviderInterface $currentUserProvider;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private FightRepositoryInterface $fightRepository;
     private ResultRepositoryInterface $resultRepository;
     private NormalizerInterface $serializer;
 
     public function __construct(
         CurrentUserProviderInterface $currentUserProvider,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         FightRepositoryInterface $fightRepository,
         ResultRepositoryInterface $resultRepository,
         NormalizerInterface $serializer,
     ) {
         $this->currentUserProvider = $currentUserProvider;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->fightRepository = $fightRepository;
         $this->resultRepository = $resultRepository;
         $this->serializer = $serializer;
@@ -44,7 +44,7 @@ final class FindPendingUserFightResultsHandler
         $limit = $findPendingUserFightResultsQuery->getLimit();
 
         // The caller's own player profiles, and the teams one of them leads.
-        $represented = $this->competitorRegistry->representedBy((string) $this->currentUserProvider->getUser()->getId());
+        $represented = $this->competitorRegistryProvider->representedBy((string) $this->currentUserProvider->getUser()->getId());
 
         if ([] === $represented) {
             return $this->page([], 0, $page, $limit);
@@ -80,7 +80,7 @@ final class FindPendingUserFightResultsHandler
             $competitorIds[] = $fight->getCompetitorOne()->getValue();
             $competitorIds[] = $fight->getCompetitorTwo()->getValue();
         }
-        $described = $this->competitorRegistry->describe($competitorIds);
+        $described = $this->competitorRegistryProvider->describe($competitorIds);
 
         $items = [];
         foreach ($results as $result) {

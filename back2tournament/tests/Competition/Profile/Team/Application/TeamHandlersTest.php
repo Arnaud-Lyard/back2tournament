@@ -16,7 +16,7 @@ use App\Competition\Profile\Team\Application\Service\DisbandTeamHandler;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
@@ -178,15 +178,15 @@ final class TeamHandlersTest extends TestCase
         TeamPlayerRepositoryInterface $teamPlayerRepository,
         bool $competed,
     ): DisbandTeamHandler {
-        $competitorRegistry = $this->createStub(CompetitorRegistryInterface::class);
-        $competitorRegistry->method('teamHasCompeted')->willReturn($competed);
+        $competitorRegistryProvider = $this->createStub(CompetitorRegistryProviderInterface::class);
+        $competitorRegistryProvider->method('teamHasCompeted')->willReturn($competed);
 
         return new DisbandTeamHandler(
             $teamRepository,
             $teamPlayerRepository,
             $this->repositoryStub(ClanRepositoryInterface::class, [$this->clan()]),
             $this->players(),
-            $competitorRegistry,
+            $competitorRegistryProvider,
             $this->signedIn(self::LEADER_USER),
             $this->createStub(EventDispatcherInterface::class),
         );

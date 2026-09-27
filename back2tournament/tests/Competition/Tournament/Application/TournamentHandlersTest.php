@@ -14,7 +14,7 @@ use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
 use App\Competition\Tournament\Application\EventSubscriber\FightSettledEventSubscriber;
 use App\Competition\Tournament\Application\Model\AdvanceTournamentCommand;
@@ -159,7 +159,7 @@ final class TournamentHandlersTest extends TestCase
     {
         $tournament = $this->tournament(1, capacity: 2);
 
-        $registry = $this->createMock(CompetitorRegistryInterface::class);
+        $registry = $this->createMock(CompetitorRegistryProviderInterface::class);
         $registry->expects($this->never())->method('enlistPlayer');
 
         $this->expectException(ConflictException::class);
@@ -375,15 +375,15 @@ final class TournamentHandlersTest extends TestCase
         return array_map(static fn (): MatchupId => new MatchupId(Uuid::v4()->toString()), range(1, $count));
     }
 
-    private function registry(): CompetitorRegistryInterface
+    private function registry(): CompetitorRegistryProviderInterface
     {
-        $registry = $this->createStub(CompetitorRegistryInterface::class);
+        $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
         $this->configureRegistry($registry);
 
         return $registry;
     }
 
-    private function configureRegistry(CompetitorRegistryInterface&Stub $registry): void
+    private function configureRegistry(CompetitorRegistryProviderInterface&Stub $registry): void
     {
         $registry->method('enlistPlayer')->willReturnCallback(static fn (string $id): string => self::uuidFor('competitor-of-'.$id));
         $registry->method('enlistTeam')->willReturnCallback(static fn (string $id): string => self::uuidFor('competitor-of-'.$id));
@@ -418,7 +418,7 @@ final class TournamentHandlersTest extends TestCase
         Tournament $tournament,
         ParticipantRepositoryInterface $participantRepository,
         string $caller,
-        (CompetitorRegistryInterface&MockObject)|null $registry = null,
+        (CompetitorRegistryProviderInterface&MockObject)|null $registry = null,
     ): RegisterParticipantHandler {
         $myClan = self::aClan(self::MY_CLAN, self::GAME_ID, self::MY_PLAYER);
         [$myTeam, $myLineup] = self::aTeam(self::MY_TEAM, $myClan, [self::MY_PLAYER, self::MATE_PLAYER]);

@@ -8,7 +8,7 @@ namespace App\Competition\Shared\Domain\Provider;
  * The competitors behind player profiles and teams: who they are, who speaks
  * for them, and enlisting them the first time they compete.
  */
-interface CompetitorRegistryInterface
+interface CompetitorRegistryProviderInterface
 {
     /**
      * The competitor a player profile competes as in 1v1, created on first use.

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Competition\Tournament\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Tournament\Application\Model\WithdrawParticipantCommand;
 use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\ParticipantId;
@@ -23,20 +23,20 @@ final class WithdrawParticipantHandler
 {
     private TournamentRepositoryInterface $tournamentRepository;
     private ParticipantRepositoryInterface $participantRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         TournamentRepositoryInterface $tournamentRepository,
         ParticipantRepositoryInterface $participantRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->tournamentRepository = $tournamentRepository;
         $this->participantRepository = $participantRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -62,7 +62,7 @@ final class WithdrawParticipantHandler
         // The participant withdraws itself, or the organizer withdraws it.
         $caller = (string) $this->currentUserProvider->getUser()->getId();
         if ($caller !== $tournament->getOrganizer()->getValue()
-            && !\in_array($leaving->getCompetitor()->getValue(), $this->competitorRegistry->representedBy($caller), true)) {
+            && !\in_array($leaving->getCompetitor()->getValue(), $this->competitorRegistryProvider->representedBy($caller), true)) {
             throw new PermissionDeniedException('only the participant or the organizer withdraws a registration');
         }
 
@@ -73,7 +73,7 @@ final class WithdrawParticipantHandler
         );
 
         $withdrawn = json_encode(
-            $this->normalizeParticipant($leaving, $this->competitorRegistry->describe([$leaving->getCompetitor()->getValue()])),
+            $this->normalizeParticipant($leaving, $this->competitorRegistryProvider->describe([$leaving->getCompetitor()->getValue()])),
             JSON_THROW_ON_ERROR,
         );
 

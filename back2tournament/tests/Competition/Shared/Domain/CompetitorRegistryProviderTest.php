@@ -9,13 +9,13 @@ use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistry;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProvider;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-final class CompetitorRegistryTest extends TestCase
+final class CompetitorRegistryProviderTest extends TestCase
 {
     use CompetitionFixtures;
     use RepositoryStubs;
@@ -91,11 +91,11 @@ final class CompetitorRegistryTest extends TestCase
         $this->assertSame(['type' => 'team', 'reference' => self::TEAM_ID, 'name' => 'Falcons'], $described[self::TEAM_COMPETITOR]);
     }
 
-    private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistry
+    private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistryProvider
     {
         [$team] = self::aTeam(self::TEAM_ID, self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID), [self::PLAYER_ID, self::MATE_PLAYER]);
 
-        return new CompetitorRegistry(
+        return new CompetitorRegistryProvider(
             $competitorRepository,
             $this->repositoryStub(PlayerRepositoryInterface::class, [
                 self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001'),

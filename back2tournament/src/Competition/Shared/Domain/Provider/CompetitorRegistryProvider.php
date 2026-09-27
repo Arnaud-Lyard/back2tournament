@@ -13,7 +13,7 @@ use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-final class CompetitorRegistry implements CompetitorRegistryInterface
+final class CompetitorRegistryProvider implements CompetitorRegistryProviderInterface
 {
     private CompetitorRepositoryInterface $competitorRepository;
     private PlayerRepositoryInterface $playerRepository;

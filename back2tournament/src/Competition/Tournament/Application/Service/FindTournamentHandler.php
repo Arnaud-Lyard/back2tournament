@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Competition\Tournament\Application\Service;
 
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Tournament\Application\Model\FindTournamentQuery;
 use App\Competition\Tournament\Domain\Entity\Matchup;
 use App\Competition\Tournament\Domain\Entity\Participant;
@@ -23,18 +23,18 @@ final class FindTournamentHandler
     private TournamentRepositoryInterface $tournamentRepository;
     private ParticipantRepositoryInterface $participantRepository;
     private MatchupRepositoryInterface $matchupRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
 
     public function __construct(
         TournamentRepositoryInterface $tournamentRepository,
         ParticipantRepositoryInterface $participantRepository,
         MatchupRepositoryInterface $matchupRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
     ) {
         $this->tournamentRepository = $tournamentRepository;
         $this->participantRepository = $participantRepository;
         $this->matchupRepository = $matchupRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
     }
 
     public function __invoke(FindTournamentQuery $findTournamentQuery): string
@@ -55,7 +55,7 @@ final class FindTournamentHandler
         }
 
         return json_encode(
-            $this->normalizeTournament($tournament, $participants, $bracket, $this->competitorRegistry->describe($competitors)),
+            $this->normalizeTournament($tournament, $participants, $bracket, $this->competitorRegistryProvider->describe($competitors)),
             JSON_THROW_ON_ERROR,
         );
     }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Competition\Tournament\Application\Service;
 
 use App\Competition\Profile\Game\Domain\Entity\GameId;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Tournament\Application\Model\FindTournamentsQuery;
 use App\Competition\Tournament\Domain\Entity\Tournament;
 use App\Competition\Tournament\Domain\Enum\TournamentStatus;
@@ -19,16 +19,16 @@ final class FindTournamentsHandler
 {
     private TournamentRepositoryInterface $tournamentRepository;
     private ParticipantRepositoryInterface $participantRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
 
     public function __construct(
         TournamentRepositoryInterface $tournamentRepository,
         ParticipantRepositoryInterface $participantRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
     ) {
         $this->tournamentRepository = $tournamentRepository;
         $this->participantRepository = $participantRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
     }
 
     public function __invoke(FindTournamentsQuery $findTournamentsQuery): string
@@ -51,7 +51,7 @@ final class FindTournamentsHandler
             static fn (Tournament $tournament): ?string => $tournament->getWinner()?->getValue(),
             $tournaments,
         )));
-        $described = $this->competitorRegistry->describe($winners);
+        $described = $this->competitorRegistryProvider->describe($winners);
 
         $total = $this->tournamentRepository->countPage($gameId, $status);
 

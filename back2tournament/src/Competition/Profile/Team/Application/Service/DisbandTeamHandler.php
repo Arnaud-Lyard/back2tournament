@@ -15,7 +15,7 @@ use App\Competition\Profile\Team\Domain\Entity\TeamId;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayer;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
@@ -29,7 +29,7 @@ final class DisbandTeamHandler
     private TeamPlayerRepositoryInterface $teamPlayerRepository;
     private ClanRepositoryInterface $clanRepository;
     private PlayerRepositoryInterface $playerRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
 
@@ -38,7 +38,7 @@ final class DisbandTeamHandler
         TeamPlayerRepositoryInterface $teamPlayerRepository,
         ClanRepositoryInterface $clanRepository,
         PlayerRepositoryInterface $playerRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
@@ -46,7 +46,7 @@ final class DisbandTeamHandler
         $this->teamPlayerRepository = $teamPlayerRepository;
         $this->clanRepository = $clanRepository;
         $this->playerRepository = $playerRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -67,7 +67,7 @@ final class DisbandTeamHandler
             throw new PermissionDeniedException('only the clan leader disbands its teams');
         }
 
-        if ($this->competitorRegistry->teamHasCompeted($teamId->getValue())) {
+        if ($this->competitorRegistryProvider->teamHasCompeted($teamId->getValue())) {
             throw new ConflictException('this team has competed and is kept for the record');
         }
 

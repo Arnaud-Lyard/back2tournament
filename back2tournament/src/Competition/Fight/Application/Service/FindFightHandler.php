@@ -12,7 +12,7 @@ use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Shared\Exception\NotFoundException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -21,18 +21,18 @@ final class FindFightHandler
 {
     private FightRepositoryInterface $fightRepository;
     private ResultRepositoryInterface $resultRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private CurrentUserProviderInterface $currentUserProvider;
 
     public function __construct(
         FightRepositoryInterface $fightRepository,
         ResultRepositoryInterface $resultRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         CurrentUserProviderInterface $currentUserProvider,
     ) {
         $this->fightRepository = $fightRepository;
         $this->resultRepository = $resultRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->currentUserProvider = $currentUserProvider;
     }
 
@@ -49,8 +49,8 @@ final class FindFightHandler
             $this->normalizeFight(
                 $fight,
                 $this->resultRepository->findBy(['fight' => $fightId->getValue()]),
-                $this->competitorRegistry->describe([$fight->getCompetitorOne()->getValue(), $fight->getCompetitorTwo()->getValue()]),
-                $this->competitorRegistry->representedBy((string) $this->currentUserProvider->getUser()->getId()),
+                $this->competitorRegistryProvider->describe([$fight->getCompetitorOne()->getValue(), $fight->getCompetitorTwo()->getValue()]),
+                $this->competitorRegistryProvider->representedBy((string) $this->currentUserProvider->getUser()->getId()),
             ),
             JSON_THROW_ON_ERROR,
         );

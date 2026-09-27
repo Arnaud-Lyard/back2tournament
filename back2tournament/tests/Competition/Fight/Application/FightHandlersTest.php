@@ -31,7 +31,7 @@ use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
@@ -188,7 +188,7 @@ final class FightHandlersTest extends TestCase
     {
         [$fight, $mine, $theirs] = $this->openFight();
 
-        $registry = $this->createMock(CompetitorRegistryInterface::class);
+        $registry = $this->createMock(CompetitorRegistryProviderInterface::class);
         $registry->expects($this->once())->method('representedBy')->with(self::MY_USER)->willReturn([self::MY_SIDE]);
         $registry->method('describe')->willReturn([]);
 
@@ -340,7 +340,7 @@ final class FightHandlersTest extends TestCase
         [$myTeam, $myLineup] = self::aTeam(self::MY_TEAM, $myClan, [self::MY_PLAYER, self::MATE_PLAYER]);
         [$defaultTeam, $defaultLineup] = self::aTeam(self::THEIR_TEAM, $theirClan, [self::THEIR_PLAYER, self::THEIR_MATE_PLAYER]);
 
-        $registry = $this->createStub(CompetitorRegistryInterface::class);
+        $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
         $registry->method('enlistPlayer')->willReturnCallback(static fn (string $id): string => 'competitor-of-'.$id);
         $registry->method('enlistTeam')->willReturnCallback(static fn (string $id): string => 'competitor-of-'.$id);
         $registry->method('describe')->willReturn([]);
@@ -368,7 +368,7 @@ final class FightHandlersTest extends TestCase
         ?Fight $fight,
         ResultRepositoryInterface $resultRepository,
         array $represented,
-        ?CompetitorRegistryInterface $registry = null,
+        ?CompetitorRegistryProviderInterface $registry = null,
     ): UpdateFightResultsHandler {
         return new UpdateFightResultsHandler(
             $this->repositoryStub(FightRepositoryInterface::class, null === $fight ? [] : [$fight]),
@@ -416,9 +416,9 @@ final class FightHandlersTest extends TestCase
     /**
      * @param list<string> $represented
      */
-    private function registry(array $represented): CompetitorRegistryInterface
+    private function registry(array $represented): CompetitorRegistryProviderInterface
     {
-        $registry = $this->createStub(CompetitorRegistryInterface::class);
+        $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
         $registry->method('representedBy')->willReturn($represented);
         $registry->method('describe')->willReturn([
             self::MY_SIDE => ['type' => 'team', 'reference' => self::MY_TEAM, 'name' => 'Falcons'],

@@ -12,7 +12,7 @@ use App\Competition\Fight\Domain\Entity\Score;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -23,18 +23,18 @@ final class UpdateFightResultsHandler
 {
     private FightRepositoryInterface $fightRepository;
     private ResultRepositoryInterface $resultRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         FightRepositoryInterface $fightRepository,
         ResultRepositoryInterface $resultRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->fightRepository = $fightRepository;
         $this->resultRepository = $resultRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -49,7 +49,7 @@ final class UpdateFightResultsHandler
             throw new NotFoundException('fight not found');
         }
 
-        $represented = $this->competitorRegistry->representedBy($updateFightResultsCommand->getUser());
+        $represented = $this->competitorRegistryProvider->representedBy($updateFightResultsCommand->getUser());
         $side = $fight->sideAmong($represented);
         if (null === $side) {
             throw new PermissionDeniedException('you do not take part in this fight');
@@ -73,7 +73,7 @@ final class UpdateFightResultsHandler
         }
 
         return json_encode(
-            $this->normalizeFight($fight, [$declaring, $opposing], $this->competitorRegistry->describe([$side->getValue(), $opponent->getValue()]), $represented),
+            $this->normalizeFight($fight, [$declaring, $opposing], $this->competitorRegistryProvider->describe([$side->getValue(), $opponent->getValue()]), $represented),
             JSON_THROW_ON_ERROR,
         );
     }

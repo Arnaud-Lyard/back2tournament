@@ -15,7 +15,7 @@ use App\Competition\Profile\Team\Domain\Entity\TeamPlayer;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Tournament\Application\Model\RegisterParticipantCommand;
 use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\ParticipantId;
@@ -43,7 +43,7 @@ final class RegisterParticipantHandler
     private PlayerRepositoryInterface $playerRepository;
     private TeamRepositoryInterface $teamRepository;
     private TeamPlayerRepositoryInterface $teamPlayerRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
 
@@ -53,7 +53,7 @@ final class RegisterParticipantHandler
         PlayerRepositoryInterface $playerRepository,
         TeamRepositoryInterface $teamRepository,
         TeamPlayerRepositoryInterface $teamPlayerRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
@@ -62,7 +62,7 @@ final class RegisterParticipantHandler
         $this->playerRepository = $playerRepository;
         $this->teamRepository = $teamRepository;
         $this->teamPlayerRepository = $teamPlayerRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -104,7 +104,7 @@ final class RegisterParticipantHandler
         }
 
         return json_encode(
-            $this->normalizeParticipant($participant, $this->competitorRegistry->describe([$competitorId])),
+            $this->normalizeParticipant($participant, $this->competitorRegistryProvider->describe([$competitorId])),
             JSON_THROW_ON_ERROR,
         );
     }
@@ -130,7 +130,7 @@ final class RegisterParticipantHandler
             throw new PermissionDeniedException('you register only your own player profile');
         }
 
-        return $this->competitorRegistry->enlistPlayer($playerId->getValue());
+        return $this->competitorRegistryProvider->enlistPlayer($playerId->getValue());
     }
 
     /**
@@ -160,7 +160,7 @@ final class RegisterParticipantHandler
 
         // A player plays for one team per tournament.
         $registeredTeams = [];
-        $described = $this->competitorRegistry->describe(array_map(
+        $described = $this->competitorRegistryProvider->describe(array_map(
             static fn (Participant $participant): string => $participant->getCompetitor()->getValue(),
             $registered,
         ));
@@ -182,7 +182,7 @@ final class RegisterParticipantHandler
             }
         }
 
-        return $this->competitorRegistry->enlistTeam($teamId->getValue());
+        return $this->competitorRegistryProvider->enlistTeam($teamId->getValue());
     }
 
     /**

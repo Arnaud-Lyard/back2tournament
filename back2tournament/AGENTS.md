@@ -54,8 +54,8 @@ make user           # seed a dev user via app:create-user
   and belong to one clan at most. A `Team` is a lineup a clan fields in one format:
   exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
-  Enlisted lazily, through `CompetitorRegistryInterface`, when a fight is opened or a
-  tournament registration made; never through an endpoint of its own.
+  Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is
+  opened or a tournament registration made; never through an endpoint of its own.
 - `Competition/Fight/` — fights between two competitors of the same game and format,
   and their results: one side declares the scores, the other confirms them. A settled
   fight records `FightSettledEvent`.
@@ -63,9 +63,14 @@ make user           # seed a dev user via app:create-user
   bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
   winners moving on as `FightSettledEvent` comes in.
 - `Competition/Shared/` — `CompetitorId`, `TeamSize`, and the contracts every
-  Competition module reads directly: `CompetitorIdProviderInterface`,
-  `CompetitorRegistryInterface` (enlist a player or a team, who a user speaks for, name
-  the sides) and `FightSchedulerInterface` (open a fight with its two pending results).
+  Competition module reads directly, in `Domain/Provider/`:
+  `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
+  `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
+  for, name the sides) and `FightSchedulerInterface` (open a fight with its two
+  pending results). Each `…Provider` is implemented next to its interface.
+  `FightSchedulerInterface` is the exception: the Fight context implements it, in
+  `Fight/Application/Service/FightScheduler.php`, because opening a fight saves the
+  Fight aggregate and dispatches its domain events, as a handler would.
 
 Each context (except `Shared`) has three layers:
 
@@ -126,7 +131,7 @@ deptrac.yaml                                                          # layers +
 ```
 
 Names line up across the four files: `PostFightResultsConfirmationController` →
-`ConfirmFightResultsCommand` → `ConfirmFightResultsHandler` → `Fight::confirmResult()`.
+`ConfirmFightResultsCommand` → `ConfirmFightResultsHandler` → `Fight::confirmOutcome()`.
 
 ## 2. Controller rules
 
@@ -141,8 +146,10 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   request payload is always a bug and usually a privilege escalation.
 - **Never read a handler's output back from the session.** A query handler returns its
   payload through `HandleTrait::handle()`; a command handler that must answer with the
-  written resource returns it the same way. Both firewalls under `^/api` are
-  `stateless: true`, so session round-trips also raise a Symfony warning.
+  written resource returns it the same way, or on the events of a User verification
+  chain (§5). Do not count on Symfony to catch a session round-trip: the
+  `stateless: true` firewalls under `^/api` keep the token out of the session, but they
+  do not mark the request stateless, so nothing warns.
 - No `try`/`catch`. Handlers throw the typed exceptions from `App\Shared\Exception\*`
   and `DomainExceptionListener` maps them to 400 / 403 / 404 / 409.
 - Controllers hold no business logic and touch no repository.
@@ -197,7 +204,7 @@ Two mechanisms, and they are not interchangeable.
 request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
 the caller injects the interface. `CurrentUserProviderInterface`,
-`CompetitorIdProviderInterface`, `CompetitorRegistryInterface` and
+`CompetitorIdProviderInterface`, `CompetitorRegistryProviderInterface` and
 `FightSchedulerInterface` are the ones in place. Prefer this over chaining finder
 services, and over events.
 

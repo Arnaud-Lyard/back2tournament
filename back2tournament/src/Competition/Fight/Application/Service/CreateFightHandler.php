@@ -18,7 +18,7 @@ use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
@@ -36,7 +36,7 @@ final class CreateFightHandler
     private TeamRepositoryInterface $teamRepository;
     private TeamPlayerRepositoryInterface $teamPlayerRepository;
     private GameRepositoryInterface $gameRepository;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private FightSchedulerInterface $fightScheduler;
     private CurrentUserProviderInterface $currentUserProvider;
 
@@ -45,7 +45,7 @@ final class CreateFightHandler
         TeamRepositoryInterface $teamRepository,
         TeamPlayerRepositoryInterface $teamPlayerRepository,
         GameRepositoryInterface $gameRepository,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         FightSchedulerInterface $fightScheduler,
         CurrentUserProviderInterface $currentUserProvider,
     ) {
@@ -53,7 +53,7 @@ final class CreateFightHandler
         $this->teamRepository = $teamRepository;
         $this->teamPlayerRepository = $teamPlayerRepository;
         $this->gameRepository = $gameRepository;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->fightScheduler = $fightScheduler;
         $this->currentUserProvider = $currentUserProvider;
     }
@@ -70,8 +70,8 @@ final class CreateFightHandler
             $this->normalizeFight(
                 $fight,
                 [],
-                $this->competitorRegistry->describe([$competitorOne, $competitorTwo]),
-                $this->competitorRegistry->representedBy($this->caller()),
+                $this->competitorRegistryProvider->describe([$competitorOne, $competitorTwo]),
+                $this->competitorRegistryProvider->representedBy($this->caller()),
             ),
             JSON_THROW_ON_ERROR,
         );
@@ -106,8 +106,8 @@ final class CreateFightHandler
         $this->ensurePlayedIn($gameId, 1);
 
         return [
-            $this->competitorRegistry->enlistPlayer($one->getValue()),
-            $this->competitorRegistry->enlistPlayer($two->getValue()),
+            $this->competitorRegistryProvider->enlistPlayer($one->getValue()),
+            $this->competitorRegistryProvider->enlistPlayer($two->getValue()),
             $gameId,
             1,
         ];
@@ -151,8 +151,8 @@ final class CreateFightHandler
         $this->ensurePlayedIn($gameId, $teamOne->getSize());
 
         return [
-            $this->competitorRegistry->enlistTeam($one->getValue()),
-            $this->competitorRegistry->enlistTeam($two->getValue()),
+            $this->competitorRegistryProvider->enlistTeam($one->getValue()),
+            $this->competitorRegistryProvider->enlistTeam($two->getValue()),
             $gameId,
             $teamOne->getSize(),
         ];

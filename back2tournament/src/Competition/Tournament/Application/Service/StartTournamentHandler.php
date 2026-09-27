@@ -6,7 +6,7 @@ namespace App\Competition\Tournament\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Provider\CompetitorRegistryInterface;
+use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
 use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
 use App\Competition\Tournament\Application\Model\StartTournamentCommand;
 use App\Competition\Tournament\Domain\Entity\Matchup;
@@ -33,7 +33,7 @@ final class StartTournamentHandler
     private ParticipantRepositoryInterface $participantRepository;
     private MatchupRepositoryInterface $matchupRepository;
     private FightSchedulerInterface $fightScheduler;
-    private CompetitorRegistryInterface $competitorRegistry;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
 
@@ -42,7 +42,7 @@ final class StartTournamentHandler
         ParticipantRepositoryInterface $participantRepository,
         MatchupRepositoryInterface $matchupRepository,
         FightSchedulerInterface $fightScheduler,
-        CompetitorRegistryInterface $competitorRegistry,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
@@ -50,7 +50,7 @@ final class StartTournamentHandler
         $this->participantRepository = $participantRepository;
         $this->matchupRepository = $matchupRepository;
         $this->fightScheduler = $fightScheduler;
-        $this->competitorRegistry = $competitorRegistry;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -102,7 +102,7 @@ final class StartTournamentHandler
         $competitors = array_map(static fn (Participant $participant): string => $participant->getCompetitor()->getValue(), $participants);
 
         return json_encode(
-            $this->normalizeTournament($tournament, $participants, $bracket, $this->competitorRegistry->describe($competitors)),
+            $this->normalizeTournament($tournament, $participants, $bracket, $this->competitorRegistryProvider->describe($competitors)),
             JSON_THROW_ON_ERROR,
         );
     }
