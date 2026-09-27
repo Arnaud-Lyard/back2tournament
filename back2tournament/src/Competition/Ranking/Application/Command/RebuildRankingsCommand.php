@@ -32,8 +32,8 @@ final class RebuildRankingsCommand extends Command
             Empties the rankings, then replays every settled fight in the order it was settled,
             each in the rankings of its format. Run it once after a migration that creates the
             rankings or empties them, as the one splitting them by format does, so that the
-            fights settled before it count; running it again gives the same rankings. A duel
-            counts for the clans its two players are active members of when it is replayed.
+            fights settled before it count; running it again gives the same rankings. Each
+            side counts for the clan its result recorded when the fight opened.
             HELP);
     }
 

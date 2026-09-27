@@ -9,6 +9,7 @@ use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Fight\Domain\Entity\ResultId;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
@@ -20,15 +21,18 @@ final class FightSchedulerProvider implements FightSchedulerProviderInterface
 {
     private FightRepositoryInterface $fightRepository;
     private ResultRepositoryInterface $resultRepository;
+    private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         FightRepositoryInterface $fightRepository,
         ResultRepositoryInterface $resultRepository,
+        CompetitorRegistryProviderInterface $competitorRegistryProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->fightRepository = $fightRepository;
         $this->resultRepository = $resultRepository;
+        $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -50,10 +54,19 @@ final class FightSchedulerProvider implements FightSchedulerProviderInterface
 
         $this->fightRepository->save($fight);
 
+        // Each side's result keeps the clan it plays for today: the fight
+        // stays with that clan whatever its players do next.
+        $lineups = $this->competitorRegistryProvider->lineups([$competitorOne, $competitorTwo]);
+
         foreach ([$competitorOne, $competitorTwo] as $competitor) {
-            $this->resultRepository->save(
-                Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId($competitor))
-            );
+            $clan = $lineups[$competitor]['clan'] ?? null;
+
+            $this->resultRepository->save(Fight::createResult(
+                $fight,
+                new ResultId(Uuid::v4()->toString()),
+                new CompetitorId($competitor),
+                null === $clan ? null : new ClanId($clan),
+            ));
         }
 
         foreach ($fight->pullDomainEvents() as $domainEvent) {

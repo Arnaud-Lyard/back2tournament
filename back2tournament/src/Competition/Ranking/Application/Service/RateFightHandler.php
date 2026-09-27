@@ -71,8 +71,10 @@ final class RateFightHandler
         $two = $fight->getCompetitorTwo()->getValue();
 
         $outcomes = [];
+        $clans = [];
         foreach ($this->resultRepository->findBy(['fight' => $fightId->getValue()]) as $result) {
             $outcomes[$result->getCompetitor()->getValue()] = $result->getStatus();
+            $clans[$result->getCompetitor()->getValue()] = $result->getClan()?->getValue();
         }
         if (!\in_array($outcomes[$one] ?? null, self::SETTLED, true) || !\in_array($outcomes[$two] ?? null, self::SETTLED, true)) {
             return;
@@ -107,9 +109,11 @@ final class RateFightHandler
         }
 
         // A clan rates on the fights of its teams, and on the duels of its
-        // members, against another clan: two sides of one clan leave it as it is.
-        $clanOne = $lineups[$one]['clan'];
-        $clanTwo = $lineups[$two]['clan'];
+        // members, against another clan: two sides of one clan leave it as it
+        // is. Each side counts for the clan its result recorded when the fight
+        // opened, so that counting the fight again gives the same ranking.
+        $clanOne = $clans[$one] ?? null;
+        $clanTwo = $clans[$two] ?? null;
         if (null !== $clanOne && null !== $clanTwo && $clanOne !== $clanTwo) {
             $sides[] = [
                 [$this->ratingOf(RankingSubject::CLAN, $clanOne, $gameId, $teamSize)],

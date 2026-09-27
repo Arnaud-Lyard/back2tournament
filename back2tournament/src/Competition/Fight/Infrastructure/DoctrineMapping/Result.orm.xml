@@ -8,11 +8,15 @@
         <unique-constraints>
             <unique-constraint columns="fight,competitor" name="uniq_result" />
         </unique-constraints>
+        <indexes>
+            <index columns="clan" name="idx_result_clan" />
+        </indexes>
 
         <id name="id" type="guid" column="id" length="36" />
 
         <field name="fight" type="guid" column="fight" length="36" />
         <field name="competitor" type="guid" column="competitor" length="36" />
+        <field name="clan" type="guid" column="clan" length="36" nullable="true" />
 
         <field name="score" type="integer" column="score" />
         <field name="status" type="string" column="status" length="16" enum-type="App\Competition\Fight\Domain\Enum\ResultStatus" />

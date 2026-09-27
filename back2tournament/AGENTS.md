@@ -64,7 +64,11 @@ make user           # seed a dev user via app:create-user
   Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is
   opened or a tournament registration made; never through an endpoint of its own.
 - `Competition/Fight/` — fights between two competitors of the same game and format,
-  and their results: one side declares the scores, the other confirms them. A settled
+  and their results: one side declares the scores, the other confirms them. Each result
+  records the clan its side played for as the fight opened (`Result.clan`: the team's
+  clan, or the clan the player profile was an active member of; null for a profile in
+  no clan), so that a fight stays with that clan whatever its players do next; a clan's
+  results are its fights against other clans. A settled
   fight records `FightSettledEvent`. When the sides disagree, an administrator settles
   the fight on the scores they impose (`Fight::arbitrate()`, the fight then reads
   `arbitrated`) or sets the declaration aside so that it is declared again
@@ -87,8 +91,8 @@ make user           # seed a dev user via app:create-user
   fight records the move and keeps a fight from counting twice.
   `bin/console app:rankings:rebuild` empties the rankings and replays every settled
   fight in the order it was settled — run it after a migration that creates or empties
-  the rankings, as `Version20260927160000` (ratings per format) does. A replayed duel
-  counts for the clans its players are members of when it is replayed.
+  the rankings, as `Version20260927160000` (ratings per format) does. A side counts for
+  the clan its result recorded (`Result.clan`), so the replay lands on the same ratings.
 - `Competition/Shared/` — `CompetitorId` and the contracts every
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,

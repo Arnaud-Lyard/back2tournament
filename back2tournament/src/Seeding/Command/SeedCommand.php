@@ -156,6 +156,15 @@ final class SeedCommand extends Command
 
     private int $moment = 0;
 
+    /**
+     * The clan each competitor plays for, keyed by competitor id, once the
+     * clans are seeded: the fights opened from then on record it, as the
+     * platform does. The fights seeded before were played before the clans.
+     *
+     * @var array<string, ClanId>
+     */
+    private array $clanOfCompetitor = [];
+
     public function __construct(
         EntityManagerInterface $entityManager,
         PasswordHasherInterface $passwordHasher,
@@ -455,6 +464,8 @@ final class SeedCommand extends Command
 
             $theirSide = $this->enlist(CompetitorType::TEAM, (string) $theirTeam->getId());
             $mySide = $this->enlist(CompetitorType::TEAM, (string) $myTeam->getId());
+            $this->clanOfCompetitor[(string) $theirSide] = $theirs->getId();
+            $this->clanOfCompetitor[(string) $mySide] = $mine->getId();
 
             // Two settled fights, for the history on the clan pages.
             for ($settled = 0; $settled < 2; ++$settled) {
@@ -484,6 +495,10 @@ final class SeedCommand extends Command
         foreach ($members as $member) {
             $membership = Clan::invite($clan, new ClanMemberId(Uuid::v4()->toString()), $member->getId());
             $this->entityManager->persist(Clan::join($clan, $membership));
+        }
+
+        foreach ([$leader, ...$members] as $player) {
+            $this->clanOfCompetitor[(string) $this->enlist(CompetitorType::PLAYER, (string) $player->getId())] = $clan->getId();
         }
 
         return $clan;
@@ -665,8 +680,8 @@ final class SeedCommand extends Command
         $fight->setCreatedAt($at);
         $fight->setUpdatedAt($at);
 
-        $resultOne = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $one);
-        $resultTwo = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $two);
+        $resultOne = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $one, $this->clanOfCompetitor[(string) $one] ?? null);
+        $resultTwo = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), $two, $this->clanOfCompetitor[(string) $two] ?? null);
 
         if (ResultStatus::PENDING !== $state) {
             $scoreOne = mt_rand(0, 3);

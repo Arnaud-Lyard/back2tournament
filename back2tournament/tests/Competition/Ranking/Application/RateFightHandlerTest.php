@@ -11,6 +11,7 @@ use App\Competition\Fight\Domain\Entity\ResultId;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
+use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Ranking\Application\Model\RateFightCommand;
 use App\Competition\Ranking\Application\Service\RateFightHandler;
@@ -63,10 +64,7 @@ final class RateFightHandlerTest extends TestCase
 
     public function test_a_duel_between_members_of_two_clans_also_ranks_the_clans_in_1v1(): void
     {
-        $this->handler($this->settled(ResultStatus::WIN), lineups: [
-            self::ONE => ['players' => [self::ALICE], 'clan' => self::CLAN_A],
-            self::TWO => ['players' => [self::BOB], 'clan' => self::CLAN_B],
-        ])(new RateFightCommand(self::FIGHT_ID));
+        $this->handler($this->settled(ResultStatus::WIN, clanOne: self::CLAN_A, clanTwo: self::CLAN_B))(new RateFightCommand(self::FIGHT_ID));
 
         $this->assertSame(
             [
@@ -82,7 +80,7 @@ final class RateFightHandlerTest extends TestCase
 
     public function test_a_team_fight_moves_every_player_of_both_lineups_and_the_two_clans_in_its_format(): void
     {
-        $this->handler($this->settled(ResultStatus::LOSS, teamSize: 2), lineups: [
+        $this->handler($this->settled(ResultStatus::LOSS, teamSize: 2, clanOne: self::CLAN_A, clanTwo: self::CLAN_B), lineups: [
             self::ONE => ['players' => [self::ALICE, self::CAROL], 'clan' => self::CLAN_A],
             self::TWO => ['players' => [self::BOB, self::DAVE], 'clan' => self::CLAN_B],
         ])(new RateFightCommand(self::FIGHT_ID));
@@ -103,22 +101,27 @@ final class RateFightHandlerTest extends TestCase
 
     public function test_two_sides_of_one_clan_rank_their_players_and_leave_the_clan_as_it_is(): void
     {
-        $this->handler($this->settled(ResultStatus::WIN), lineups: [
-            self::ONE => ['players' => [self::ALICE], 'clan' => self::CLAN_A],
-            self::TWO => ['players' => [self::BOB], 'clan' => self::CLAN_A],
-        ])(new RateFightCommand(self::FIGHT_ID));
+        $this->handler($this->settled(ResultStatus::WIN, clanOne: self::CLAN_A, clanTwo: self::CLAN_A))(new RateFightCommand(self::FIGHT_ID));
 
         $this->assertSame([['player', self::ALICE, 1, 1016], ['player', self::BOB, 1, 984]], $this->standings());
     }
 
     public function test_a_player_in_no_clan_ranks_alone(): void
     {
-        $this->handler($this->settled(ResultStatus::WIN), lineups: [
-            self::ONE => ['players' => [self::ALICE], 'clan' => self::CLAN_A],
-            self::TWO => ['players' => [self::BOB], 'clan' => null],
-        ])(new RateFightCommand(self::FIGHT_ID));
+        $this->handler($this->settled(ResultStatus::WIN, clanOne: self::CLAN_A))(new RateFightCommand(self::FIGHT_ID));
 
         $this->assertSame([['player', self::ALICE, 1, 1016], ['player', self::BOB, 1, 984]], $this->standings());
+    }
+
+    public function test_a_side_counts_for_the_clan_it_played_for_when_the_fight_opened(): void
+    {
+        // Alice has left CLAN_A for CLAN_B since: the duel stays CLAN_A's.
+        $this->handler($this->settled(ResultStatus::WIN, clanOne: self::CLAN_A, clanTwo: self::CLAN_B), lineups: [
+            self::ONE => ['players' => [self::ALICE], 'clan' => self::CLAN_B],
+            self::TWO => ['players' => [self::BOB], 'clan' => self::CLAN_B],
+        ])(new RateFightCommand(self::FIGHT_ID));
+
+        $this->assertSame([['clan', self::CLAN_A, 1, 1016], ['clan', self::CLAN_B, 1, 984]], \array_slice($this->standings(), 2));
     }
 
     public function test_a_draw_counts_for_both(): void
@@ -180,7 +183,7 @@ final class RateFightHandlerTest extends TestCase
 
     public function test_a_side_nobody_knows_moves_nothing(): void
     {
-        $this->handler($this->settled(ResultStatus::WIN), lineups: [
+        $this->handler($this->settled(ResultStatus::WIN, clanOne: self::CLAN_A, clanTwo: self::CLAN_B), lineups: [
             self::ONE => ['players' => [self::ALICE], 'clan' => self::CLAN_A],
         ])(new RateFightCommand(self::FIGHT_ID));
 
@@ -190,7 +193,7 @@ final class RateFightHandlerTest extends TestCase
     public function test_a_player_on_both_sides_leaves_the_players_as_they_are(): void
     {
         // Fights refuse it; were one let through, only the clans would move.
-        $this->handler($this->settled(ResultStatus::WIN, teamSize: 2), lineups: [
+        $this->handler($this->settled(ResultStatus::WIN, teamSize: 2, clanOne: self::CLAN_A, clanTwo: self::CLAN_B), lineups: [
             self::ONE => ['players' => [self::ALICE, self::CAROL], 'clan' => self::CLAN_A],
             self::TWO => ['players' => [self::ALICE, self::DAVE], 'clan' => self::CLAN_B],
         ])(new RateFightCommand(self::FIGHT_ID));
@@ -207,15 +210,15 @@ final class RateFightHandlerTest extends TestCase
 
     /**
      * The fight between ONE and TWO in a format, and its two results, ONE's
-     * being $outcomeOfOne.
+     * being $outcomeOfOne; each result keeps the clan its side played for.
      *
      * @return array{?Fight, list<Result>}
      */
-    private function settled(ResultStatus $outcomeOfOne, int $teamSize = 1): array
+    private function settled(ResultStatus $outcomeOfOne, int $teamSize = 1, ?string $clanOne = null, ?string $clanTwo = null): array
     {
         $fight = Fight::create(new FightId(self::FIGHT_ID), new CompetitorId(self::ONE), new CompetitorId(self::TWO), new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
-        $one = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId(self::ONE));
-        $two = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId(self::TWO));
+        $one = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId(self::ONE), null === $clanOne ? null : new ClanId($clanOne));
+        $two = Fight::createResult($fight, new ResultId(Uuid::v4()->toString()), new CompetitorId(self::TWO), null === $clanTwo ? null : new ClanId($clanTwo));
 
         $outcomeOfTwo = match ($outcomeOfOne) {
             ResultStatus::WIN => ResultStatus::LOSS,
