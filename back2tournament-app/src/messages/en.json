@@ -18,6 +18,7 @@
     "logout": "Logout",
     "register": "Sign up",
     "playerProfile": "Player profile",
+    "account": "My account",
     "backoffice": "Backoffice",
     "mainLabel": "Main navigation",
     "openMenu": "Open menu",
@@ -425,6 +426,41 @@
     },
     "back": "Back to my profiles"
   },
+  "account": {
+    "title": "My account",
+    "description": "Your account's details, shared by all your player profiles.",
+    "avatar": {
+      "title": "Profile picture",
+      "description": "It appears in your account menu, cropped to a square."
+    },
+    "identity": {
+      "title": "Identity",
+      "username": "Username",
+      "role": "Role"
+    }
+  },
+  "images": {
+    "alt": "Image of {name}",
+    "choose": "Choose an image",
+    "change": "Change the image",
+    "remove": "Remove the image",
+    "confirmRemove": "Remove the image?",
+    "chooseLabel": "Choose an image for {name}",
+    "changeLabel": "Change the image of {name}",
+    "removeLabel": "Remove the image of {name}",
+    "confirmRemoveLabel": "Confirm removing the image of {name}",
+    "hint": "JPEG, PNG, WebP or GIF of 8 MB at most. The image is saved as soon as you choose it, resized and compressed.",
+    "uploaded": "Image saved",
+    "removed": "Image removed",
+    "uploadError": "Could not send the image",
+    "removeError": "Could not remove the image",
+    "problems": {
+      "type": "Choose a JPEG, PNG, WebP or GIF image.",
+      "empty": "This file is empty.",
+      "size": "The image weighs more than 8 MB.",
+      "unreadable": "The image could not be read: it must be 16 pixels a side at least and 40 megapixels at most."
+    }
+  },
   "backoffice": {
     "nav": {
       "title": "Backoffice",
@@ -465,6 +501,7 @@
         "forbidden": "Only administrators can create a game."
       },
       "columns": {
+        "image": "Image",
         "name": "Title",
         "id": "Identifier",
         "createdAt": "Created on",
@@ -567,6 +604,10 @@
           "forbidden": "Editing articles is reserved to editors.",
           "notFound": "This article or this category no longer exists."
         }
+      },
+      "cover": {
+        "title": "Cover",
+        "description": "It illustrates the article on the blog: at the top of the article and, cropped to 16/9, in the lists."
       },
       "preview": {
         "publishedAt": "Published on {date}",

@@ -18,6 +18,7 @@
     "logout": "Déconnexion",
     "register": "S'inscrire",
     "playerProfile": "Profil joueur",
+    "account": "Mon compte",
     "backoffice": "Backoffice",
     "mainLabel": "Navigation principale",
     "openMenu": "Ouvrir le menu",
@@ -425,6 +426,41 @@
     },
     "back": "Retour à mes profils"
   },
+  "account": {
+    "title": "Mon compte",
+    "description": "Les informations de votre compte, communes à tous vos profils joueurs.",
+    "avatar": {
+      "title": "Photo de profil",
+      "description": "Elle apparaît dans le menu de votre compte, recadrée en carré."
+    },
+    "identity": {
+      "title": "Identité",
+      "username": "Nom d'utilisateur",
+      "role": "Rôle"
+    }
+  },
+  "images": {
+    "alt": "Image de {name}",
+    "choose": "Choisir une image",
+    "change": "Changer l'image",
+    "remove": "Retirer l'image",
+    "confirmRemove": "Retirer l'image ?",
+    "chooseLabel": "Choisir une image pour {name}",
+    "changeLabel": "Changer l'image de {name}",
+    "removeLabel": "Retirer l'image de {name}",
+    "confirmRemoveLabel": "Confirmer le retrait de l'image de {name}",
+    "hint": "JPEG, PNG, WebP ou GIF de 8 Mo au plus. L'image est enregistrée dès que vous la choisissez, redimensionnée et compressée.",
+    "uploaded": "Image enregistrée",
+    "removed": "Image retirée",
+    "uploadError": "Envoi de l'image impossible",
+    "removeError": "Retrait de l'image impossible",
+    "problems": {
+      "type": "Choisissez une image JPEG, PNG, WebP ou GIF.",
+      "empty": "Ce fichier est vide.",
+      "size": "L'image pèse plus de 8 Mo.",
+      "unreadable": "L'image n'a pas pu être lue : elle doit mesurer au moins 16 pixels de côté et 40 mégapixels au plus."
+    }
+  },
   "backoffice": {
     "nav": {
       "title": "Backoffice",
@@ -465,6 +501,7 @@
         "forbidden": "Seuls les administrateurs peuvent créer un jeu."
       },
       "columns": {
+        "image": "Image",
         "name": "Titre",
         "id": "Identifiant",
         "createdAt": "Créé le",
@@ -567,6 +604,10 @@
           "forbidden": "La modification d'articles est réservée aux éditeurs.",
           "notFound": "Cet article ou cette catégorie n'existe plus."
         }
+      },
+      "cover": {
+        "title": "Couverture",
+        "description": "Elle illustre l'article sur le blog : en tête de l'article et, recadrée en 16/9, dans les listes."
       },
       "preview": {
         "publishedAt": "Publié le {date}",

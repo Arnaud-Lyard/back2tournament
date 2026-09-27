@@ -19,6 +19,8 @@ export interface AuthUser {
   role: UserRole
   permissions: AuthPermission[]
   verified: boolean
+  /** Where their picture is read from; null while they have none. */
+  avatar: string | null
   /** The caller's player profile in each game, keyed by game id. */
   playersByGame: Partial<Record<string, PlayerProfile>>
 }

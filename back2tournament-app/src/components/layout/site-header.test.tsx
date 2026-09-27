@@ -9,6 +9,7 @@ function userWith(roles: string[]): AuthUser {
   return {
     username: "demo",
     verified: true,
+    avatar: null,
     ...mapSymfonyRoles(roles),
     playersByGame: {},
   }

@@ -22,6 +22,7 @@ const user: AuthUser = {
   role: "user",
   permissions: [],
   verified: true,
+  avatar: null,
   playersByGame: { [GAME_ID]: { id: PLAYER_ID, battletag: "PlayerOne#1234" } },
 }
 

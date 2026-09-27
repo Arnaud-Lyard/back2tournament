@@ -8,6 +8,7 @@ const PRIVATE_PATHS = [
   "/verify-email",
   "/403",
   "/players/new",
+  "/account",
   "/backoffice",
 ]
 

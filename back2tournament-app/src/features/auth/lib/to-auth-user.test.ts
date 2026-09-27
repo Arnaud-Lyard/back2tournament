@@ -5,13 +5,17 @@ import { authUserFromJwt, toAuthUser } from "./to-auth-user"
 const GAME_ID = "11111111-1111-4111-8111-111111111111"
 const OTHER_GAME_ID = "22222222-2222-4222-8222-222222222222"
 
-function me(players: CurrentUser["players"] = []): CurrentUser {
+function me(
+  players: CurrentUser["players"] = [],
+  avatar?: CurrentUser["avatar"]
+): CurrentUser {
   return {
     id: "00000000-0000-4000-8000-000000000000",
     email: "demo@back2tournament.fr",
     username: "demo",
     roles: ["ROLE_EDITOR", "ROLE_USER"],
     verified: true,
+    avatar,
     players,
   }
 }
@@ -35,6 +39,16 @@ describe("toAuthUser", () => {
     expect(toAuthUser(me()).playersByGame[GAME_ID]).toBeUndefined()
   })
 
+  it("keeps where their picture is read from, or none", () => {
+    const avatar =
+      "http://localhost:3902/avatars/0f8fad5b-d9cb-469f-a165-70867728950e.webp"
+
+    expect(toAuthUser(me([], avatar)).avatar).toBe(avatar)
+    expect(toAuthUser(me([], null)).avatar).toBeNull()
+    // An API older than pictures leaves the field out.
+    expect(toAuthUser(me()).avatar).toBeNull()
+  })
+
   it("maps the Symfony roles like the JWT does", () => {
     const user = toAuthUser(me())
 
@@ -46,10 +60,11 @@ describe("toAuthUser", () => {
 })
 
 describe("authUserFromJwt", () => {
-  it("keeps the identity but knows no player profile", () => {
+  it("keeps the identity but knows no picture nor player profile", () => {
     const user = authUserFromJwt("demo", ["ROLE_ADMIN"])
 
     expect(user.role).toBe("admin")
+    expect(user.avatar).toBeNull()
     expect(user.playersByGame).toEqual({})
   })
 })

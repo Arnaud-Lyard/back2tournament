@@ -9,9 +9,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getFormatter, getLocale, getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
-import { MediaPlaceholder } from "@/components/media-placeholder"
 import { PlayerAvatar } from "@/components/player-avatar"
 import { ShareButtons } from "@/components/share-buttons"
+import { StoredImage } from "@/components/stored-image"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -47,7 +47,7 @@ export async function generateMetadata({
 
   const { title, body } = localizeArticle(article.data, locale)
   const description = toExcerpt(body, 160)
-  const { authorName } = article.data
+  const { authorName, image } = article.data
 
   // A draft reaches the editors only: it has nothing to share yet.
   if (!isPublished(article.data)) {
@@ -66,6 +66,8 @@ export async function generateMetadata({
       url: `${baseUrl}/blog/${articleId}`,
       publishedTime: article.data.publishedAt ?? undefined,
       ...(authorName ? { authors: [authorName] } : {}),
+      // The cover, when it has one, is what a shared link shows.
+      ...(image ? { images: [{ url: image, alt: title }] } : {}),
     },
   }
 }
@@ -163,7 +165,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </h1>
         </header>
 
-        <MediaPlaceholder className="rounded-xl" />
+        <StoredImage src={article.data.image} className="rounded-xl" eager />
 
         <div
           lang={lang}

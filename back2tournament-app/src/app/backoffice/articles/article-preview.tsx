@@ -1,6 +1,8 @@
 import { ExternalLinkIcon, LanguagesIcon, PencilIcon } from "lucide-react"
 import Link from "next/link"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { ImagePicker } from "@/components/image-picker"
+import { StoredImage } from "@/components/stored-image"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -26,6 +28,8 @@ interface ArticlePreviewProps {
   /** Where the "Edit" button leads; none when the caller may not edit. */
   editHref?: string
   canPublish: boolean
+  /** Whether the caller may change the cover, right on the preview. */
+  canIllustrate: boolean
 }
 
 /** Server Component: reads one article, then its comments, straight from the API. */
@@ -34,6 +38,7 @@ export async function ArticlePreview({
   categories,
   editHref,
   canPublish,
+  canIllustrate,
 }: ArticlePreviewProps) {
   const [t, format, loaded, comments] = await Promise.all([
     getTranslations("backoffice.articles.preview"),
@@ -77,6 +82,17 @@ export async function ArticlePreview({
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {canIllustrate ? (
+          <ImagePicker
+            endpoint={`/api/articles/${encodeURIComponent(articleId)}/image`}
+            image={article.image}
+            name={article.title ?? ""}
+          />
+        ) : (
+          article.image && (
+            <StoredImage src={article.image} className="rounded-lg" />
+          )
+        )}
         <p className="whitespace-pre-line">{article.body}</p>
         <section
           aria-labelledby="preview-english"

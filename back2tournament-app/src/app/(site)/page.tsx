@@ -3,7 +3,7 @@ import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
-import { MediaPlaceholder } from "@/components/media-placeholder"
+import { StoredImage } from "@/components/stored-image"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import {
@@ -60,7 +60,7 @@ function GameCard({ game, enter }: { game: Game; enter: string }) {
           href={`/games/${encodeURIComponent(id)}/players`}
           className="flex h-full flex-col rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <MediaPlaceholder />
+          <StoredImage src={game.image} />
           <div className="flex flex-1 flex-col gap-1.5 p-4">
             <CardTitle>{game.title}</CardTitle>
             <CardDescription className="mt-auto inline-flex items-center gap-1 text-primary">
