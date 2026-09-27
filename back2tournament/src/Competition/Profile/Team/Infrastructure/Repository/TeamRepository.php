@@ -25,6 +25,21 @@ final class TeamRepository extends ServiceEntityRepository implements TeamReposi
         $this->getEntityManager()->flush();
     }
 
+    public function findNamed(string $search, ?string $gameId, int $limit): array
+    {
+        $queryBuilder = $this->createQueryBuilder('team')
+            ->andWhere('LOWER(team.name) LIKE :search')
+            ->setParameter('search', '%'.mb_strtolower($search).'%')
+            ->orderBy('team.name', 'ASC')
+            ->setMaxResults($limit);
+
+        if (null !== $gameId) {
+            $queryBuilder->andWhere('team.game = :gameId')->setParameter('gameId', $gameId);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
     public function remove(Team $team): void
     {
         $this->getEntityManager()->remove($team);

@@ -22,6 +22,14 @@ interface PlayerRepositoryInterface
 
     public function countPage(string $gameId, ?string $search): int;
 
+    /**
+     * The player profiles whose battletag holds $search, in one game or in
+     * all of them; $limit at most.
+     *
+     * @return list<Player>
+     */
+    public function findNamed(string $search, ?string $gameId, int $limit): array;
+
     public function save(Player $player): void;
 
     public function remove(Player $player): void;

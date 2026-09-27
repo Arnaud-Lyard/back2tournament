@@ -139,17 +139,39 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame([], $registry->rankedAs([]));
     }
 
+    public function test_a_name_finds_the_competitors_of_the_profiles_and_teams_bearing_it(): void
+    {
+        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
+            self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
+            self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
+        ]));
+
+        // The stubs name Leader#0001 for "lead", and the Falcons for "falc".
+        $this->assertSame([self::PLAYER_COMPETITOR], $registry->named('lead'));
+        $this->assertSame([self::TEAM_COMPETITOR], $registry->named('falc', self::GAME_ID));
+        $this->assertSame([], $registry->named('nobody'));
+    }
+
     private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistryProvider
     {
         [$team, $lineup] = self::aTeam(self::TEAM_ID, self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID), [self::PLAYER_ID, self::MATE_PLAYER]);
+        $players = [
+            self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001'),
+            self::aPlayer(self::MATE_PLAYER, self::MATE_USER, self::GAME_ID, 'Mate#0002'),
+        ];
+
+        $playerRepository = $this->repositoryStub(PlayerRepositoryInterface::class, $players);
+        $playerRepository->method('findNamed')->willReturnCallback(static fn (string $search): array => array_values(array_filter(
+            $players,
+            static fn ($player): bool => str_contains(mb_strtolower((string) $player->getBattletag()), mb_strtolower($search)),
+        )));
+        $teamRepository = $this->repositoryStub(TeamRepositoryInterface::class, [$team]);
+        $teamRepository->method('findNamed')->willReturnCallback(static fn (string $search): array => str_contains(mb_strtolower((string) $team->getName()), mb_strtolower($search)) ? [$team] : []);
 
         return new CompetitorRegistryProvider(
             $competitorRepository,
-            $this->repositoryStub(PlayerRepositoryInterface::class, [
-                self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001'),
-                self::aPlayer(self::MATE_PLAYER, self::MATE_USER, self::GAME_ID, 'Mate#0002'),
-            ]),
-            $this->repositoryStub(TeamRepositoryInterface::class, [$team]),
+            $playerRepository,
+            $teamRepository,
             $this->repositoryStub(TeamPlayerRepositoryInterface::class, $lineup),
             $this->createStub(EventDispatcherInterface::class),
         );

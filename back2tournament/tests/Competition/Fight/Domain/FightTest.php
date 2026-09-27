@@ -241,6 +241,112 @@ final class FightTest extends TestCase
         Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_ONE), $one, new Score(0), $two, new Score(3));
     }
 
+    public function test_an_administrator_settles_a_fight_nobody_declared(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+        $fight->pullDomainEvents();
+
+        Fight::arbitrate($fight, $one, new Score(1), $two, new Score(3));
+
+        $this->assertSame([ResultStatus::LOSS, 1], [$one->getStatus(), $one->getScore()]);
+        $this->assertSame([ResultStatus::WIN, 3], [$two->getStatus(), $two->getScore()]);
+        $this->assertTrue($fight->isArbitrated());
+
+        $settled = array_values(array_filter($fight->pullDomainEvents(), static fn (object $event): bool => $event instanceof FightSettledEvent));
+        $this->assertCount(1, $settled);
+        $this->assertSame(self::COMPETITOR_TWO, $settled[0]->getWinner()?->getValue());
+    }
+
+    public function test_the_scores_an_administrator_imposes_override_the_declaration_in_dispute(): void
+    {
+        [$fight, $one, $two] = $this->openFight(new TournamentId(self::TOURNAMENT_ID));
+        Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_ONE), $one, new Score(3), $two, new Score(0));
+
+        Fight::arbitrate($fight, $one, new Score(0), $two, new Score(2));
+
+        $this->assertSame([ResultStatus::LOSS, 0, null], [$one->getStatus(), $one->getScore(), $one->getReportedStatus()]);
+        $this->assertSame([ResultStatus::WIN, 2, null], [$two->getStatus(), $two->getScore(), $two->getReportedStatus()]);
+    }
+
+    public function test_an_administrator_settles_a_challenge_on_a_draw(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+
+        Fight::arbitrate($fight, $one, new Score(2), $two, new Score(2));
+
+        $this->assertSame([ResultStatus::DRAW, ResultStatus::DRAW], [$one->getStatus(), $two->getStatus()]);
+    }
+
+    public function test_not_even_an_administrator_ends_a_tournament_fight_on_a_draw(): void
+    {
+        [$fight, $one, $two] = $this->openFight(new TournamentId(self::TOURNAMENT_ID));
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessageIsOrContains('cannot end in a draw');
+
+        Fight::arbitrate($fight, $one, new Score(1), $two, new Score(1));
+    }
+
+    public function test_a_settled_fight_is_not_arbitrated(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+        Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_ONE), $one, new Score(3), $two, new Score(0));
+        Fight::confirmOutcome($fight, new CompetitorId(self::COMPETITOR_TWO), $one, $two);
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('already settled');
+
+        Fight::arbitrate($fight, $one, new Score(0), $two, new Score(3));
+    }
+
+    public function test_the_results_are_given_in_the_order_the_fight_holds_its_sides(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        Fight::arbitrate($fight, $two, new Score(3), $one, new Score(0));
+    }
+
+    public function test_an_administrator_sets_a_declaration_aside_and_the_fight_is_to_declare_again(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+        Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_ONE), $one, new Score(3), $two, new Score(0));
+
+        Fight::reopen($fight, $one, $two);
+
+        foreach ([$one, $two] as $result) {
+            $this->assertSame([ResultStatus::PENDING, 0, null], [$result->getStatus(), $result->getScore(), $result->getReportedStatus()]);
+        }
+        $this->assertNull($fight->getDeclaredBy());
+        $this->assertFalse($fight->isArbitrated());
+
+        // The other side may now declare.
+        Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_TWO), $two, new Score(2), $one, new Score(1));
+        $this->assertSame(self::COMPETITOR_TWO, $fight->getDeclaredBy()?->getValue());
+    }
+
+    public function test_a_fight_nobody_declared_has_nothing_to_set_aside(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('no outcome has been declared');
+
+        Fight::reopen($fight, $one, $two);
+    }
+
+    public function test_a_settled_fight_is_not_reopened(): void
+    {
+        [$fight, $one, $two] = $this->openFight();
+        Fight::arbitrate($fight, $one, new Score(1), $two, new Score(0));
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('already settled');
+
+        Fight::reopen($fight, $one, $two);
+    }
+
     private function fight(?TournamentId $tournamentId = null): Fight
     {
         return Fight::create(

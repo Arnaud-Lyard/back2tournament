@@ -228,6 +228,7 @@ nelmio_api_doc:
                             description: 'The competitor that declared the scores. Null while nothing has been declared.'
                             properties:
                                 value: { type: string, format: uuid }
+                        arbitrated: { type: boolean, description: 'An administrator settled the fight after a dispute, instead of a confirmation by the other side.' }
                         winner:
                             type: object
                             nullable: true
@@ -266,6 +267,7 @@ nelmio_api_doc:
                             type: string
                             enum: [win, loss, draw]
                             description: 'How the fight ended for `side`.'
+                        arbitrated: { type: boolean, description: 'An administrator settled the fight after a dispute.' }
                         settledAt:
                             type: string
                             format: date-time
@@ -286,6 +288,17 @@ nelmio_api_doc:
                                 - type: object
                                   properties:
                                       score: { type: integer, minimum: 0, example: 1 }
+                FightPage:
+                    type: object
+                    required: [items, total, page, limit, pages]
+                    properties:
+                        items:
+                            type: array
+                            items: { $ref: '#/components/schemas/FightSummary' }
+                        total: { type: integer, example: 12, description: 'Fights matching the filters, every page taken together' }
+                        page: { type: integer, example: 1 }
+                        limit: { type: integer, example: 20 }
+                        pages: { type: integer, example: 1, description: '0 when no fight matches' }
                 SettledResultPage:
                     type: object
                     required: [items, total, page, limit, pages]

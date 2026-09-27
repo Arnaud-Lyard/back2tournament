@@ -112,6 +112,7 @@ final class FindResultHistoryHandler
             'teamSize' => $fight->getTeamSize(),
             'tournament' => null === $fight->getTournament() ? null : ['value' => $fight->getTournament()->getValue()],
             'outcome' => $result->getStatus()->value,
+            'arbitrated' => $fight->isArbitrated(),
             'settledAt' => $result->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
             'side' => $this->normalizeSide($side, $scores[$side] ?? $result->getScore(), $described),
             'opponent' => null === $opponent ? null : $this->normalizeSide($opponent, $scores[$opponent] ?? 0, $described),

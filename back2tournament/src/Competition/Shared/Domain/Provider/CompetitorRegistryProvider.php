@@ -16,6 +16,11 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class CompetitorRegistryProvider implements CompetitorRegistryProviderInterface
 {
+    /**
+     * How many player profiles, and how many teams, a name search keeps.
+     */
+    private const NAMED_AT_MOST = 100;
+
     private CompetitorRepositoryInterface $competitorRepository;
     private PlayerRepositoryInterface $playerRepository;
     private TeamRepositoryInterface $teamRepository;
@@ -182,6 +187,28 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
         }
 
         return $ranked;
+    }
+
+    public function named(string $search, ?string $gameId = null): array
+    {
+        $playerIds = array_map(
+            static fn ($player): string => $player->getId()->getValue(),
+            $this->playerRepository->findNamed($search, $gameId, self::NAMED_AT_MOST),
+        );
+        $teamIds = array_map(
+            static fn ($team): string => $team->getId()->getValue(),
+            $this->teamRepository->findNamed($search, $gameId, self::NAMED_AT_MOST),
+        );
+
+        $competitors = [] === $playerIds ? [] : $this->competitorRepository->findBy(['type' => CompetitorType::PLAYER, 'reference' => $playerIds]);
+        if ([] !== $teamIds) {
+            $competitors = array_merge(
+                $competitors,
+                $this->competitorRepository->findBy(['type' => CompetitorType::TEAM, 'reference' => $teamIds]),
+            );
+        }
+
+        return array_map(static fn (Competitor $competitor): string => $competitor->getId()->getValue(), $competitors);
     }
 
     public function teamHasCompeted(string $teamId): bool

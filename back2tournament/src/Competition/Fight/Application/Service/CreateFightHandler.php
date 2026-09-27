@@ -234,6 +234,7 @@ final class CreateFightHandler
             'tournament' => null === $fight->getTournament() ? null : ['value' => $fight->getTournament()->getValue()],
             'status' => $status,
             'declaredBy' => null === $fight->getDeclaredBy() ? null : ['value' => $fight->getDeclaredBy()->getValue()],
+            'arbitrated' => $fight->isArbitrated(),
             'winner' => $winner,
             'mySide' => $mySide,
             'sides' => $sides,
