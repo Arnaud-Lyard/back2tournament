@@ -290,14 +290,14 @@ nelmio_api_doc:
                             nullable: true
                             description: 'When the result was confirmed.'
                         side:
-                            description: 'The side the list is about: the player profile, a team it plays in, or a team of the clan.'
+                            description: 'The side the list is about: the player profile or a team it plays in; for a clan, one of its teams or the member who fought the duel. Its `tag` is the tag of the clan it played for in this fight, whichever clan its players are in today.'
                             allOf:
                                 - { $ref: '#/components/schemas/NamedSide' }
                                 - type: object
                                   properties:
                                       score: { type: integer, minimum: 0, example: 3 }
                         opponent:
-                            description: 'The other side of the fight.'
+                            description: 'The other side of the fight. Its `tag` is the tag of the clan it played for in this fight.'
                             nullable: true
                             allOf:
                                 - { $ref: '#/components/schemas/NamedSide' }

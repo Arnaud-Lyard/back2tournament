@@ -988,12 +988,12 @@ export interface components {
              * @description When the result was confirmed.
              */
             settledAt?: string | null;
-            /** @description The side the list is about: the player profile, a team it plays in, or a team of the clan. */
+            /** @description The side the list is about: the player profile or a team it plays in; for a clan, one of its teams or the member who fought the duel. Its `tag` is the tag of the clan it played for in this fight, whichever clan its players are in today. */
             side: components["schemas"]["NamedSide"] & {
                 /** @example 3 */
                 score?: number;
             };
-            /** @description The other side of the fight. */
+            /** @description The other side of the fight. Its `tag` is the tag of the clan it played for in this fight. */
             opponent?: (components["schemas"]["NamedSide"] & {
                 /** @example 1 */
                 score?: number;
@@ -1916,7 +1916,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of the settled fights of a clan's teams, newest first. `side` is the clan's team. `items` is empty when no team of the clan finished a fight, when the page is past the last one, and when no clan has this id. */
+            /** @description One page of the settled fights a clan played against other clans, newest first: the fights of its teams, and in 1v1 the duels of its members, as each fight recorded the clan of its sides when it opened. `side` is the clan's team, or the member who fought the duel. A fight between two sides of the clan, or against a player in no clan, is left out. `items` is empty when the clan finished no such fight, when the page is past the last one, and when no clan has this id. */
             200: {
                 headers: {
                     [name: string]: unknown;

@@ -99,23 +99,6 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
         return array_map(static fn (Competitor $competitor): string => $competitor->getId()->getValue(), $competitors);
     }
 
-    public function competitorsOfClan(string $clanId): array
-    {
-        $teamIds = [];
-        foreach ($this->teamRepository->findBy(['clan' => $clanId]) as $team) {
-            $teamIds[] = $team->getId()->getValue();
-        }
-
-        if ([] === $teamIds) {
-            return [];
-        }
-
-        return array_map(
-            static fn (Competitor $competitor): string => $competitor->getId()->getValue(),
-            $this->competitorRepository->findBy(['type' => CompetitorType::TEAM, 'reference' => $teamIds]),
-        );
-    }
-
     public function describe(array $competitorIds): array
     {
         $competitorIds = array_values(array_unique($competitorIds));

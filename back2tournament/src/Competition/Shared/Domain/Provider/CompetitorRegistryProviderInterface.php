@@ -37,13 +37,6 @@ interface CompetitorRegistryProviderInterface
     public function competitorsOfPlayer(string $playerId): array;
 
     /**
-     * The competitors of a clan's teams. Only the teams that already competed.
-     *
-     * @return list<string>
-     */
-    public function competitorsOfClan(string $clanId): array;
-
-    /**
      * @param list<string> $competitorIds
      *
      * `tag` is the tag of the clan the side plays for: the clan of the

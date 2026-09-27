@@ -862,12 +862,12 @@
     "title": "Latest results",
     "description": {
       "player": "Their finished fights, in 1v1 and with their teams, newest first.",
-      "clan": "The finished fights of the clan's teams, newest first."
+      "clan": "Its finished fights against other clans, newest first: its teams' fights and, in 1v1, its members' duels."
     },
     "empty": {
       "title": "No results",
       "player": "No finished fight yet.",
-      "clan": "No team of the clan has finished a fight yet."
+      "clan": "The clan has not finished a fight against another clan yet."
     },
     "outcome": {
       "win": "Win",

@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Parameter(name: 'limit', in: 'query', required: false, description: 'How many results that page holds, 10 by default and 50 at most.', schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 50, default: 10))]
 #[OA\Response(
     response: 200,
-    description: 'One page of the settled fights of a clan\'s teams, newest first. `side` is the clan\'s team. `items` is empty when no team of the clan finished a fight, when the page is past the last one, and when no clan has this id.',
+    description: 'One page of the settled fights a clan played against other clans, newest first: the fights of its teams, and in 1v1 the duels of its members, as each fight recorded the clan of its sides when it opened. `side` is the clan\'s team, or the member who fought the duel. A fight between two sides of the clan, or against a player in no clan, is left out. `items` is empty when the clan finished no such fight, when the page is past the last one, and when no clan has this id.',
     content: new OA\JsonContent(ref: '#/components/schemas/SettledResultPage'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]

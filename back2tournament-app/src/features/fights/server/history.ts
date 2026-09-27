@@ -14,7 +14,7 @@ export async function loadPlayerHistory(playerId: string) {
   )
 }
 
-/** The latest settled fights of a clan's teams. */
+/** The latest settled fights of a clan against other clans: its teams', its members' duels. */
 export async function loadClanHistory(clanId: string) {
   const client = await getServerApiClient()
   return loadApiResult(

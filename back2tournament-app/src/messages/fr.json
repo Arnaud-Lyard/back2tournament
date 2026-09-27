@@ -862,12 +862,12 @@
     "title": "Derniers résultats",
     "description": {
       "player": "Ses matchs terminés, en 1v1 et avec ses équipes, du plus récent au plus ancien.",
-      "clan": "Les matchs terminés des équipes du clan, du plus récent au plus ancien."
+      "clan": "Ses matchs terminés contre d'autres clans, du plus récent au plus ancien : ceux de ses équipes et, en 1v1, les duels de ses membres."
     },
     "empty": {
       "title": "Aucun résultat",
       "player": "Aucun match terminé pour le moment.",
-      "clan": "Aucune équipe du clan n'a encore terminé de match."
+      "clan": "Le clan n'a encore terminé aucun match contre un autre clan."
     },
     "outcome": {
       "win": "Victoire",

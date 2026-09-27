@@ -127,17 +127,6 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame([], $registry->competitorsOfPlayer(self::PLAYER_ID));
     }
 
-    public function test_a_clan_competes_through_its_teams(): void
-    {
-        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
-            self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
-            self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
-        ]));
-
-        $this->assertSame([self::TEAM_COMPETITOR], $registry->competitorsOfClan(self::CLAN_ID));
-        $this->assertSame([], $registry->competitorsOfClan(self::GAME_ID));
-    }
-
     public function test_a_player_plays_alone_for_its_clan_and_a_team_fields_its_lineup_for_its_clan(): void
     {
         $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
