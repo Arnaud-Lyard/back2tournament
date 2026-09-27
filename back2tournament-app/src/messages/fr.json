@@ -636,7 +636,6 @@
         "reporting": "À confirmer",
         "finished": "Terminé"
       },
-      "arbitrated": "Arbitré",
       "unknownSide": "Camp inconnu",
       "list": {
         "title": "Matchs",
@@ -663,8 +662,7 @@
         "declaring": "(a déclaré)",
         "declaredBy": "{name} a déclaré ce score ; l'autre camp ne l'a pas confirmé.",
         "noDeclaration": "Aucun score déclaré pour l'instant.",
-        "finished": "Match confirmé par les deux camps : le résultat est définitif.",
-        "finishedArbitrated": "Match arbitré par un administrateur : le résultat est définitif.",
+        "finished": "Match terminé : le résultat est définitif.",
         "fightId": "Identifiant",
         "copyId": "Copier l'identifiant du match",
         "notFound": {
@@ -678,7 +676,7 @@
       },
       "arbitration": {
         "title": "Imposer un résultat",
-        "description": "Le score saisi remplace toute déclaration : le match est terminé, marqué comme arbitré, et ce résultat est définitif.",
+        "description": "Le score saisi remplace toute déclaration : le match est terminé et ce résultat est définitif.",
         "scoreOf": "Score de {name}",
         "submit": "Imposer ce résultat",
         "confirmTitle": "Imposer {one} {scoreOne} – {scoreTwo} {two} ?",
@@ -880,9 +878,7 @@
     "unknown": "adversaire inconnu",
     "tournament": "Tournoi",
     "latest": "Les {shown} derniers sur {total}",
-    "loadError": "Impossible de charger les résultats pour le moment.",
-    "arbitrated": "Arbitré",
-    "arbitratedHint": "Un administrateur a tranché ce match après un litige."
+    "loadError": "Impossible de charger les résultats pour le moment."
   },
   "rankings": {
     "title": "Classement",

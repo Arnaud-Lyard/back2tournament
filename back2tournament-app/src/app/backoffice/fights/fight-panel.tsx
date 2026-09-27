@@ -16,7 +16,7 @@ import { formatLabel } from "@/features/fights/lib/challenge"
 import type { FightSummary } from "@/features/fights/types"
 import type { Loaded } from "@/libs/api/load"
 import { ArbitrationForm } from "./arbitration-form"
-import { FightStatusBadges } from "./fight-status-badges"
+import { FightStatusBadge } from "./fight-status-badge"
 
 interface FightPanelProps {
   fightId: string
@@ -69,7 +69,7 @@ export async function FightPanel({
           )}
         </CardDescription>
         <CardAction>
-          <FightStatusBadges fight={fight} />
+          <FightStatusBadge fight={fight} />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -93,9 +93,7 @@ export async function FightPanel({
         </dl>
         <p className="text-sm text-muted-foreground">
           {fight.status === "finished"
-            ? t(
-                fight.arbitrated ? "panel.finishedArbitrated" : "panel.finished"
-              )
+            ? t("panel.finished")
             : declaring
               ? t("panel.declaredBy", {
                   name: declaring.name ?? t("unknownSide"),

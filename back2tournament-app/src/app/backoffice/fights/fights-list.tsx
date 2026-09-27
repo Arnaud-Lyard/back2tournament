@@ -15,7 +15,7 @@ import type { FightStatusFilter, FightSummary } from "@/features/fights/types"
 import type { Game } from "@/features/games/types"
 import { listHref } from "@/libs/list-params"
 import { ListCard } from "../list-card"
-import { FightStatusBadges } from "./fight-status-badges"
+import { FightStatusBadge } from "./fight-status-badge"
 
 interface FightsListProps {
   fights: FightSummary[]
@@ -112,7 +112,7 @@ export async function FightsList({
                   </span>
                 </TableCell>
                 <TableCell>
-                  <FightStatusBadges fight={fight} />
+                  <FightStatusBadge fight={fight} />
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {fight.updatedAt

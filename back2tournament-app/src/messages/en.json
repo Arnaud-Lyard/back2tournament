@@ -636,7 +636,6 @@
         "reporting": "To confirm",
         "finished": "Finished"
       },
-      "arbitrated": "Arbitrated",
       "unknownSide": "Unknown side",
       "list": {
         "title": "Fights",
@@ -663,8 +662,7 @@
         "declaring": "(declared)",
         "declaredBy": "{name} declared this score; the other side has not confirmed it.",
         "noDeclaration": "No score declared yet.",
-        "finished": "Confirmed by both sides: the result is final.",
-        "finishedArbitrated": "Arbitrated by an administrator: the result is final.",
+        "finished": "Finished: the result is final.",
         "fightId": "Id",
         "copyId": "Copy the fight id",
         "notFound": {
@@ -678,7 +676,7 @@
       },
       "arbitration": {
         "title": "Impose a result",
-        "description": "The score you enter replaces any declaration: the fight is finished, marked as arbitrated, and the result is final.",
+        "description": "The score you enter replaces any declaration: the fight is finished and the result is final.",
         "scoreOf": "{name}'s score",
         "submit": "Impose this result",
         "confirmTitle": "Impose {one} {scoreOne} – {scoreTwo} {two}?",
@@ -880,9 +878,7 @@
     "unknown": "unknown opponent",
     "tournament": "Tournament",
     "latest": "The latest {shown} of {total}",
-    "loadError": "The results cannot be loaded right now.",
-    "arbitrated": "Arbitrated",
-    "arbitratedHint": "An administrator settled this fight after a dispute."
+    "loadError": "The results cannot be loaded right now."
   },
   "rankings": {
     "title": "Rankings",
