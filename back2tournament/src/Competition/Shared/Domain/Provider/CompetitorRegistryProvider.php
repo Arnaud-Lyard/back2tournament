@@ -146,6 +146,44 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
         return $described;
     }
 
+    public function rankedAs(array $competitorIds): array
+    {
+        $competitorIds = array_values(array_unique($competitorIds));
+        if ([] === $competitorIds) {
+            return [];
+        }
+
+        $competitors = $this->competitorRepository->findBy(['id' => $competitorIds]);
+
+        $teamIds = [];
+        foreach ($competitors as $competitor) {
+            if (CompetitorType::TEAM === $competitor->getType()) {
+                $teamIds[] = $competitor->getReference();
+            }
+        }
+
+        // A team's results count for its clan.
+        $clans = [];
+        if ([] !== $teamIds) {
+            foreach ($this->teamRepository->findBy(['id' => $teamIds]) as $team) {
+                $clans[$team->getId()->getValue()] = $team->getClan()->getValue();
+            }
+        }
+
+        $ranked = [];
+        foreach ($competitors as $competitor) {
+            $reference = $competitor->getReference();
+
+            if (CompetitorType::PLAYER === $competitor->getType()) {
+                $ranked[$competitor->getId()->getValue()] = ['type' => 'player', 'id' => $reference];
+            } elseif (isset($clans[$reference])) {
+                $ranked[$competitor->getId()->getValue()] = ['type' => 'clan', 'id' => $clans[$reference]];
+            }
+        }
+
+        return $ranked;
+    }
+
     public function teamHasCompeted(string $teamId): bool
     {
         return null !== $this->competitorRepository->findOneBy(['type' => CompetitorType::TEAM, 'reference' => $teamId]);

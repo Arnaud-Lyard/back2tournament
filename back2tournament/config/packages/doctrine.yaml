@@ -74,6 +74,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Competition/Tournament/Infrastructure/DoctrineMapping'
                 prefix: 'App\Competition\Tournament\Domain\Entity'
                 alias: Tournament
+            Ranking:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Competition/Ranking/Infrastructure/DoctrineMapping'
+                prefix: 'App\Competition\Ranking\Domain\Entity'
+                alias: Ranking
 
         controller_resolver:
             auto_mapping: false

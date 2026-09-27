@@ -122,6 +122,23 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame([], $registry->competitorsOfClan(self::GAME_ID));
     }
 
+    public function test_a_player_ranks_as_itself_and_a_team_as_its_clan(): void
+    {
+        $registry = $this->registry($this->repositoryStub(CompetitorRepositoryInterface::class, [
+            self::aCompetitor(self::PLAYER_COMPETITOR, CompetitorType::PLAYER, self::PLAYER_ID),
+            self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
+        ]));
+
+        $this->assertSame(
+            [
+                self::PLAYER_COMPETITOR => ['type' => 'player', 'id' => self::PLAYER_ID],
+                self::TEAM_COMPETITOR => ['type' => 'clan', 'id' => self::CLAN_ID],
+            ],
+            $registry->rankedAs([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR, self::GAME_ID]),
+        );
+        $this->assertSame([], $registry->rankedAs([]));
+    }
+
     private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistryProvider
     {
         [$team, $lineup] = self::aTeam(self::TEAM_ID, self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID), [self::PLAYER_ID, self::MATE_PLAYER]);

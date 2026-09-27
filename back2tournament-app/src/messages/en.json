@@ -107,7 +107,8 @@
     "nav": {
       "label": "Sections of {title}",
       "players": "Players",
-      "clans": "Clans"
+      "clans": "Clans",
+      "rankings": "Rankings"
     },
     "loadError": {
       "title": "This game could not be loaded",
@@ -781,5 +782,50 @@
     "tournament": "Tournament",
     "latest": "The latest {shown} of {total}",
     "loadError": "The results cannot be loaded right now."
+  },
+  "rankings": {
+    "title": "Rankings",
+    "description": "The Elo rankings of this game's players and clans.",
+    "howItWorks": "Everyone starts at 1000 points. Each confirmed fight wins or loses up to 32: beating a higher-rated opponent is worth more. Players are ranked on their duels, clans on their teams' fights.",
+    "views": {
+      "label": "Ranking to show",
+      "players": "Players",
+      "clans": "Clans"
+    },
+    "columns": {
+      "rank": "Rank",
+      "player": "Player",
+      "clan": "Clan",
+      "rating": "Elo",
+      "fights": "Fights",
+      "record": "W – D – L"
+    },
+    "you": "You",
+    "unknown": "Unknown",
+    "empty": {
+      "title": "Nobody is ranked yet",
+      "players": "The ranking fills up with every confirmed duel.",
+      "clans": "Clans enter the ranking with their teams' confirmed fights."
+    },
+    "loadError": {
+      "title": "The rankings could not be loaded",
+      "description": "The server did not answer. Try again in a moment."
+    },
+    "card": {
+      "title": "Elo rating",
+      "description": {
+        "player": "Worked out from its confirmed duels.",
+        "clan": "Worked out from its teams' confirmed fights."
+      },
+      "viewRanking": "View the rankings",
+      "rating": "Elo",
+      "rank": "Rank",
+      "outOf": "of {total}",
+      "unranked": "Not ranked yet",
+      "record": "Record",
+      "recordValue": "{wins} W · {draws} D · {losses} L",
+      "fights": "{count, plural, =0 {No fights} one {# fight} other {# fights}}",
+      "loadError": "The rating could not be loaded."
+    }
   }
 }

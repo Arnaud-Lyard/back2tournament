@@ -107,7 +107,8 @@
     "nav": {
       "label": "Sections du jeu {title}",
       "players": "Joueurs",
-      "clans": "Clans"
+      "clans": "Clans",
+      "rankings": "Classement"
     },
     "loadError": {
       "title": "Impossible de charger ce jeu",
@@ -781,5 +782,50 @@
     "tournament": "Tournoi",
     "latest": "Les {shown} derniers sur {total}",
     "loadError": "Impossible de charger les résultats pour le moment."
+  },
+  "rankings": {
+    "title": "Classement",
+    "description": "Le classement Elo des joueurs et des clans de ce jeu.",
+    "howItWorks": "Tout le monde démarre à 1000 points. Chaque combat confirmé en fait gagner ou perdre jusqu'à 32 : battre mieux classé que soi rapporte davantage. Les joueurs sont classés sur leurs duels, les clans sur les combats de leurs équipes.",
+    "views": {
+      "label": "Classement à afficher",
+      "players": "Joueurs",
+      "clans": "Clans"
+    },
+    "columns": {
+      "rank": "Rang",
+      "player": "Joueur",
+      "clan": "Clan",
+      "rating": "Elo",
+      "fights": "Combats",
+      "record": "V – N – D"
+    },
+    "you": "Vous",
+    "unknown": "Inconnu",
+    "empty": {
+      "title": "Personne n'est encore classé",
+      "players": "Le classement se remplit à chaque duel confirmé.",
+      "clans": "Les clans entrent au classement avec les combats confirmés de leurs équipes."
+    },
+    "loadError": {
+      "title": "Impossible de charger le classement",
+      "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
+    },
+    "card": {
+      "title": "Classement Elo",
+      "description": {
+        "player": "Calculé sur ses duels confirmés.",
+        "clan": "Calculé sur les combats confirmés de ses équipes."
+      },
+      "viewRanking": "Voir le classement",
+      "rating": "Elo",
+      "rank": "Rang",
+      "outOf": "sur {total}",
+      "unranked": "Pas encore classé",
+      "record": "Bilan",
+      "recordValue": "{wins} V · {draws} N · {losses} D",
+      "fights": "{count, plural, =0 {Aucun combat} one {# combat} other {# combats}}",
+      "loadError": "Impossible de charger le classement."
+    }
   }
 }

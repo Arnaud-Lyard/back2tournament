@@ -533,6 +533,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rankings/clans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_rankings_clan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rankings/games/{gameId}/clans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_rankings_clans"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rankings/players/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_rankings_player"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rankings/games/{gameId}/players": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_rankings_players"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tournaments/{id}/participants/{participantid}": {
         parameters: {
             query?: never;
@@ -1050,6 +1114,92 @@ export interface components {
              */
             rounds?: number;
             matchups?: components["schemas"]["TournamentMatchup"][];
+        };
+        /** @description Who a ranking entry is about: a player profile, named by its battletag, or a clan, by its name and tag. */
+        RankedSubject: {
+            /** @enum {string} */
+            type?: "player" | "clan";
+            id?: components["schemas"]["Uuid"];
+            /** @example Demo#1001 */
+            name?: string | null;
+            /**
+             * @description The clan tag; null for a player profile
+             * @example B2T
+             */
+            tag?: string | null;
+        };
+        /** @description One place in a ranking. Every rating starts at 1000 and moves by up to 32 points per settled fight (Elo, K = 32). */
+        RankingEntry: {
+            /**
+             * @description Equal ratings share a rank: 1, 2, 2, 4…
+             * @example 1
+             */
+            rank: number;
+            /** @example 1087 */
+            rating: number;
+            /**
+             * @description Settled fights counted in the rating
+             * @example 12
+             */
+            fights: number;
+            /** @example 8 */
+            wins: number;
+            /** @example 1 */
+            draws: number;
+            /** @example 3 */
+            losses: number;
+            subject: components["schemas"]["RankedSubject"];
+        };
+        RankingPage: {
+            items: components["schemas"]["RankingEntry"][];
+            /**
+             * @description Ranked player profiles or clans, every page taken together
+             * @example 42
+             */
+            total: number;
+            /**
+             * @description The page these entries come from
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description How many entries a full page holds
+             * @example 20
+             */
+            limit: number;
+            /**
+             * @description How many pages there are, 0 when nobody is ranked yet
+             * @example 3
+             */
+            pages: number;
+        };
+        /** @description The Elo rating of one player profile or clan, and where it stands in the ranking of its game. */
+        SubjectRating: {
+            subject: components["schemas"]["RankedSubject"];
+            game: components["schemas"]["Uuid"];
+            /**
+             * @description Null until the first settled fight
+             * @example 3
+             */
+            rank: number | null;
+            /**
+             * @description How many player profiles, or clans, the ranking of the game holds
+             * @example 42
+             */
+            total: number;
+            /**
+             * @description 1000 until the first settled fight
+             * @example 1087
+             */
+            rating: number;
+            /** @example 12 */
+            fights: number;
+            /** @example 8 */
+            wins: number;
+            /** @example 1 */
+            draws: number;
+            /** @example 3 */
+            losses: number;
         };
     };
     responses: {
@@ -2799,6 +2949,132 @@ export interface operations {
                 };
                 content?: never;
             };
+        };
+    };
+    get_api_rankings_clan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Elo rating of a clan and its rank in its game. A clan none of whose teams has settled a fight yet stands at the initial 1000, with `rank` null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubjectRating"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description No clan has this id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    get_api_rankings_clans: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many entries that page holds, 20 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Game ID */
+                gameId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the Elo ranking of a game's clans, the highest rating first. A clan enters it on the first settled fight of one of its teams, whatever the format. Equal ratings share a rank. `items` is empty when no clan is ranked yet, or when the page is past the last one. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RankingPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    get_api_rankings_player: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Player profile ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Elo rating of a player profile and its rank in its game. A profile that has not settled a 1v1 fight yet stands at the initial 1000, with `rank` null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubjectRating"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description No player profile has this id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    get_api_rankings_players: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many entries that page holds, 20 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Game ID */
+                gameId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the Elo ranking of a game's player profiles, the highest rating first. A profile enters it on its first settled 1v1 fight; team fights count for the clans. Equal ratings share a rank. `items` is empty when nobody is ranked yet, or when the page is past the last one. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RankingPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
         };
     };
     delete_api_tournament_participant_delete: {

@@ -51,6 +51,16 @@ interface CompetitorRegistryProviderInterface
     public function describe(array $competitorIds): array;
 
     /**
+     * What a competitor's results count for in the rankings: the player
+     * profile it is, or the clan its team plays for.
+     *
+     * @param list<string> $competitorIds
+     *
+     * @return array<string, array{type: 'player'|'clan', id: string}> keyed by competitor id; an unknown id is left out
+     */
+    public function rankedAs(array $competitorIds): array;
+
+    /**
      * Whether the team was ever enlisted, in a fight or a tournament.
      */
     public function teamHasCompeted(string $teamId): bool;
