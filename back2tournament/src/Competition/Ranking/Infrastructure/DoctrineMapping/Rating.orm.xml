@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Competition\Ranking\Domain\Entity\Rating" table="rating" repository-class="App\Competition\Ranking\Infrastructure\Repository\RatingRepository">
+        <unique-constraints>
+            <unique-constraint columns="subject_type,subject" name="uniq_rating_subject" />
+        </unique-constraints>
+        <indexes>
+            <index columns="subject_type,game,value" name="idx_rating_ranking" />
+        </indexes>
+
+        <id name="id" type="guid" column="id" length="36" />
+
+        <field name="subjectType" type="string" column="subject_type" length="16" enum-type="App\Competition\Ranking\Domain\Enum\RankingSubject" />
+        <field name="subject" type="guid" column="subject" length="36" />
+        <field name="game" type="guid" column="game" length="36" />
+        <field name="value" type="integer" column="value" />
+        <field name="fights" type="integer" column="fights" />
+        <field name="wins" type="integer" column="wins" />
+        <field name="draws" type="integer" column="draws" />
+        <field name="losses" type="integer" column="losses" />
+
+        <field name="createdAt" type="datetime_immutable" column="created_at" />
+        <field name="updatedAt" type="datetime_immutable" column="updated_at" />
+    </entity>
+
+</doctrine-mapping>

@@ -60,6 +60,7 @@ security:
         - { path: '^/api/teams/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/tournaments, methods: [GET], roles: PUBLIC_ACCESS }
         - { path: '^/api/results/(players|clans)/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: '^/api/rankings/(games/[^/]+/(players|clans)|players/[^/]+|clans/[^/]+)$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/categories/$, methods: [POST], roles: ROLE_ADMIN }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 

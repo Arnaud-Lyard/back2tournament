@@ -35,6 +35,7 @@ use App\Competition\Profile\Player\Domain\Entity\UserId;
 use App\Competition\Profile\Team\Domain\Entity\Team;
 use App\Competition\Profile\Team\Domain\Entity\TeamId;
 use App\Competition\Profile\Team\Domain\Entity\TeamPlayerId;
+use App\Competition\Ranking\Application\Service\RebuildRankingsService;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Tournament\Domain\Entity\MatchupId;
 use App\Competition\Tournament\Domain\Entity\OrganizerId;
@@ -131,6 +132,7 @@ final class SeedCommand extends Command
     ];
 
     private const TABLES = [
+        'rating_change', 'rating',
         'tournament_matchup', 'tournament_participant', 'tournament',
         'result', 'fight', 'competitor', 'team_player', 'team', 'clan_member', 'clan',
         'player', 'comment', 'article', 'category', 'game', 'users',
@@ -140,6 +142,8 @@ final class SeedCommand extends Command
 
     private PasswordHasherInterface $passwordHasher;
 
+    private RebuildRankingsService $rebuildRankingsService;
+
     private \DateTimeImmutable $now;
 
     private int $moment = 0;
@@ -147,9 +151,11 @@ final class SeedCommand extends Command
     public function __construct(
         EntityManagerInterface $entityManager,
         PasswordHasherInterface $passwordHasher,
+        RebuildRankingsService $rebuildRankingsService,
     ) {
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
+        $this->rebuildRankingsService = $rebuildRankingsService;
 
         parent::__construct();
     }
@@ -208,6 +214,10 @@ final class SeedCommand extends Command
         $this->seedArticles($mine, $rivals, $categories);
         $this->entityManager->flush();
 
+        // The seeded fights were settled without going through a confirmation:
+        // they are counted into the rankings the way a deployment counts old ones.
+        $rankings = $this->rebuildRankingsService->rebuild();
+
         $challenges = \count($games) * (self::MINE_PENDING + self::MINE_REPORTING);
         $firstGame = (string) $games[0]->getId();
 
@@ -223,11 +233,13 @@ final class SeedCommand extends Command
             ['Tournaments' => 2],
             ['Articles' => \sprintf('%d published, %d drafts', self::ARTICLES - self::DRAFT_ARTICLES, self::DRAFT_ARTICLES)],
             ['Comments' => self::COMMENTED_ARTICLES * self::COMMENTS_PER_ARTICLE],
+            ['Ranked' => \sprintf('%d player profiles and clans, from %d settled fights', $rankings['ratings'], $rankings['fights'])],
         );
         $io->listing([
             \sprintf('GET /api/results/users/fights — at least %d waiting, %d pages', $challenges, $this->pages($challenges)),
             \sprintf('GET /api/players/%s/games — %d pages', $firstGame, $this->pages(1 + self::PLAYERS_PER_GAME)),
             \sprintf('GET /api/games/%s/clans', $firstGame),
+            \sprintf('GET /api/rankings/games/%s/players and /clans', $firstGame),
             'GET /api/tournaments/ — one upcoming, one ongoing',
             \sprintf('GET /api/articles/ — %d pages', $this->pages(self::ARTICLES - self::DRAFT_ARTICLES)),
         ]);
