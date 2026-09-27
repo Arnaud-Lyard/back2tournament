@@ -416,6 +416,51 @@ nelmio_api_doc:
                               matchups:
                                   type: array
                                   items: { $ref: '#/components/schemas/TournamentMatchup' }
+                RankedSubject:
+                    type: object
+                    description: 'Who a ranking entry is about: a player profile, named by its battletag, or a clan, by its name and tag.'
+                    properties:
+                        type: { type: string, enum: [player, clan] }
+                        id: { $ref: '#/components/schemas/Uuid' }
+                        name: { type: string, nullable: true, example: 'Demo#1001' }
+                        tag: { type: string, nullable: true, example: 'B2T', description: 'The clan tag; null for a player profile' }
+                RankingEntry:
+                    type: object
+                    description: 'One place in a ranking. Every rating starts at 1000 and moves by up to 32 points per settled fight (Elo, K = 32).'
+                    required: [rank, rating, fights, wins, draws, losses, subject]
+                    properties:
+                        rank: { type: integer, example: 1, description: 'Equal ratings share a rank: 1, 2, 2, 4…' }
+                        rating: { type: integer, example: 1087 }
+                        fights: { type: integer, example: 12, description: 'Settled fights counted in the rating' }
+                        wins: { type: integer, example: 8 }
+                        draws: { type: integer, example: 1 }
+                        losses: { type: integer, example: 3 }
+                        subject: { $ref: '#/components/schemas/RankedSubject' }
+                RankingPage:
+                    type: object
+                    required: [items, total, page, limit, pages]
+                    properties:
+                        items:
+                            type: array
+                            items: { $ref: '#/components/schemas/RankingEntry' }
+                        total: { type: integer, example: 42, description: 'Ranked player profiles or clans, every page taken together' }
+                        page: { type: integer, example: 1, description: 'The page these entries come from' }
+                        limit: { type: integer, example: 20, description: 'How many entries a full page holds' }
+                        pages: { type: integer, example: 3, description: 'How many pages there are, 0 when nobody is ranked yet' }
+                SubjectRating:
+                    type: object
+                    description: 'The Elo rating of one player profile or clan, and where it stands in the ranking of its game.'
+                    required: [subject, game, rank, total, rating, fights, wins, draws, losses]
+                    properties:
+                        subject: { $ref: '#/components/schemas/RankedSubject' }
+                        game: { $ref: '#/components/schemas/Uuid' }
+                        rank: { type: integer, nullable: true, example: 3, description: 'Null until the first settled fight' }
+                        total: { type: integer, example: 42, description: 'How many player profiles, or clans, the ranking of the game holds' }
+                        rating: { type: integer, example: 1087, description: '1000 until the first settled fight' }
+                        fights: { type: integer, example: 12 }
+                        wins: { type: integer, example: 8 }
+                        draws: { type: integer, example: 1 }
+                        losses: { type: integer, example: 3 }
             responses:
                 BadRequest:
                     description: 'Invalid input: a value object rule or a business rule was violated'
