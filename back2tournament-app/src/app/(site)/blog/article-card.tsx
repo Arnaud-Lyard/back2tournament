@@ -1,9 +1,10 @@
 import Link from "next/link"
-import { getFormatter, getTranslations } from "next-intl/server"
+import { getFormatter, getLocale, getTranslations } from "next-intl/server"
 import { MediaPlaceholder } from "@/components/media-placeholder"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { toExcerpt } from "@/features/blog/lib/excerpt"
+import { localizeArticle } from "@/features/blog/lib/localize"
 import { articleDate } from "@/features/blog/lib/publication"
 import type { ArticleSummary, Category } from "@/features/blog/types"
 
@@ -13,9 +14,10 @@ interface ArticleCardProps {
 }
 
 export async function ArticleCard({ article, categories }: ArticleCardProps) {
-  const [t, format] = await Promise.all([
+  const [t, format, locale] = await Promise.all([
     getTranslations("blog"),
     getFormatter(),
+    getLocale(),
   ])
 
   const id = article.id?.value
@@ -25,6 +27,7 @@ export async function ArticleCard({ article, categories }: ArticleCardProps) {
     (candidate) => candidate.id === article.category?.value
   )
   const date = articleDate(article)
+  const { title, body, lang, untranslated } = localizeArticle(article, locale)
 
   return (
     <li>
@@ -45,10 +48,15 @@ export async function ArticleCard({ article, categories }: ArticleCardProps) {
               {article.authorName && (
                 <span>{t("byAuthor", { author: article.authorName })}</span>
               )}
+              {untranslated && (
+                <Badge variant="outline">{t("frenchOnly")}</Badge>
+              )}
             </div>
-            <CardTitle className="text-lg">{article.title}</CardTitle>
-            <CardDescription className="line-clamp-3">
-              {toExcerpt(article.body)}
+            <CardTitle className="text-lg" lang={lang}>
+              {title}
+            </CardTitle>
+            <CardDescription className="line-clamp-3" lang={lang}>
+              {toExcerpt(body)}
             </CardDescription>
             <span className="mt-auto pt-2 text-sm font-medium text-primary">
               {t("readMore")}

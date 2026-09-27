@@ -15,6 +15,11 @@
         <field name="tournament" type="guid" column="tournament" length="36" nullable="true" />
 
         <field name="declaredBy" type="guid" column="declared_by" length="36" nullable="true" />
+        <field name="arbitrated" type="boolean" column="arbitrated">
+            <options>
+                <option name="default">0</option>
+            </options>
+        </field>
 
         <field name="createdAt" type="datetime_immutable" column="created_at" />
         <field name="updatedAt" type="datetime_immutable" column="updated_at" />

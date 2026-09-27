@@ -51,6 +51,21 @@ final class PlayerRepository extends ServiceEntityRepository implements PlayerRe
             ->getSingleScalarResult();
     }
 
+    public function findNamed(string $search, ?string $gameId, int $limit): array
+    {
+        $queryBuilder = $this->createQueryBuilder('player')
+            ->andWhere('LOWER(player.battletag) LIKE :search')
+            ->setParameter('search', '%'.mb_strtolower($search).'%')
+            ->orderBy('player.battletag', 'ASC')
+            ->setMaxResults($limit);
+
+        if (null !== $gameId) {
+            $queryBuilder->andWhere('player.game = :gameId')->setParameter('gameId', $gameId);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
     private function filtered(string $gameId, ?string $search): QueryBuilder
     {
         $queryBuilder = $this->createQueryBuilder('player')

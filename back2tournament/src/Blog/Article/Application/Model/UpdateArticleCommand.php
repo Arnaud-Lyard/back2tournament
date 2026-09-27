@@ -14,15 +14,28 @@ final class UpdateArticleCommand
 
     private ?string $categorySlug;
 
+    private ?string $titleEn;
+
+    private ?string $bodyEn;
+
     /**
-     * A null field keeps what the article has.
+     * A null field keeps what the article has. An empty English field removes
+     * the English version.
      */
-    public function __construct(string $articleId, ?string $title, ?string $body, ?string $categorySlug)
-    {
+    public function __construct(
+        string $articleId,
+        ?string $title,
+        ?string $body,
+        ?string $categorySlug,
+        ?string $titleEn = null,
+        ?string $bodyEn = null,
+    ) {
         $this->articleId = $articleId;
         $this->title = $title;
         $this->body = $body;
         $this->categorySlug = $categorySlug;
+        $this->titleEn = $titleEn;
+        $this->bodyEn = $bodyEn;
     }
 
     public function getArticleId(): string
@@ -43,5 +56,15 @@ final class UpdateArticleCommand
     public function getCategorySlug(): ?string
     {
         return $this->categorySlug;
+    }
+
+    public function getTitleEn(): ?string
+    {
+        return $this->titleEn;
+    }
+
+    public function getBodyEn(): ?string
+    {
+        return $this->bodyEn;
     }
 }

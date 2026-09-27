@@ -43,7 +43,9 @@ final class PublicationRequestedEventSubscriber implements EventSubscriberInterf
             $event->getTitle(),
             $event->getBody(),
             (string) $user->getId(),
-            $event->getCategorySlug()
+            $event->getCategorySlug(),
+            $event->getTitleEn(),
+            $event->getBodyEn(),
         ));
 
         $event->setCreatedArticle($verifiedEvent->getCreatedArticle());

@@ -61,7 +61,8 @@ class ArticleRepository extends ServiceEntityRepository implements ArticleReposi
 
         if (null !== $search) {
             $queryBuilder
-                ->andWhere('LOWER(article.title) LIKE :search OR LOWER(article.body) LIKE :search')
+                // In either language.
+                ->andWhere('LOWER(article.title) LIKE :search OR LOWER(article.body) LIKE :search OR LOWER(article.titleEn) LIKE :search OR LOWER(article.bodyEn) LIKE :search')
                 ->setParameter('search', '%'.mb_strtolower($search).'%');
         }
 

@@ -33,6 +33,7 @@ import { createArticleSchema } from "@/features/blog/schemas/create-article.sche
 import type { Category } from "@/features/blog/types"
 import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 import { useFieldErrors } from "@/hooks/use-field-errors"
+import { EnglishVersionFields } from "./english-version-fields"
 
 export function CreateArticleForm({ categories }: { categories: Category[] }) {
   const t = useTranslations("backoffice.articles")
@@ -42,9 +43,19 @@ export function CreateArticleForm({ categories }: { categories: Category[] }) {
   const [title, setTitle] = useState("")
   const [categorySlug, setCategorySlug] = useState("")
   const [body, setBody] = useState("")
+  const [titleEn, setTitleEn] = useState("")
+  const [bodyEn, setBodyEn] = useState("")
   const [articleId, setArticleId] = useState<string | null>(null)
-  const parsed = createArticleSchema.safeParse({ title, categorySlug, body })
-  const fieldErrors = useFieldErrors<"title" | "categorySlug" | "body">(parsed)
+  const parsed = createArticleSchema.safeParse({
+    title,
+    categorySlug,
+    body,
+    titleEn,
+    bodyEn,
+  })
+  const fieldErrors = useFieldErrors<
+    "title" | "categorySlug" | "body" | "titleEn" | "bodyEn"
+  >(parsed)
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -76,6 +87,8 @@ export function CreateArticleForm({ categories }: { categories: Category[] }) {
     setArticleId(null)
     setTitle("")
     setBody("")
+    setTitleEn("")
+    setBodyEn("")
     fieldErrors.hide()
     createArticle.reset()
   }
@@ -168,6 +181,14 @@ export function CreateArticleForm({ categories }: { categories: Category[] }) {
               />
               <FieldError errors={fieldErrors.messagesFor("body")} />
             </Field>
+            <EnglishVersionFields
+              idPrefix="article"
+              titleEn={titleEn}
+              bodyEn={bodyEn}
+              onTitleEnChange={setTitleEn}
+              onBodyEnChange={setBodyEn}
+              fieldErrors={fieldErrors}
+            />
           </FieldGroup>
         </form>
       </CardContent>

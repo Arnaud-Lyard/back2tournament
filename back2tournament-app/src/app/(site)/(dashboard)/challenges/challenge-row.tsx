@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { challengeStage, formatLabel } from "@/features/fights/lib/challenge"
 import type { PendingResult } from "@/features/fights/types"
+import { siteConfig } from "@/features/site/config"
 import { cn } from "@/libs/utils"
 import { ChallengeActions } from "./challenge-actions"
 
@@ -91,6 +92,7 @@ export async function ChallengeRow({ result, gameTitle }: ChallengeRowProps) {
               stage={stage}
               score={score}
               opponentScore={opponentScore}
+              discordUrl={siteConfig.social.discord}
             />
           </div>
         )}

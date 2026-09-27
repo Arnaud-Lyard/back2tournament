@@ -61,6 +61,15 @@ interface CompetitorRegistryProviderInterface
     public function rankedAs(array $competitorIds): array;
 
     /**
+     * The competitors whose name holds $search: player profiles by battletag,
+     * teams by name, in one game or in all of them. Only competitors that
+     * already exist.
+     *
+     * @return list<string>
+     */
+    public function named(string $search, ?string $gameId = null): array;
+
+    /**
      * Whether the team was ever enlisted, in a fight or a tournament.
      */
     public function teamHasCompeted(string $teamId): bool;

@@ -22,6 +22,8 @@ interface ChallengeActionsProps {
   /** What is declared so far, to start a correction from. */
   score: number
   opponentScore: number
+  /** Where players reach an administrator in a dispute, when the site has one. */
+  discordUrl?: string
 }
 
 export function ChallengeActions({
@@ -29,11 +31,14 @@ export function ChallengeActions({
   stage,
   score,
   opponentScore,
+  discordUrl,
 }: ChallengeActionsProps) {
   const t = useTranslations("challenges")
   const [correcting, setCorrecting] = useState(false)
 
-  if (stage === "confirm") return <ConfirmButton fightId={fightId} />
+  if (stage === "confirm") {
+    return <ConfirmButton fightId={fightId} discordUrl={discordUrl} />
+  }
 
   if (stage === "awaiting" && !correcting) {
     return (
@@ -156,7 +161,13 @@ function DeclareForm({
   )
 }
 
-function ConfirmButton({ fightId }: { fightId: string }) {
+function ConfirmButton({
+  fightId,
+  discordUrl,
+}: {
+  fightId: string
+  discordUrl?: string
+}) {
   const t = useTranslations("challenges")
   const router = useRouter()
   const describeError = useApiErrorMessage()
@@ -191,7 +202,23 @@ function ConfirmButton({ fightId }: { fightId: string }) {
         )}
         {t("confirm")}
       </Button>
-      <p className="text-xs text-muted-foreground">{t("disagree")}</p>
+      <p className="text-xs text-muted-foreground">
+        {t.rich("disagree", {
+          discord: (chunks) =>
+            discordUrl ? (
+              <a
+                href={discordUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4"
+              >
+                {chunks}
+              </a>
+            ) : (
+              chunks
+            ),
+        })}
+      </p>
     </div>
   )
 }

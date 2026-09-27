@@ -9,6 +9,25 @@ describe("updateArticleSchema", () => {
     })
   })
 
+  it("lets both English fields be emptied, to remove the English version", () => {
+    expect(updateArticleSchema.parse({ titleEn: "", bodyEn: " " })).toEqual({
+      titleEn: "",
+      bodyEn: "",
+    })
+  })
+
+  it("does not judge an English field sent alone: the article holds the other", () => {
+    expect(updateArticleSchema.safeParse({ titleEn: "Better" }).success).toBe(
+      true
+    )
+  })
+
+  it("flags an English version emptied by half", () => {
+    expect(
+      updateArticleSchema.safeParse({ titleEn: "Title", bodyEn: "" }).success
+    ).toBe(false)
+  })
+
   it("refuses to blank a field that is sent", () => {
     expect(updateArticleSchema.safeParse({ title: "   " }).success).toBe(false)
     expect(updateArticleSchema.safeParse({ body: "" }).success).toBe(false)

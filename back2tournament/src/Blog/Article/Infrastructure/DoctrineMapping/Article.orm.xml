@@ -9,6 +9,8 @@
 
         <field name="title" column="title" length="255" />
         <field name="body" type="text" column="body" length="255" />
+        <field name="titleEn" column="title_en" length="255" nullable="true" />
+        <field name="bodyEn" type="text" column="body_en" nullable="true" />
         <field name="createdAt" type="datetime_immutable" column="created_at"  />
         <field name="updatedAt" type="datetime_immutable" column="updated_at" />
 

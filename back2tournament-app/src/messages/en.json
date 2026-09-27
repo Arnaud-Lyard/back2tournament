@@ -101,6 +101,11 @@
         "gone": "This article no longer exists.",
         "closed": "Comments open once the article is published."
       }
+    },
+    "frenchOnly": "In French",
+    "untranslated": {
+      "title": "Only in French",
+      "description": "This article has not been translated into English yet: here is its French version."
     }
   },
   "games": {
@@ -307,7 +312,7 @@
     "confirm": "Confirm the result",
     "confirmed": "Result confirmed: the match is over.",
     "confirmError": "Could not confirm",
-    "disagree": "Disagree? Do not confirm, and contact an administrator.",
+    "disagree": "Disagree? Do not confirm, and contact an administrator on <discord>Discord</discord>: they will settle the fight.",
     "errors": {
       "draw": "This score is refused: a tournament match cannot end in a draw.",
       "notYours": "You do not play this match, or you do not lead the team.",
@@ -431,7 +436,8 @@
       "articles": "Articles",
       "categories": "Categories",
       "backToSite": "Back to the site",
-      "toggleSidebar": "Show or hide the menu"
+      "toggleSidebar": "Show or hide the menu",
+      "fights": "Disputes"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -439,6 +445,7 @@
       "open": "Open",
       "sections": {
         "games": "Add the games players create their profile in.",
+        "fights": "Settle disputed fights: impose a result, or send a fight back to be declared.",
         "articles": "Write and publish the site's articles.",
         "categories": "Create the categories articles are filed under."
       }
@@ -579,7 +586,9 @@
         },
         "commentsError": "The comments could not be loaded.",
         "edit": "Edit",
-        "viewOnBlog": "View on the blog"
+        "viewOnBlog": "View on the blog",
+        "english": "English version",
+        "noEnglish": "None: the site read in English shows the French version."
       },
       "noCategories": "No categories: create one first",
       "list": {
@@ -594,12 +603,101 @@
           "author": "Author",
           "category": "Category",
           "date": "Date"
-        }
+        },
+        "translated": "Translated into English"
+      },
+      "english": {
+        "legend": "English version",
+        "description": "Optional: it shows when the site is read in English. Without it, the site shows the French version. The title and the body go together.",
+        "titleLabel": "Title in English",
+        "titlePlaceholder": "Spring tournament results",
+        "bodyLabel": "Content in English",
+        "bodyPlaceholder": "Write the English version…"
       }
     },
     "loadError": {
       "title": "The list could not be loaded",
       "description": "The server did not answer. Try again in a moment."
+    },
+    "fights": {
+      "title": "Disputes and fights",
+      "description": "Settle disputed fights. Players reach you on Discord: find their fight here by a player's battletag, a team name or the fight id.",
+      "filters": {
+        "label": "Fights to show",
+        "reporting": "To confirm",
+        "pending": "To declare",
+        "finished": "Finished",
+        "all": "All"
+      },
+      "searchPlaceholder": "Battletag, team name or fight id…",
+      "searchLabel": "Search a fight",
+      "status": {
+        "pending": "To declare",
+        "reporting": "To confirm",
+        "finished": "Finished"
+      },
+      "arbitrated": "Arbitrated",
+      "unknownSide": "Unknown side",
+      "list": {
+        "title": "Fights",
+        "description": {
+          "reporting": "One side declared a score the other has not confirmed yet: this is where disputes start.",
+          "pending": "Nobody has declared a score yet.",
+          "finished": "Both sides confirmed the result, or an administrator imposed it.",
+          "all": "Every fight, the most recently changed first."
+        },
+        "emptyTitle": "No fights",
+        "emptyDescription": "No fight matches these criteria.",
+        "versus": "vs",
+        "tournament": "Tournament fight",
+        "columns": {
+          "match": "Fight",
+          "score": "Score",
+          "game": "Game",
+          "status": "Status",
+          "updatedAt": "Changed on"
+        }
+      },
+      "panel": {
+        "title": "{one} vs {two}",
+        "declaring": "(declared)",
+        "declaredBy": "{name} declared this score; the other side has not confirmed it.",
+        "noDeclaration": "No score declared yet.",
+        "finished": "Confirmed by both sides: the result is final.",
+        "finishedArbitrated": "Arbitrated by an administrator: the result is final.",
+        "fightId": "Id",
+        "copyId": "Copy the fight id",
+        "notFound": {
+          "title": "Fight not found",
+          "description": "No fight has this id."
+        },
+        "loadError": {
+          "title": "The fight could not be loaded",
+          "description": "The server did not answer. Try again in a moment."
+        }
+      },
+      "arbitration": {
+        "title": "Impose a result",
+        "description": "The score you enter replaces any declaration: the fight is finished, marked as arbitrated, and the result is final.",
+        "scoreOf": "{name}'s score",
+        "submit": "Impose this result",
+        "confirmTitle": "Impose {one} {scoreOne} – {scoreTwo} {two}?",
+        "confirmDescription": "This result will be final: neither the players nor an administrator will be able to go back on it. The Elo rankings and, in a tournament, the bracket will follow.",
+        "confirm": "Yes, impose it",
+        "cancel": "Cancel",
+        "noDraw": "No draws in a tournament: pick a winner.",
+        "settled": "Result imposed",
+        "reopen": "Back to declare",
+        "reopenDescription": "Sets the disputed declaration aside: one of the sides declares again.",
+        "reopened": "Declaration set aside: the fight is to declare",
+        "error": "Action failed",
+        "errors": {
+          "invalid": "Scores refused: check them (no draws in a tournament).",
+          "forbidden": "Arbitration is reserved to administrators.",
+          "notFound": "This fight no longer exists.",
+          "changed": "The fight changed in the meantime: reload the page."
+        }
+      }
     }
   },
   "validation": {
@@ -627,7 +725,8 @@
     "leaderInLineup": "The captain must play in the team.",
     "invalidCapacity": "Between 2 and 128 participants.",
     "invalidDate": "Pick a date and time to come.",
-    "invalidTeamSizes": "Players per side between 1 and 64, separated by commas: 1, 2, 5."
+    "invalidTeamSizes": "Players per side between 1 and 64, separated by commas: 1, 2, 5.",
+    "translationIncomplete": "The English version needs both a title and a body: fill in both, or empty both."
   },
   "apiErrors": {
     "invalid": "The server rejected this data.",
@@ -781,7 +880,9 @@
     "unknown": "unknown opponent",
     "tournament": "Tournament",
     "latest": "The latest {shown} of {total}",
-    "loadError": "The results cannot be loaded right now."
+    "loadError": "The results cannot be loaded right now.",
+    "arbitrated": "Arbitrated",
+    "arbitratedHint": "An administrator settled this fight after a dispute."
   },
   "rankings": {
     "title": "Rankings",

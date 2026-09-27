@@ -15,6 +15,7 @@ use App\Blog\Article\Domain\Event\ArticleUnpublishedEvent;
 use App\Blog\Article\Domain\Event\ArticleUpdatedEvent;
 use App\Blog\Shared\Domain\Entity\ValueObject\CategoryId;
 use App\Shared\Exception\ConflictException;
+use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\ArticleBodyValueObject;
 use App\Shared\ValueObject\ArticleTitleValueObject;
 use PHPUnit\Framework\TestCase;
@@ -96,6 +97,72 @@ final class ArticleTest extends TestCase
         $this->assertSame(ArticleStatus::PUBLISHED, $article->getStatus());
         $this->assertSame(self::PUBLISHER_ID, $article->getAuthor()?->getValue());
         $this->assertInstanceOf(ArticleUpdatedEvent::class, $article->pullDomainEvents()[0]);
+    }
+
+    public function test_an_article_is_written_with_its_english_version(): void
+    {
+        $article = Article::create(
+            new ArticleId(self::ARTICLE_ID),
+            new ArticleTitleValueObject('Titre'),
+            new ArticleBodyValueObject('Contenu'),
+            new CategoryId(self::CATEGORY_ID),
+            new ArticleTitleValueObject(' Title '),
+            new ArticleBodyValueObject('Body'),
+        );
+
+        $this->assertSame(['Titre', 'Contenu', 'Title', 'Body'], [$article->getTitle(), $article->getBody(), $article->getTitleEn(), $article->getBodyEn()]);
+    }
+
+    public function test_an_article_is_in_french_only_until_it_is_translated(): void
+    {
+        $article = $this->draft();
+
+        $this->assertNull($article->getTitleEn());
+        $this->assertNull($article->getBodyEn());
+    }
+
+    public function test_a_half_english_version_is_refused(): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessageIsOrContains('the English version needs both a title and a body');
+
+        Article::create(
+            new ArticleId(self::ARTICLE_ID),
+            new ArticleTitleValueObject('Titre'),
+            new ArticleBodyValueObject('Contenu'),
+            new CategoryId(self::CATEGORY_ID),
+            new ArticleTitleValueObject('Title'),
+        );
+    }
+
+    public function test_a_translation_gives_the_english_version_and_is_announced(): void
+    {
+        $article = $this->published();
+        $article->pullDomainEvents();
+
+        Article::translate($article, new ArticleTitleValueObject('Title'), new ArticleBodyValueObject('Body'));
+
+        $this->assertSame(['Title', 'Body'], [$article->getTitleEn(), $article->getBodyEn()]);
+        $this->assertInstanceOf(ArticleUpdatedEvent::class, $article->pullDomainEvents()[0]);
+    }
+
+    public function test_the_english_version_is_taken_away_whole(): void
+    {
+        $article = $this->published();
+        Article::translate($article, new ArticleTitleValueObject('Title'), new ArticleBodyValueObject('Body'));
+
+        Article::translate($article, null, null);
+
+        $this->assertSame([null, null], [$article->getTitleEn(), $article->getBodyEn()]);
+    }
+
+    public function test_a_translation_without_a_body_is_refused(): void
+    {
+        $article = $this->published();
+
+        $this->expectException(ValidationException::class);
+
+        Article::translate($article, new ArticleTitleValueObject('Title'), null);
     }
 
     public function test_a_comment_records_who_wrote_it(): void

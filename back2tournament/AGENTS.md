@@ -50,6 +50,8 @@ make user           # seed a dev user via app:create-user
   `Article` is a `draft` until an editor publishes it: whoever publishes it becomes its
   `author` — not whoever wrote it — and taking it back to draft clears the author. Only
   a published article is public and takes comments; a comment records who wrote it.
+  An article is written in French and may carry an English version (`titleEn`,
+  `bodyEn`): both or neither, which the site shows when it is read in English.
   `Blog/Shared/Domain/Provider/` holds `CategoryIdProviderInterface` (a category by its
   slug) and `AuthorProviderInterface` (the usernames behind author and commenter ids).
 - `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
@@ -63,7 +65,13 @@ make user           # seed a dev user via app:create-user
   opened or a tournament registration made; never through an endpoint of its own.
 - `Competition/Fight/` — fights between two competitors of the same game and format,
   and their results: one side declares the scores, the other confirms them. A settled
-  fight records `FightSettledEvent`.
+  fight records `FightSettledEvent`. When the sides disagree, an administrator settles
+  the fight on the scores they impose (`Fight::arbitrate()`, the fight then reads
+  `arbitrated`) or sets the declaration aside so that it is declared again
+  (`Fight::reopen()`). Until both sides agree, the result may change: the declaring
+  side corrects its declaration, an administrator arbitrates or reopens. Once settled,
+  confirmed by the other side or arbitrated, a fight is final for everyone,
+  administrators included.
 - `Competition/Tournament/` — single-elimination tournaments: registrations, the
   bracket (`Matchup`, one per slot, seeded 1 v last with byes for the top seeds), and
   winners moving on as `FightSettledEvent` comes in.
@@ -80,7 +88,7 @@ make user           # seed a dev user via app:create-user
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
   for, which competitors a player profile or a clan plays as, name the sides, what a
-  competitor ranks as) and
+  competitor ranks as, which competitors bear a name) and
   `FightSchedulerProviderInterface` (open a fight with its two pending results). Each
   `…ProviderInterface` has its `…Provider` implementation next to it, in the same
   folder.

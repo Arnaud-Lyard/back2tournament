@@ -62,6 +62,8 @@ security:
         - { path: '^/api/results/(players|clans)/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: '^/api/rankings/(games/[^/]+/(players|clans)|players/[^/]+|clans/[^/]+)$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/categories/$, methods: [POST], roles: ROLE_ADMIN }
+        - { path: ^/api/fights/$, methods: [GET], roles: ROLE_ADMIN }
+        - { path: '^/api/fights/[^/]+/status$', methods: [PATCH], roles: ROLE_ADMIN }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

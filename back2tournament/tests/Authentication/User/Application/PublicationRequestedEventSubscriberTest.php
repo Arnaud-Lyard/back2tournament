@@ -43,6 +43,8 @@ final class PublicationRequestedEventSubscriberTest extends TestCase
         $this->assertSame('Body', $dispatched->getBody());
         $this->assertSame('news', $dispatched->getCategorySlug());
         $this->assertSame(self::EDITOR_ID, $dispatched->getAuthor());
+        $this->assertSame('Patch notes EN', $dispatched->getTitleEn());
+        $this->assertSame('Body EN', $dispatched->getBodyEn());
     }
 
     public function test_the_created_article_travels_back_on_the_requested_event(): void
@@ -84,7 +86,7 @@ final class PublicationRequestedEventSubscriberTest extends TestCase
 
     private function requestedEvent(): OnPublicationRequestedEvent
     {
-        return new OnPublicationRequestedEvent('Patch notes', 'Body', 'news');
+        return new OnPublicationRequestedEvent('Patch notes', 'Body', 'news', 'Patch notes EN', 'Body EN');
     }
 
     private function currentUserProvider(User $user): CurrentUserProviderInterface

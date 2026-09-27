@@ -38,6 +38,11 @@ class Fight extends AggregateRoot
 
     private ?string $declaredBy = null;
 
+    /**
+     * An administrator settled the fight, after a dispute between its sides.
+     */
+    private bool $arbitrated = false;
+
     private \DateTimeImmutable $createdAt;
 
     private \DateTimeImmutable $updatedAt;
@@ -99,6 +104,11 @@ class Fight extends AggregateRoot
         $this->declaredBy = $declaredBy?->getValue();
 
         return $this;
+    }
+
+    public function isArbitrated(): bool
+    {
+        return $this->arbitrated;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
@@ -322,6 +332,80 @@ class Fight extends AggregateRoot
         $fight->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $fight->recordDomainEvent(new FightSettledEvent($fight->getId(), $winner, $fight->getTournament()));
+    }
+
+    /**
+     * An administrator settles a fight its sides disagree on: the scores they
+     * impose stand, whatever was declared, and the fight is settled as if
+     * confirmed. `$resultOne` is the result of the first side, `$resultTwo`
+     * of the second.
+     */
+    public static function arbitrate(
+        Fight $fight,
+        Result $resultOne,
+        Score $scoreOne,
+        Result $resultTwo,
+        Score $scoreTwo,
+    ): void {
+        self::ensureResultOf($fight, $resultOne, $fight->getCompetitorOne());
+        self::ensureResultOf($fight, $resultTwo, $fight->getCompetitorTwo());
+
+        foreach ([$resultOne, $resultTwo] as $result) {
+            if (!\in_array($result->getStatus(), [ResultStatus::PENDING, ResultStatus::REPORTING], true)) {
+                throw new ConflictException('this fight is already settled');
+            }
+        }
+
+        $statusOne = self::outcome($scoreOne->getValue(), $scoreTwo->getValue());
+        if (null !== $fight->tournament && ResultStatus::DRAW === $statusOne) {
+            throw new ValidationException('a tournament fight cannot end in a draw');
+        }
+
+        $winner = null;
+        foreach ([[$resultOne, $scoreOne, $statusOne], [$resultTwo, $scoreTwo, self::outcome($scoreTwo->getValue(), $scoreOne->getValue())]] as [$result, $score, $status]) {
+            $result->setScore($score->getValue());
+            self::confirmResult($fight, $result, $status);
+
+            if (ResultStatus::WIN === $status) {
+                $winner = $result->getCompetitor();
+            }
+        }
+
+        $fight->arbitrated = true;
+        $fight->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $fight->recordDomainEvent(new FightSettledEvent($fight->getId(), $winner, $fight->getTournament()));
+    }
+
+    /**
+     * An administrator sets aside a declaration in dispute: both sides are
+     * back to pending, and one of them declares again.
+     */
+    public static function reopen(Fight $fight, Result $resultOne, Result $resultTwo): void
+    {
+        self::ensureResultOf($fight, $resultOne, $fight->getCompetitorOne());
+        self::ensureResultOf($fight, $resultTwo, $fight->getCompetitorTwo());
+
+        foreach ([$resultOne, $resultTwo] as $result) {
+            if (ResultStatus::PENDING === $result->getStatus()) {
+                throw new ConflictException('no outcome has been declared on this fight yet');
+            }
+            if (ResultStatus::REPORTING !== $result->getStatus()) {
+                throw new ConflictException('this fight is already settled');
+            }
+        }
+
+        foreach ([$resultOne, $resultTwo] as $result) {
+            $result->setScore(0);
+            $result->setStatus(ResultStatus::PENDING);
+            $result->setReportedStatus(null);
+            $result->setUpdatedAt(new \DateTimeImmutable('now'));
+
+            $fight->recordDomainEvent(new ResultUpdatedEvent($result->getId()));
+        }
+
+        $fight->setDeclaredBy(null);
+        $fight->setUpdatedAt(new \DateTimeImmutable('now'));
     }
 
     private static function outcome(int $score, int $against): ResultStatus

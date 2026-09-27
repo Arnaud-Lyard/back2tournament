@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Attribute\Route;
             new OA\Property(property: 'title', type: 'string', example: 'My article'),
             new OA\Property(property: 'body', type: 'string', example: 'Article content...'),
             new OA\Property(property: 'categorySlug', type: 'string', description: 'Slug of an existing category', example: 'news'),
+            new OA\Property(property: 'titleEn', type: 'string', nullable: true, maxLength: 255, example: 'My article', description: 'The English title. Optional, but the English version is whole: send it with `bodyEn`, or neither. Blank reads as absent.'),
+            new OA\Property(property: 'bodyEn', type: 'string', nullable: true, example: 'Article content...', description: 'The English body, sent with `titleEn`.'),
         ],
     ),
 )]
@@ -55,6 +57,8 @@ final class PostArticleController extends AbstractController
             $parameters['title'],
             $parameters['body'],
             $parameters['categorySlug'],
+            $parameters['titleEn'] ?? null,
+            $parameters['bodyEn'] ?? null,
         ));
 
         return JsonResponse::fromJsonString($event->getCreatedArticle());

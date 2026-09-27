@@ -101,6 +101,11 @@
         "gone": "Cet article n'existe plus.",
         "closed": "Les commentaires ouvriront à la publication de l'article."
       }
+    },
+    "frenchOnly": "En français",
+    "untranslated": {
+      "title": "Article en français uniquement",
+      "description": "Cet article n'a pas encore été traduit en anglais : voici sa version française."
     }
   },
   "games": {
@@ -307,7 +312,7 @@
     "confirm": "Confirmer le résultat",
     "confirmed": "Résultat confirmé : le match est terminé.",
     "confirmError": "Confirmation impossible",
-    "disagree": "En désaccord ? Ne confirmez pas et contactez un administrateur.",
+    "disagree": "En désaccord ? Ne confirmez pas et contactez un administrateur sur <discord>Discord</discord> : il arbitrera le match.",
     "errors": {
       "draw": "Ce score n'est pas accepté : un match de tournoi ne peut pas finir sur une égalité.",
       "notYours": "Vous ne jouez pas ce match, ou vous n'êtes pas le capitaine de l'équipe.",
@@ -431,7 +436,8 @@
       "articles": "Articles",
       "categories": "Catégories",
       "backToSite": "Retour au site",
-      "toggleSidebar": "Afficher ou masquer le menu"
+      "toggleSidebar": "Afficher ou masquer le menu",
+      "fights": "Litiges"
     },
     "dashboard": {
       "title": "Tableau de bord",
@@ -439,6 +445,7 @@
       "open": "Ouvrir",
       "sections": {
         "games": "Ajoutez les jeux dans lesquels les joueurs créent leur profil.",
+        "fights": "Arbitrez les matchs contestés : imposez un résultat ou remettez un match à déclarer.",
         "articles": "Rédigez et publiez les articles du site.",
         "categories": "Créez les catégories auxquelles les articles sont rattachés."
       }
@@ -579,7 +586,9 @@
         },
         "commentsError": "Impossible de charger les commentaires.",
         "edit": "Modifier",
-        "viewOnBlog": "Voir sur le blog"
+        "viewOnBlog": "Voir sur le blog",
+        "english": "Version anglaise",
+        "noEnglish": "Aucune : le site lu en anglais affiche la version française."
       },
       "noCategories": "Aucune catégorie : créez-en une d'abord",
       "list": {
@@ -594,12 +603,101 @@
           "author": "Auteur",
           "category": "Catégorie",
           "date": "Date"
-        }
+        },
+        "translated": "Traduit en anglais"
+      },
+      "english": {
+        "legend": "Version anglaise",
+        "description": "Facultative : elle s'affiche quand le site est lu en anglais. Sans elle, le site montre la version française. Titre et contenu vont ensemble.",
+        "titleLabel": "Titre en anglais",
+        "titlePlaceholder": "Spring tournament results",
+        "bodyLabel": "Contenu en anglais",
+        "bodyPlaceholder": "Write the English version…"
       }
     },
     "loadError": {
       "title": "Impossible de charger la liste",
       "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
+    },
+    "fights": {
+      "title": "Litiges et matchs",
+      "description": "Arbitrez les matchs contestés. Les joueurs vous contactent sur Discord : retrouvez leur match ici par le battletag d'un joueur, le nom d'une équipe ou l'identifiant du match.",
+      "filters": {
+        "label": "Matchs à afficher",
+        "reporting": "À confirmer",
+        "pending": "À déclarer",
+        "finished": "Terminés",
+        "all": "Tous"
+      },
+      "searchPlaceholder": "Battletag, nom d'équipe ou identifiant du match…",
+      "searchLabel": "Rechercher un match",
+      "status": {
+        "pending": "À déclarer",
+        "reporting": "À confirmer",
+        "finished": "Terminé"
+      },
+      "arbitrated": "Arbitré",
+      "unknownSide": "Camp inconnu",
+      "list": {
+        "title": "Matchs",
+        "description": {
+          "reporting": "Un camp a déclaré un score que l'autre n'a pas encore confirmé : c'est là que naissent les litiges.",
+          "pending": "Personne n'a encore déclaré de score.",
+          "finished": "Les deux camps ont confirmé le résultat, ou un administrateur l'a imposé.",
+          "all": "Tous les matchs, du plus récemment modifié au plus ancien."
+        },
+        "emptyTitle": "Aucun match",
+        "emptyDescription": "Aucun match ne correspond à ces critères.",
+        "versus": "contre",
+        "tournament": "Match de tournoi",
+        "columns": {
+          "match": "Match",
+          "score": "Score",
+          "game": "Jeu",
+          "status": "Statut",
+          "updatedAt": "Modifié le"
+        }
+      },
+      "panel": {
+        "title": "{one} contre {two}",
+        "declaring": "(a déclaré)",
+        "declaredBy": "{name} a déclaré ce score ; l'autre camp ne l'a pas confirmé.",
+        "noDeclaration": "Aucun score déclaré pour l'instant.",
+        "finished": "Match confirmé par les deux camps : le résultat est définitif.",
+        "finishedArbitrated": "Match arbitré par un administrateur : le résultat est définitif.",
+        "fightId": "Identifiant",
+        "copyId": "Copier l'identifiant du match",
+        "notFound": {
+          "title": "Match introuvable",
+          "description": "Aucun match ne porte cet identifiant."
+        },
+        "loadError": {
+          "title": "Impossible de charger le match",
+          "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
+        }
+      },
+      "arbitration": {
+        "title": "Imposer un résultat",
+        "description": "Le score saisi remplace toute déclaration : le match est terminé, marqué comme arbitré, et ce résultat est définitif.",
+        "scoreOf": "Score de {name}",
+        "submit": "Imposer ce résultat",
+        "confirmTitle": "Imposer {one} {scoreOne} – {scoreTwo} {two} ?",
+        "confirmDescription": "Ce résultat sera définitif : ni les joueurs ni un administrateur ne pourront revenir dessus. Le classement Elo et, en tournoi, le tableau en tiendront compte.",
+        "confirm": "Oui, imposer",
+        "cancel": "Annuler",
+        "noDraw": "Pas de match nul en tournoi : départagez les deux camps.",
+        "settled": "Résultat imposé",
+        "reopen": "Remettre à déclarer",
+        "reopenDescription": "Annule la déclaration contestée : l'un des deux camps déclare à nouveau.",
+        "reopened": "Déclaration annulée : le match est à déclarer",
+        "error": "Action impossible",
+        "errors": {
+          "invalid": "Scores refusés : vérifiez-les (pas de match nul en tournoi).",
+          "forbidden": "L'arbitrage est réservé aux administrateurs.",
+          "notFound": "Ce match n'existe plus.",
+          "changed": "Le match a changé entre-temps : rechargez la page."
+        }
+      }
     }
   },
   "validation": {
@@ -627,7 +725,8 @@
     "leaderInLineup": "Le capitaine doit faire partie de l'équipe.",
     "invalidCapacity": "Entre 2 et 128 participants.",
     "invalidDate": "Choisissez une date et une heure à venir.",
-    "invalidTeamSizes": "Des joueurs par camp entre 1 et 64, séparés par des virgules : 1, 2, 5."
+    "invalidTeamSizes": "Des joueurs par camp entre 1 et 64, séparés par des virgules : 1, 2, 5.",
+    "translationIncomplete": "La version anglaise demande un titre et un contenu : remplissez les deux, ou videz-les."
   },
   "apiErrors": {
     "invalid": "Le serveur a refusé ces données.",
@@ -781,7 +880,9 @@
     "unknown": "adversaire inconnu",
     "tournament": "Tournoi",
     "latest": "Les {shown} derniers sur {total}",
-    "loadError": "Impossible de charger les résultats pour le moment."
+    "loadError": "Impossible de charger les résultats pour le moment.",
+    "arbitrated": "Arbitré",
+    "arbitratedHint": "Un administrateur a tranché ce match après un litige."
   },
   "rankings": {
     "title": "Classement",

@@ -1,8 +1,13 @@
-import { ArrowLeftIcon, FilePenIcon, MessageSquareIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  FilePenIcon,
+  LanguagesIcon,
+  MessageSquareIcon,
+} from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { getFormatter, getTranslations } from "next-intl/server"
+import { getFormatter, getLocale, getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { MediaPlaceholder } from "@/components/media-placeholder"
 import { PlayerAvatar } from "@/components/player-avatar"
@@ -12,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { toExcerpt } from "@/features/blog/lib/excerpt"
+import { localizeArticle } from "@/features/blog/lib/localize"
 import { articleDate, isPublished } from "@/features/blog/lib/publication"
 import { loadArticle, loadCategories } from "@/features/blog/server/blog"
 import { baseUrl } from "@/features/site/config"
@@ -33,11 +39,14 @@ export async function generateMetadata({
   const articleId = await readArticleId(params)
   if (!articleId) return {}
 
-  const article = await loadArticle(articleId)
+  const [article, locale] = await Promise.all([
+    loadArticle(articleId),
+    getLocale(),
+  ])
   if (!article.ok) return {}
 
-  const title = article.data.title ?? ""
-  const description = toExcerpt(article.data.body, 160)
+  const { title, body } = localizeArticle(article.data, locale)
+  const description = toExcerpt(body, 160)
   const { authorName } = article.data
 
   // A draft reaches the editors only: it has nothing to share yet.
@@ -65,9 +74,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const articleId = await readArticleId(params)
   if (!articleId) notFound()
 
-  const [t, format, article, categories] = await Promise.all([
+  const [t, format, locale, article, categories] = await Promise.all([
     getTranslations("blog"),
     getFormatter(),
+    getLocale(),
     loadArticle(articleId),
     loadCategories(),
   ])
@@ -85,7 +95,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     )
   }
 
-  const { title, body, authorName, comments = [] } = article.data
+  const { authorName, comments = [] } = article.data
+  const { title, body, lang, untranslated } = localizeArticle(
+    article.data,
+    locale
+  )
   const published = isPublished(article.data)
   const date = articleDate(article.data)
   const category = categories.ok
@@ -115,6 +129,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </Alert>
       )}
 
+      {untranslated && (
+        <Alert>
+          <LanguagesIcon />
+          <AlertTitle>{t("untranslated.title")}</AlertTitle>
+          <AlertDescription>{t("untranslated.description")}</AlertDescription>
+        </Alert>
+      )}
+
       <article className="flex flex-col gap-6">
         <header className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -133,14 +155,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             )}
             {authorName && <span>{t("byAuthor", { author: authorName })}</span>}
           </div>
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-balance">
+          <h1
+            lang={lang}
+            className="font-heading text-3xl font-semibold tracking-tight text-balance"
+          >
             {title}
           </h1>
         </header>
 
         <MediaPlaceholder className="rounded-xl" />
 
-        <div className="text-base leading-relaxed whitespace-pre-line">
+        <div
+          lang={lang}
+          className="text-base leading-relaxed whitespace-pre-line"
+        >
           {body}
         </div>
 
@@ -148,10 +176,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <>
             <Separator />
 
-            <ShareButtons
-              url={`${baseUrl}/blog/${articleId}`}
-              title={title ?? ""}
-            />
+            <ShareButtons url={`${baseUrl}/blog/${articleId}`} title={title} />
           </>
         )}
       </article>

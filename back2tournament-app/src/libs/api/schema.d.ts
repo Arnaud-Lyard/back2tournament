@@ -213,6 +213,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/fights/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_fight_list"];
+        put?: never;
+        post: operations["post_api_fight_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/results/pending/players/{gameid}": {
         parameters: {
             query?: never;
@@ -277,7 +293,7 @@ export interface paths {
         patch: operations["patch_api_fight_results_patch"];
         trace?: never;
     };
-    "/api/fights/": {
+    "/api/fights/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -286,11 +302,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["post_api_fight_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patch_api_fight_status_patch"];
         trace?: never;
     };
     "/api/fights/{id}/results/confirmation": {
@@ -736,6 +752,13 @@ export interface components {
              * @example demo
              */
             authorName?: string | null;
+            /**
+             * @description The English title. The English version is whole: `titleEn` and `bodyEn` are both set, or both null when the article is in French only.
+             * @example The weekend results
+             */
+            titleEn?: string | null;
+            /** @description The English body, null when the article is in French only. */
+            bodyEn?: string | null;
         };
         /** @description A comment on an article. */
         Comment: {
@@ -907,6 +930,8 @@ export interface components {
                 /** Format: uuid */
                 value?: string;
             } | null;
+            /** @description An administrator settled the fight after a dispute, instead of a confirmation by the other side. */
+            arbitrated?: boolean;
             /** @description The competitor that won, once `finished`. Null before, and for a draw. */
             winner?: {
                 /** Format: uuid */
@@ -943,6 +968,8 @@ export interface components {
              * @enum {string}
              */
             outcome: "win" | "loss" | "draw";
+            /** @description An administrator settled the fight after a dispute. */
+            arbitrated?: boolean;
             /**
              * Format: date-time
              * @description When the result was confirmed.
@@ -958,6 +985,23 @@ export interface components {
                 /** @example 1 */
                 score?: number;
             }) | null;
+        };
+        FightPage: {
+            items: components["schemas"]["FightSummary"][];
+            /**
+             * @description Fights matching the filters, every page taken together
+             * @example 12
+             */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /**
+             * @description 0 when no fight matches
+             * @example 1
+             */
+            pages: number;
         };
         SettledResultPage: {
             items: components["schemas"]["SettledResult"][];
@@ -1534,7 +1578,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        /** @description Requires an editor or an administrator. Every key is optional: a key left out keeps what the article has. A draft and a published article are edited alike; editing does not change the status or the author. */
+        /** @description Requires an editor or an administrator. Every key is optional: a key left out keeps what the article has. `titleEn` and `bodyEn` sent empty or null remove the English version, which must stay whole: a title and a body, or neither. A draft and a published article are edited alike; editing does not change the status or the author. */
         requestBody: {
             content: {
                 "application/json": {
@@ -1547,6 +1591,10 @@ export interface operations {
                      * @example actualites
                      */
                     categorySlug?: string;
+                    /** @example The weekend results */
+                    titleEn?: string | null;
+                    /** @example Looking back at Saturday's matches… */
+                    bodyEn?: string | null;
                 };
             };
         };
@@ -1647,6 +1695,16 @@ export interface operations {
                      * @example news
                      */
                     categorySlug: string;
+                    /**
+                     * @description The English title. Optional, but the English version is whole: send it with `bodyEn`, or neither. Blank reads as absent.
+                     * @example My article
+                     */
+                    titleEn?: string | null;
+                    /**
+                     * @description The English body, sent with `titleEn`.
+                     * @example Article content...
+                     */
+                    bodyEn?: string | null;
                 };
             };
         };
@@ -1867,6 +1925,102 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+        };
+    };
+    get_api_fight_list: {
+        parameters: {
+            query?: {
+                /** @description `reporting` keeps the fights whose declaration waits for its confirmation, where disputes are; `pending` those nobody declared yet; `finished` the settled ones; `all` by default. */
+                status?: "all" | "pending" | "reporting" | "finished";
+                /** @description Keeps the fights of this game. */
+                game?: string;
+                /** @description A battletag or a team name, or part of one: keeps the fights of the player profiles and teams that bear it. A fight id finds that fight. */
+                q?: string;
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many fights that page holds, 20 by default and 50 at most. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requires an administrator. One page of every fight, the latest to have moved first, both sides named; `mySide` is always null. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FightPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    post_api_fight_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Name either two player profiles, for a 1v1, or two teams of the same format, for an NvN. The caller stands on one side: they own one of the two profiles, or lead one of the two teams. The game must be played in that format. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description First player profile of a 1v1
+                     */
+                    playerOne?: string;
+                    /**
+                     * Format: uuid
+                     * @description Second player profile of a 1v1
+                     */
+                    playerTwo?: string;
+                    /**
+                     * Format: uuid
+                     * @description First team of an NvN
+                     */
+                    teamOne?: string;
+                    /**
+                     * Format: uuid
+                     * @description Second team of an NvN
+                     */
+                    teamTwo?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Fight opened. Both sides are `pending` until one of them declares the scores. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FightSummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller stands on neither side */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A player profile or a team does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     get_api_results_pending_players: {
@@ -2093,42 +2247,37 @@ export interface operations {
             };
         };
     };
-    post_api_fight_post: {
+    patch_api_fight_status_patch: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description Fight ID */
+                id: string;
+            };
             cookie?: never;
         };
-        /** @description Name either two player profiles, for a 1v1, or two teams of the same format, for an NvN. The caller stands on one side: they own one of the two profiles, or lead one of the two teams. The game must be played in that format. */
+        /** @description Requires an administrator, who settles a dispute between the sides of a fight not settled yet. `finished` settles it on `scores`, whatever was declared: the fight is `arbitrated`, and the bracket and the rankings move on as after a confirmation. `pending` sets a declaration aside: both sides are back to pending, and one of them declares again. */
         requestBody: {
             content: {
                 "application/json": {
+                    /** @enum {string} */
+                    status: "finished" | "pending";
                     /**
-                     * Format: uuid
-                     * @description First player profile of a 1v1
+                     * @description With `finished`: the score of each side, keyed by competitor id. A tournament fight cannot end in a draw.
+                     * @example {
+                     *       "3f4c3a8e-0f55-4d3b-9a43-6b1f0e7d8c21": 3,
+                     *       "9b2e71d4-5c8a-4f16-8e0b-2d7c4a9f1e35": 1
+                     *     }
                      */
-                    playerOne?: string;
-                    /**
-                     * Format: uuid
-                     * @description Second player profile of a 1v1
-                     */
-                    playerTwo?: string;
-                    /**
-                     * Format: uuid
-                     * @description First team of an NvN
-                     */
-                    teamOne?: string;
-                    /**
-                     * Format: uuid
-                     * @description Second team of an NvN
-                     */
-                    teamTwo?: string;
+                    scores?: {
+                        [key: string]: number;
+                    };
                 };
             };
         };
         responses: {
-            /** @description Fight opened. Both sides are `pending` until one of them declares the scores. */
+            /** @description The fight in its new status */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2139,19 +2288,16 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
-            /** @description The caller stands on neither side */
-            403: {
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description The fight is already settled, or has no declaration to set aside */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description A player profile or a team does not exist */
-            404: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
-                content?: never;
             };
         };
     };

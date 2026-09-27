@@ -1,5 +1,6 @@
 import {
   Gamepad2Icon,
+  GavelIcon,
   LayoutDashboardIcon,
   NewspaperIcon,
   TagsIcon,
@@ -10,7 +11,7 @@ import type { AuthPermission } from "@/features/auth/types"
 
 export interface BackofficeNavItem {
   href: string
-  labelKey: "dashboard" | "games" | "articles" | "categories"
+  labelKey: "dashboard" | "games" | "fights" | "articles" | "categories"
   icon: LucideIcon
   permission: AuthPermission
 }
@@ -43,6 +44,12 @@ export const backofficeNav: readonly BackofficeNavGroup[] = [
         labelKey: "games",
         icon: Gamepad2Icon,
         permission: "game:manage",
+      },
+      {
+        href: "/backoffice/fights",
+        labelKey: "fights",
+        icon: GavelIcon,
+        permission: "fight:manage",
       },
     ],
   },
