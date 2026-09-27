@@ -15,7 +15,7 @@ use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
-use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
+use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Competition\Tournament\Application\EventSubscriber\FightSettledEventSubscriber;
 use App\Competition\Tournament\Application\Model\AdvanceTournamentCommand;
 use App\Competition\Tournament\Application\Model\CreateTournamentCommand;
@@ -222,7 +222,7 @@ final class TournamentHandlersTest extends TestCase
         $tournament = $this->tournament(1);
         $participants = array_map(fn (int $seed): Participant => $this->participant($seed, Uuid::v4()->toString()), [1, 2, 3, 4]);
 
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->exactly(2))->method('schedule')->willReturnCallback(
             static fn (string $one, string $two, string $game, int $teamSize, ?string $tournament): Fight => Fight::create(
                 new FightId(Uuid::v4()->toString()),
@@ -256,7 +256,7 @@ final class TournamentHandlersTest extends TestCase
 
     public function test_only_the_organizer_starts_the_tournament(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $this->expectException(PermissionDeniedException::class);
@@ -275,7 +275,7 @@ final class TournamentHandlersTest extends TestCase
         Tournament::recordWinner($tournament, $bracket, $bracket[1], $participants[1]->getCompetitor());
         $tournament->pullDomainEvents();
 
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->once())
             ->method('schedule')
             ->with($participants[0]->getCompetitor()->getValue(), $participants[1]->getCompetitor()->getValue(), self::GAME_ID, 1, self::TOURNAMENT_ID)
@@ -302,7 +302,7 @@ final class TournamentHandlersTest extends TestCase
         $bracket = Tournament::start($tournament, $participants, $this->ids(1));
         Tournament::attachFight($tournament, $bracket[0], new FightId(self::FIGHT_ID));
 
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $this->advanceHandler($tournament, $bracket, $scheduler)(
@@ -461,7 +461,7 @@ final class TournamentHandlersTest extends TestCase
         Tournament $tournament,
         array $participants,
         MatchupRepositoryInterface $matchupRepository,
-        FightSchedulerInterface $scheduler,
+        FightSchedulerProviderInterface $scheduler,
         string $caller,
     ): StartTournamentHandler {
         return new StartTournamentHandler(
@@ -478,7 +478,7 @@ final class TournamentHandlersTest extends TestCase
     /**
      * @param list<Matchup> $bracket
      */
-    private function advanceHandler(Tournament $tournament, array $bracket, FightSchedulerInterface $scheduler): AdvanceTournamentHandler
+    private function advanceHandler(Tournament $tournament, array $bracket, FightSchedulerProviderInterface $scheduler): AdvanceTournamentHandler
     {
         return new AdvanceTournamentHandler(
             $this->repositoryStub(TournamentRepositoryInterface::class, [$tournament]),

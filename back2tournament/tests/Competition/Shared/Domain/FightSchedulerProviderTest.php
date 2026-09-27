@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Competition\Fight\Application;
+namespace App\Tests\Competition\Shared\Domain;
 
-use App\Competition\Fight\Application\Service\FightScheduler;
 use App\Competition\Fight\Domain\Entity\Fight;
 use App\Competition\Fight\Domain\Entity\Result;
 use App\Competition\Fight\Domain\Enum\ResultStatus;
 use App\Competition\Fight\Domain\Repository\FightRepositoryInterface;
 use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
+use App\Competition\Shared\Domain\Provider\FightSchedulerProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-final class FightSchedulerTest extends TestCase
+final class FightSchedulerProviderTest extends TestCase
 {
     private const GAME_ID = '11111111-1111-4111-8111-111111111111';
     private const ONE = '22222222-2222-4222-8222-222222222222';
@@ -34,7 +34,7 @@ final class FightSchedulerTest extends TestCase
             }
         );
 
-        $fight = new FightScheduler($fightRepository, $resultRepository, $this->createStub(EventDispatcherInterface::class))
+        $fight = new FightSchedulerProvider($fightRepository, $resultRepository, $this->createStub(EventDispatcherInterface::class))
             ->schedule(self::ONE, self::TWO, self::GAME_ID, 3, self::TOURNAMENT_ID);
 
         $this->assertSame(3, $fight->getTeamSize());

@@ -9,7 +9,7 @@ use App\Competition\Fight\Domain\Entity\Fight;
 /**
  * Opens fights, for a challenge between two sides as well as for a tournament bracket.
  */
-interface FightSchedulerInterface
+interface FightSchedulerProviderInterface
 {
     /**
      * A fight between two competitors, with a pending result for each side.

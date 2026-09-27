@@ -66,11 +66,9 @@ make user           # seed a dev user via app:create-user
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
-  for, name the sides) and `FightSchedulerInterface` (open a fight with its two
-  pending results). Each `…Provider` is implemented next to its interface.
-  `FightSchedulerInterface` is the exception: the Fight context implements it, in
-  `Fight/Application/Service/FightScheduler.php`, because opening a fight saves the
-  Fight aggregate and dispatches its domain events, as a handler would.
+  for, name the sides) and `FightSchedulerProviderInterface` (open a fight with its
+  two pending results). Each `…ProviderInterface` has its `…Provider` implementation
+  next to it, in the same folder.
 
 Each context (except `Shared`) has three layers:
 
@@ -204,9 +202,9 @@ Two mechanisms, and they are not interchangeable.
 request needs a fact owned by another context. The owning context publishes an
 interface under `src/<BC>/Shared/…`, implements it against its own repositories, and
 the caller injects the interface. `CurrentUserProviderInterface`,
-`CompetitorIdProviderInterface`, `CompetitorRegistryProviderInterface` and
-`FightSchedulerInterface` are the ones in place. Prefer this over chaining finder
-services, and over events.
+`CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
+`CompetitorRegistryProviderInterface` and `FightSchedulerProviderInterface` are the
+ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a

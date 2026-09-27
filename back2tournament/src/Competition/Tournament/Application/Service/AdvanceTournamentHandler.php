@@ -6,7 +6,7 @@ namespace App\Competition\Tournament\Application\Service;
 
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
-use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
+use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Competition\Tournament\Application\Model\AdvanceTournamentCommand;
 use App\Competition\Tournament\Domain\Entity\Matchup;
 use App\Competition\Tournament\Domain\Entity\Tournament;
@@ -25,18 +25,18 @@ final class AdvanceTournamentHandler
 {
     private TournamentRepositoryInterface $tournamentRepository;
     private MatchupRepositoryInterface $matchupRepository;
-    private FightSchedulerInterface $fightScheduler;
+    private FightSchedulerProviderInterface $fightSchedulerProvider;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         TournamentRepositoryInterface $tournamentRepository,
         MatchupRepositoryInterface $matchupRepository,
-        FightSchedulerInterface $fightScheduler,
+        FightSchedulerProviderInterface $fightSchedulerProvider,
         EventDispatcherInterface $eventDispatcher,
     ) {
         $this->tournamentRepository = $tournamentRepository;
         $this->matchupRepository = $matchupRepository;
-        $this->fightScheduler = $fightScheduler;
+        $this->fightSchedulerProvider = $fightSchedulerProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -73,7 +73,7 @@ final class AdvanceTournamentHandler
 
         if (null !== $next) {
             foreach (Tournament::readyForFight([$next]) as $ready) {
-                $fight = $this->fightScheduler->schedule(
+                $fight = $this->fightSchedulerProvider->schedule(
                     $ready->getCompetitorOne()->getValue(),
                     $ready->getCompetitorTwo()->getValue(),
                     $tournament->getGame()->getValue(),

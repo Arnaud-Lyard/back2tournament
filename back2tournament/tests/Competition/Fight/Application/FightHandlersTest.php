@@ -32,7 +32,7 @@ use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
-use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
+use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
@@ -69,7 +69,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_a_player_challenges_another_player_of_the_game(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->once())
             ->method('schedule')
             ->with('competitor-of-'.self::MY_PLAYER, 'competitor-of-'.self::THEIR_PLAYER, self::GAME_ID, 1)
@@ -80,7 +80,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_a_bystander_opens_no_fight(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $this->expectException(PermissionDeniedException::class);
@@ -90,7 +90,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_players_of_two_games_do_not_fight(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $this->expectException(ValidationException::class);
@@ -103,7 +103,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_a_game_not_played_one_versus_one_has_no_duel(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $this->expectException(ValidationException::class);
@@ -114,7 +114,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_a_team_leader_challenges_a_team_of_the_same_format(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->once())
             ->method('schedule')
             ->with('competitor-of-'.self::MY_TEAM, 'competitor-of-'.self::THEIR_TEAM, self::GAME_ID, 2)
@@ -125,7 +125,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_a_team_member_who_does_not_lead_opens_no_team_fight(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $this->expectException(PermissionDeniedException::class);
@@ -136,7 +136,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_teams_of_two_formats_do_not_fight(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $theirClan = self::aClan(self::THEIR_CLAN, self::GAME_ID, self::THEIR_PLAYER, 'OTH');
@@ -152,7 +152,7 @@ final class FightHandlersTest extends TestCase
 
     public function test_a_player_never_stands_on_both_sides(): void
     {
-        $scheduler = $this->createMock(FightSchedulerInterface::class);
+        $scheduler = $this->createMock(FightSchedulerProviderInterface::class);
         $scheduler->expects($this->never())->method('schedule');
 
         $theirClan = self::aClan(self::THEIR_CLAN, self::GAME_ID, self::THEIR_PLAYER, 'OTH');
@@ -328,7 +328,7 @@ final class FightHandlersTest extends TestCase
      * @param list<TeamPlayer>|null $theirLineup
      */
     private function createHandler(
-        FightSchedulerInterface $scheduler,
+        FightSchedulerProviderInterface $scheduler,
         string $caller,
         array $teamSizes = [1, 2],
         array $extraPlayers = [],

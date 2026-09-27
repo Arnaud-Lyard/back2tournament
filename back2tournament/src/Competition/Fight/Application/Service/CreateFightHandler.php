@@ -19,7 +19,7 @@ use App\Competition\Profile\Team\Domain\Entity\TeamId;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
-use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
+use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
@@ -37,7 +37,7 @@ final class CreateFightHandler
     private TeamPlayerRepositoryInterface $teamPlayerRepository;
     private GameRepositoryInterface $gameRepository;
     private CompetitorRegistryProviderInterface $competitorRegistryProvider;
-    private FightSchedulerInterface $fightScheduler;
+    private FightSchedulerProviderInterface $fightSchedulerProvider;
     private CurrentUserProviderInterface $currentUserProvider;
 
     public function __construct(
@@ -46,7 +46,7 @@ final class CreateFightHandler
         TeamPlayerRepositoryInterface $teamPlayerRepository,
         GameRepositoryInterface $gameRepository,
         CompetitorRegistryProviderInterface $competitorRegistryProvider,
-        FightSchedulerInterface $fightScheduler,
+        FightSchedulerProviderInterface $fightSchedulerProvider,
         CurrentUserProviderInterface $currentUserProvider,
     ) {
         $this->playerRepository = $playerRepository;
@@ -54,7 +54,7 @@ final class CreateFightHandler
         $this->teamPlayerRepository = $teamPlayerRepository;
         $this->gameRepository = $gameRepository;
         $this->competitorRegistryProvider = $competitorRegistryProvider;
-        $this->fightScheduler = $fightScheduler;
+        $this->fightSchedulerProvider = $fightSchedulerProvider;
         $this->currentUserProvider = $currentUserProvider;
     }
 
@@ -64,7 +64,7 @@ final class CreateFightHandler
             ? $this->betweenTeams(new TeamId($createFightCommand->getSideOne()), new TeamId($createFightCommand->getSideTwo()))
             : $this->betweenPlayers(new PlayerId($createFightCommand->getSideOne()), new PlayerId($createFightCommand->getSideTwo()));
 
-        $fight = $this->fightScheduler->schedule($competitorOne, $competitorTwo, $gameId, $teamSize);
+        $fight = $this->fightSchedulerProvider->schedule($competitorOne, $competitorTwo, $gameId, $teamSize);
 
         return json_encode(
             $this->normalizeFight(

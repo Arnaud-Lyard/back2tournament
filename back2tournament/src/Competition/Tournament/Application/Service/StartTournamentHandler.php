@@ -7,7 +7,7 @@ namespace App\Competition\Tournament\Application\Service;
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProviderInterface;
-use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
+use App\Competition\Shared\Domain\Provider\FightSchedulerProviderInterface;
 use App\Competition\Tournament\Application\Model\StartTournamentCommand;
 use App\Competition\Tournament\Domain\Entity\Matchup;
 use App\Competition\Tournament\Domain\Entity\MatchupId;
@@ -32,7 +32,7 @@ final class StartTournamentHandler
     private TournamentRepositoryInterface $tournamentRepository;
     private ParticipantRepositoryInterface $participantRepository;
     private MatchupRepositoryInterface $matchupRepository;
-    private FightSchedulerInterface $fightScheduler;
+    private FightSchedulerProviderInterface $fightSchedulerProvider;
     private CompetitorRegistryProviderInterface $competitorRegistryProvider;
     private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
@@ -41,7 +41,7 @@ final class StartTournamentHandler
         TournamentRepositoryInterface $tournamentRepository,
         ParticipantRepositoryInterface $participantRepository,
         MatchupRepositoryInterface $matchupRepository,
-        FightSchedulerInterface $fightScheduler,
+        FightSchedulerProviderInterface $fightSchedulerProvider,
         CompetitorRegistryProviderInterface $competitorRegistryProvider,
         CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
@@ -49,7 +49,7 @@ final class StartTournamentHandler
         $this->tournamentRepository = $tournamentRepository;
         $this->participantRepository = $participantRepository;
         $this->matchupRepository = $matchupRepository;
-        $this->fightScheduler = $fightScheduler;
+        $this->fightSchedulerProvider = $fightSchedulerProvider;
         $this->competitorRegistryProvider = $competitorRegistryProvider;
         $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
@@ -82,7 +82,7 @@ final class StartTournamentHandler
         }
 
         foreach (Tournament::readyForFight($bracket) as $matchup) {
-            $fight = $this->fightScheduler->schedule(
+            $fight = $this->fightSchedulerProvider->schedule(
                 $matchup->getCompetitorOne()->getValue(),
                 $matchup->getCompetitorTwo()->getValue(),
                 $tournament->getGame()->getValue(),

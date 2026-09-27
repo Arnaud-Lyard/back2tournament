@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Competition\Fight\Application\Service;
+namespace App\Competition\Shared\Domain\Provider;
 
 use App\Competition\Fight\Domain\Entity\Fight;
 use App\Competition\Fight\Domain\Entity\FightId;
@@ -12,12 +12,11 @@ use App\Competition\Fight\Domain\Repository\ResultRepositoryInterface;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 use App\Competition\Shared\Domain\Entity\ValueObject\TeamSize;
-use App\Competition\Shared\Domain\Provider\FightSchedulerInterface;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-final class FightScheduler implements FightSchedulerInterface
+final class FightSchedulerProvider implements FightSchedulerProviderInterface
 {
     private FightRepositoryInterface $fightRepository;
     private ResultRepositoryInterface $resultRepository;
