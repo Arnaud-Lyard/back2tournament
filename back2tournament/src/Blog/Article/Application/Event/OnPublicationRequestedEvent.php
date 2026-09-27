@@ -14,6 +14,8 @@ final class OnPublicationRequestedEvent extends Event
 
     private string $categorySlug;
 
+    private string $createdArticle;
+
     public function __construct(string $title, string $body, string $categorySlug)
     {
         $this->title = $title;
@@ -34,5 +36,18 @@ final class OnPublicationRequestedEvent extends Event
     public function getCategorySlug(): string
     {
         return $this->categorySlug;
+    }
+
+    /**
+     * The created article, as the handler serialized it, handed back to the controller.
+     */
+    public function getCreatedArticle(): string
+    {
+        return $this->createdArticle;
+    }
+
+    public function setCreatedArticle(string $createdArticle): void
+    {
+        $this->createdArticle = $createdArticle;
     }
 }

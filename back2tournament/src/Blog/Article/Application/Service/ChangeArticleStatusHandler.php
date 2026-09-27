@@ -5,69 +5,73 @@ declare(strict_types=1);
 namespace App\Blog\Article\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
-use App\Blog\Article\Application\Model\CreateCommentCommand;
+use App\Blog\Article\Application\Model\ChangeArticleStatusCommand;
 use App\Blog\Article\Domain\Entity\Article;
+use App\Blog\Article\Domain\Entity\ArticleId;
 use App\Blog\Article\Domain\Entity\AuthorId;
-use App\Blog\Article\Domain\Entity\CommentId;
 use App\Blog\Article\Domain\Enum\ArticleStatus;
 use App\Blog\Article\Domain\Repository\ArticleRepositoryInterface;
-use App\Blog\Article\Domain\Repository\CommentRepositoryInterface;
 use App\Shared\Exception\NotFoundException;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use App\Shared\Exception\PermissionDeniedException;
+use App\Shared\Exception\ValidationException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsMessageHandler]
-final class CreateCommentHandler
+final class ChangeArticleStatusHandler
 {
     private ArticleRepositoryInterface $articleRepository;
-    private CommentRepositoryInterface $commentRepository;
     private CurrentUserProviderInterface $currentUserProvider;
     private EventDispatcherInterface $eventDispatcher;
     private NormalizerInterface $serializer;
 
     public function __construct(
         ArticleRepositoryInterface $articleRepository,
-        CommentRepositoryInterface $commentRepository,
         CurrentUserProviderInterface $currentUserProvider,
         EventDispatcherInterface $eventDispatcher,
-        NormalizerInterface $serializer
+        NormalizerInterface $serializer,
     ) {
         $this->articleRepository = $articleRepository;
-        $this->commentRepository = $commentRepository;
         $this->currentUserProvider = $currentUserProvider;
         $this->eventDispatcher = $eventDispatcher;
         $this->serializer = $serializer;
     }
 
-    public function __invoke(CreateCommentCommand $createCommentCommand): string
+    public function __invoke(ChangeArticleStatusCommand $changeArticleStatusCommand): string
     {
+        $articleId = new ArticleId($changeArticleStatusCommand->getArticleId());
+        $status = ArticleStatus::tryFrom($changeArticleStatusCommand->getStatus());
+        if (null === $status) {
+            throw new ValidationException('status must be draft or published');
+        }
+
+        if (!$this->currentUserProvider->isGranted('ROLE_EDITOR')) {
+            throw new PermissionDeniedException('only an editor publishes an article');
+        }
         $user = $this->currentUserProvider->getUser();
 
-        $article = $this->articleRepository->findOneBy(['id' => $createCommentCommand->getArticleId()]);
-        // A draft exists for the editors only.
-        if (!$article instanceof Article
-            || (ArticleStatus::PUBLISHED !== $article->getStatus() && !$this->currentUserProvider->isGranted('ROLE_EDITOR'))) {
+        $article = $this->articleRepository->findOneBy(['id' => $articleId->getValue()]);
+        if (!$article instanceof Article) {
             throw new NotFoundException('article not found');
         }
 
-        $comment = Article::createComment(
-            $article,
-            new CommentId(Uuid::v4()->toString()),
-            $createCommentCommand->getMessage(),
-            new AuthorId((string) $user->getId()),
-        );
+        // Whoever publishes the article becomes its author.
+        if (ArticleStatus::PUBLISHED === $status) {
+            Article::publish($article, new AuthorId((string) $user->getId()));
+        } else {
+            Article::unpublish($article);
+        }
 
-        $this->commentRepository->save($comment);
+        $this->articleRepository->save($article);
 
         foreach ($article->pullDomainEvents() as $domainEvent) {
             $this->eventDispatcher->dispatch($domainEvent);
         }
 
         /** @var array<string, mixed> $normalized */
-        $normalized = $this->serializer->normalize($comment);
-        $normalized['authorName'] = $user->getUsername();
+        $normalized = $this->serializer->normalize($article);
+        $normalized['authorName'] = ArticleStatus::PUBLISHED === $status ? $user->getUsername() : null;
 
         return json_encode($normalized, JSON_THROW_ON_ERROR);
     }

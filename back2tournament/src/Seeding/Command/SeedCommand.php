@@ -42,6 +42,8 @@ use App\Competition\Tournament\Domain\Entity\Participant;
 use App\Competition\Tournament\Domain\Entity\ParticipantId;
 use App\Competition\Tournament\Domain\Entity\Tournament;
 use App\Competition\Tournament\Domain\Entity\TournamentId;
+use App\Shared\ValueObject\ArticleBodyValueObject;
+use App\Shared\ValueObject\ArticleTitleValueObject;
 use App\Shared\ValueObject\ClanNameValueObject;
 use App\Shared\ValueObject\ClanTagValueObject;
 use App\Shared\ValueObject\TeamNameValueObject;
@@ -83,6 +85,9 @@ final class SeedCommand extends Command
     private const ARTICLES = 25;
 
     private const COMMENTED_ARTICLES = 5;
+
+    /** The last articles stay drafts, for the backoffice to publish. */
+    private const DRAFT_ARTICLES = 3;
 
     private const COMMENTS_PER_ARTICLE = 3;
 
@@ -200,7 +205,7 @@ final class SeedCommand extends Command
             }
         }
 
-        $this->seedArticles($mine, $categories);
+        $this->seedArticles($mine, $rivals, $categories);
         $this->entityManager->flush();
 
         $challenges = \count($games) * (self::MINE_PENDING + self::MINE_REPORTING);
@@ -216,7 +221,7 @@ final class SeedCommand extends Command
             ['Clans' => $clans],
             ['Fights' => $fights],
             ['Tournaments' => 2],
-            ['Articles' => self::ARTICLES],
+            ['Articles' => \sprintf('%d published, %d drafts', self::ARTICLES - self::DRAFT_ARTICLES, self::DRAFT_ARTICLES)],
             ['Comments' => self::COMMENTED_ARTICLES * self::COMMENTS_PER_ARTICLE],
         );
         $io->listing([
@@ -224,7 +229,7 @@ final class SeedCommand extends Command
             \sprintf('GET /api/players/%s/games — %d pages', $firstGame, $this->pages(1 + self::PLAYERS_PER_GAME)),
             \sprintf('GET /api/games/%s/clans', $firstGame),
             'GET /api/tournaments/ — one upcoming, one ongoing',
-            \sprintf('GET /api/articles/ — %d pages', $this->pages(self::ARTICLES)),
+            \sprintf('GET /api/articles/ — %d pages', $this->pages(self::ARTICLES - self::DRAFT_ARTICLES)),
         ]);
 
         return Command::SUCCESS;
@@ -676,9 +681,15 @@ final class SeedCommand extends Command
     /**
      * @param list<Category> $categories
      */
-    private function seedArticles(User $author, array $categories): void
+    /**
+     * Articles published by the demo account, but the last few, left as drafts;
+     * the first ones commented by the rivals.
+     *
+     * @param list<User> $commenters
+     */
+    private function seedArticles(User $publisher, array $commenters, array $categories): void
     {
-        $authorId = new AuthorId((string) $author->getId());
+        $publisherId = new AuthorId((string) $publisher->getId());
 
         for ($index = 0; $index < self::ARTICLES; ++$index) {
             $headline = self::HEADLINES[$index % \count(self::HEADLINES)];
@@ -687,11 +698,14 @@ final class SeedCommand extends Command
 
             $article = Article::create(
                 new ArticleId(Uuid::v4()->toString()),
-                \sprintf('%s (%02d)', $headline, $index + 1),
-                $this->body($headline),
-                $authorId,
+                new ArticleTitleValueObject(\sprintf('%s (%02d)', $headline, $index + 1)),
+                new ArticleBodyValueObject($this->body($headline)),
                 new CategoryId($category->getId()),
             );
+            if ($index < self::ARTICLES - self::DRAFT_ARTICLES) {
+                Article::publish($article, $publisherId);
+                $article->setPublishedAt($at);
+            }
             $article->setCreatedAt($at);
             $article->setUpdatedAt($at);
             $this->entityManager->persist($article);
@@ -701,10 +715,12 @@ final class SeedCommand extends Command
             }
 
             for ($reply = 0; $reply < self::COMMENTS_PER_ARTICLE; ++$reply) {
+                $commenter = $commenters[($index * self::COMMENTS_PER_ARTICLE + $reply) % \count($commenters)];
                 $comment = Article::createComment(
                     $article,
                     new CommentId(Uuid::v4()->toString()),
                     \sprintf('Seeded comment %d on "%s".', $reply + 1, $headline),
+                    new AuthorId((string) $commenter->getId()),
                 );
                 $comment->setCreatedAt($at);
                 $comment->setUpdatedAt($at);

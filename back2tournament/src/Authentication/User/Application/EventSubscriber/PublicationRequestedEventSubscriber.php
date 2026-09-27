@@ -39,11 +39,13 @@ final class PublicationRequestedEventSubscriber implements EventSubscriberInterf
             throw new PermissionDeniedException('the author does not have the necessary permissions');
         }
 
-        $this->eventDispatcher->dispatch(new OnPublicationRequestedUserVerifiedEvent(
+        $verifiedEvent = $this->eventDispatcher->dispatch(new OnPublicationRequestedUserVerifiedEvent(
             $event->getTitle(),
             $event->getBody(),
             (string) $user->getId(),
             $event->getCategorySlug()
         ));
+
+        $event->setCreatedArticle($verifiedEvent->getCreatedArticle());
     }
 }

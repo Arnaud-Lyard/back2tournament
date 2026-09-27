@@ -13,6 +13,8 @@ final class OnPublicationRequestedUserVerifiedEvent extends Event
     private string $author;
     private string $categorySlug;
 
+    private string $createdArticle;
+
     public function __construct(string $title, string $body, string $author, string $categorySlug)
     {
         $this->title = $title;
@@ -39,5 +41,18 @@ final class OnPublicationRequestedUserVerifiedEvent extends Event
     public function getCategorySlug(): string
     {
         return $this->categorySlug;
+    }
+
+    /**
+     * The created article, as the handler serialized it, handed back to the controller.
+     */
+    public function getCreatedArticle(): string
+    {
+        return $this->createdArticle;
+    }
+
+    public function setCreatedArticle(string $createdArticle): void
+    {
+        $this->createdArticle = $createdArticle;
     }
 }

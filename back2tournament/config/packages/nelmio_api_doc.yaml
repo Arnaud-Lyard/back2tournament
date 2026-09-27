@@ -23,7 +23,7 @@ nelmio_api_doc:
                         value: { type: string, format: uuid }
                 Article:
                     type: object
-                    description: 'A blog article. `author` names the user who published it and `category` the category it is filed under. Its comments are not part of it.'
+                    description: 'A blog article. A draft is read by editors only; once published it is public. `author` is the user who published it — not the one who wrote it — and `category` the category it is filed under. Its comments are not part of it.'
                     properties:
                         category: { $ref: '#/components/schemas/Uuid' }
                         id: { $ref: '#/components/schemas/Uuid' }
@@ -31,7 +31,26 @@ nelmio_api_doc:
                         updatedAt: { type: string, format: date-time }
                         body: { type: string }
                         title: { type: string }
-                        author: { $ref: '#/components/schemas/Uuid' }
+                        status:
+                            type: string
+                            enum: [draft, published]
+                            description: '`draft` until an editor publishes it.'
+                        publishedAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: 'When the article was published. Null for a draft.'
+                        author:
+                            type: object
+                            nullable: true
+                            description: 'The user who published the article. Null for a draft.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        authorName:
+                            type: string
+                            nullable: true
+                            example: 'demo'
+                            description: 'The username of `author`. Null for a draft.'
                 Comment:
                     type: object
                     description: 'A comment on an article.'
@@ -41,6 +60,17 @@ nelmio_api_doc:
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
                         articleId: { $ref: '#/components/schemas/Uuid' }
+                        author:
+                            type: object
+                            nullable: true
+                            description: 'The user who wrote the comment. Null for a comment older than authorship.'
+                            properties:
+                                value: { type: string, format: uuid }
+                        authorName:
+                            type: string
+                            nullable: true
+                            example: 'rival01'
+                            description: 'The username of `author`.'
                 Category:
                     type: object
                     description: 'A blog category. Unlike other resources, its id is a plain string, not a value object.'

@@ -8,11 +8,13 @@ use App\Blog\Article\Application\Model\CreateArticleCommand;
 use App\Blog\Shared\Domain\Provider\CategoryIdProviderInterface;
 use App\Authentication\User\Application\Event\OnPublicationRequestedUserVerifiedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final class OnPublicationRequestedUserVerifiedEventSubscriber implements EventSubscriberInterface
 {
-    private MessageBusInterface $messageBus;
+    use HandleTrait;
+
     private CategoryIdProviderInterface $categoryIdProvider;
 
     public function __construct(
@@ -35,11 +37,11 @@ final class OnPublicationRequestedUserVerifiedEventSubscriber implements EventSu
         $createArticleCommand = new CreateArticleCommand();
         $createArticleCommand->setTitle($event->getTitle());
         $createArticleCommand->setBody($event->getBody());
-        $createArticleCommand->setAuthor($event->getAuthor());
         $createArticleCommand->setCategory(
             $this->categoryIdProvider->bySlug($event->getCategorySlug())
         );
 
-        $this->messageBus->dispatch($createArticleCommand);
+        // A new article is a draft: whoever publishes it later becomes its author.
+        $event->setCreatedArticle($this->handle($createArticleCommand));
     }
 }

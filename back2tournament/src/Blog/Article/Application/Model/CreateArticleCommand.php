@@ -10,8 +10,6 @@ final class CreateArticleCommand
 
     private string $body;
 
-    private string $author;
-
     private string $category;
 
     public function getTitle(): string
@@ -32,16 +30,6 @@ final class CreateArticleCommand
     public function setBody(string $body): void
     {
         $this->body = $body;
-    }
-
-    public function getAuthor(): string
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(string $author): void
-    {
-        $this->author = $author;
     }
 
     public function getCategory(): string

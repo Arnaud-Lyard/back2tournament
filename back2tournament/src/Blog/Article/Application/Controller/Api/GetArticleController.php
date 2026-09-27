@@ -14,40 +14,25 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
- #[Route('/api/articles/{id}', name: 'api_article', methods: ['GET'])]
+#[Route('/api/articles/{id}', name: 'api_article', methods: ['GET'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(
     response: 200,
-    description: 'Article found, including its comments',
+    description: 'The article with its comments, oldest first. A draft is found by an editor or an administrator only.',
     content: new OA\JsonContent(
-        description: 'Identifiers are serialized as a `{value: string}` object (Value Object)',
-        properties: [
-            new OA\Property(property: 'category', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-            new OA\Property(property: 'id', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-            new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'body', type: 'string', nullable: true),
-            new OA\Property(property: 'title', type: 'string', nullable: true),
-            new OA\Property(property: 'author', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-            new OA\Property(
-                property: 'comments',
-                type: 'array',
-                items: new OA\Items(
-                    properties: [
-                        new OA\Property(property: 'id', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-                        new OA\Property(property: 'message', type: 'string'),
-                        new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
-                        new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
-                        new OA\Property(property: 'articleId', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-                    ],
-                    type: 'object',
-                ),
+        allOf: [
+            new OA\Schema(ref: '#/components/schemas/Article'),
+            new OA\Schema(
+                properties: [
+                    new OA\Property(property: 'comments', type: 'array', items: new OA\Items(ref: '#/components/schemas/Comment')),
+                ],
+                type: 'object',
             ),
         ],
     ),
 )]
-#[OA\Response(response: 404, ref: '#/components/responses/NotFound')]
+#[OA\Response(response: 404, description: 'No article has this id, or it is a draft and the caller is not an editor', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 #[Security(name: null)]
 final class GetArticleController extends AbstractController
 {

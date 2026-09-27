@@ -27,21 +27,13 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(
     response: 200,
-    description: 'Comment created',
-    content: new OA\JsonContent(
-        description: 'Identifiers are serialized as a `{value: string}` object (Value Object)',
-        properties: [
-            new OA\Property(property: 'id', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-            new OA\Property(property: 'message', type: 'string'),
-            new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'articleId', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-        ],
-    ),
+    description: 'The comment created, written by the authenticated user',
+    content: new OA\JsonContent(ref: '#/components/schemas/Comment'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 404, ref: '#/components/responses/NotFound')]
+#[OA\Response(response: 404, description: 'No article has this id, or it is a draft and the caller is not an editor', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'The article is a draft: comments open once it is published', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostCommentController extends AbstractController
 {
     use HandleTrait;

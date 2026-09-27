@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
- #[Route('/api/articles/', name: 'api_article_post', methods: ['POST'])]
+#[Route('/api/articles/', name: 'api_article_post', methods: ['POST'])]
 #[OA\Tag(name: 'Article')]
 #[OA\RequestBody(
     required: true,
@@ -27,19 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(
     response: 200,
-    description: 'Article created',
-    content: new OA\JsonContent(
-        description: 'Identifiers are serialized as a `{value: string}` object (Value Object)',
-        properties: [
-            new OA\Property(property: 'category', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')], description: 'Category ID (resolved from categorySlug)'),
-            new OA\Property(property: 'id', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-            new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
-            new OA\Property(property: 'body', type: 'string', nullable: true),
-            new OA\Property(property: 'title', type: 'string', nullable: true),
-            new OA\Property(property: 'author', type: 'object', properties: [new OA\Property(property: 'value', type: 'string', format: 'uuid')]),
-        ],
-    ),
+    description: 'The article created, as a draft: it has no author until an editor publishes it (`PATCH /api/articles/{id}/status`)',
+    content: new OA\JsonContent(ref: '#/components/schemas/Article'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
@@ -62,14 +51,12 @@ final class PostArticleController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $this->eventDispatcher->dispatch(new OnPublicationRequestedEvent(
+        $event = $this->eventDispatcher->dispatch(new OnPublicationRequestedEvent(
             $parameters['title'],
             $parameters['body'],
             $parameters['categorySlug'],
         ));
 
-        return JsonResponse::fromJsonString(
-            $request->getSession()->get('last_article_created')
-        );
+        return JsonResponse::fromJsonString($event->getCreatedArticle());
     }
 }
