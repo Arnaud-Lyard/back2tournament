@@ -24,7 +24,7 @@
     "menuDescription": "Accédez aux différentes sections de la plateforme.",
     "accountMenu": "Menu du compte {username}",
     "blog": "Blog",
-    "challenges": "Demandes de défi",
+    "challenges": "Matchs en attente",
     "myClans": "Mes clans",
     "organizeTournament": "Organiser un tournoi",
     "tournaments": "Tournois"
@@ -265,7 +265,7 @@
       "disbandError": "Dissolution impossible",
       "challengeWith": "Défier avec {team}",
       "challengeSent": "Défi envoyé",
-      "challengeSentDescription": "Le match contre {team} est ouvert : déclarez son résultat depuis vos défis.",
+      "challengeSentDescription": "Le match contre {team} est ouvert : déclarez son résultat depuis vos matchs en attente.",
       "challengeError": "Défi impossible",
       "errors": {
         "competed": "Cette équipe a déjà joué : elle est conservée pour l'historique.",
@@ -275,8 +275,8 @@
     }
   },
   "challenges": {
-    "title": "Demandes de défi",
-    "description": "Les matchs qui attendent un résultat, tous jeux et formats confondus : déclarez le score, ou confirmez celui de l'adversaire.",
+    "title": "Matchs en attente",
+    "description": "Vos duels et vos matchs de tournoi qui attendent un résultat, tous jeux et formats confondus : déclarez le score, ou confirmez celui de l'adversaire.",
     "unknownPlayer": "Profil inconnu",
     "awaitingDeclaration": "Aucun résultat déclaré pour le moment.",
     "outcome": {
@@ -285,12 +285,12 @@
       "draw": "match nul"
     },
     "empty": {
-      "title": "Aucun défi en attente",
-      "description": "Quand vous défierez quelqu'un, ou qu'on vous défiera, le match apparaîtra ici.",
+      "title": "Aucun match en attente",
+      "description": "Quand vous défierez quelqu'un, qu'on vous défiera ou qu'un match de tournoi vous attendra, il apparaîtra ici.",
       "action": "Parcourir les jeux"
     },
     "loadError": {
-      "title": "Impossible de charger vos défis",
+      "title": "Impossible de charger vos matchs en attente",
       "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
     },
     "versus": "vs",
@@ -765,7 +765,7 @@
   },
   "tournaments": {
     "title": "Tournois",
-    "description": "Des tournois à élimination directe, en 1v1 comme en équipe. Inscrivez-vous, puis déclarez vos matchs comme n'importe quel défi : le vainqueur avance dans le tableau.",
+    "description": "Des tournois à élimination directe, en 1v1 comme en équipe. Une fois inscrit, vos matchs du tableau arrivent dans vos matchs en attente, où vous les déclarez comme un duel : le vainqueur avance dans le tableau.",
     "organize": "Organiser un tournoi",
     "back": "Retour aux tournois",
     "all": "Tous",

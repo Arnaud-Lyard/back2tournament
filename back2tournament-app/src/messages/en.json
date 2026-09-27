@@ -24,7 +24,7 @@
     "menuDescription": "Browse the sections of the platform.",
     "accountMenu": "Account menu for {username}",
     "blog": "Blog",
-    "challenges": "Challenge requests",
+    "challenges": "Pending matches",
     "myClans": "My clans",
     "organizeTournament": "Organize a tournament",
     "tournaments": "Tournaments"
@@ -265,7 +265,7 @@
       "disbandError": "Could not disband",
       "challengeWith": "Challenge with {team}",
       "challengeSent": "Challenge sent",
-      "challengeSentDescription": "The match against {team} is open: declare its result from your challenges.",
+      "challengeSentDescription": "The match against {team} is open: declare its result from your pending matches.",
       "challengeError": "Could not challenge",
       "errors": {
         "competed": "This team has already played: it is kept for the record.",
@@ -275,8 +275,8 @@
     }
   },
   "challenges": {
-    "title": "Challenge requests",
-    "description": "The matches waiting for a result, whatever the game and format: declare the score, or confirm your opponent's.",
+    "title": "Pending matches",
+    "description": "Your duels and tournament matches waiting for a result, whatever the game and format: declare the score, or confirm your opponent's.",
     "unknownPlayer": "Unknown profile",
     "awaitingDeclaration": "No result declared yet.",
     "outcome": {
@@ -285,12 +285,12 @@
       "draw": "draw"
     },
     "empty": {
-      "title": "No challenge waiting",
-      "description": "When you challenge someone, or someone challenges you, the match shows up here.",
+      "title": "No pending match",
+      "description": "When you challenge someone, someone challenges you or a tournament match awaits you, it shows up here.",
       "action": "Browse the games"
     },
     "loadError": {
-      "title": "Your challenges could not be loaded",
+      "title": "Your pending matches could not be loaded",
       "description": "The server did not answer. Try again in a moment."
     },
     "versus": "vs",
@@ -765,7 +765,7 @@
   },
   "tournaments": {
     "title": "Tournaments",
-    "description": "Single-elimination tournaments, 1v1 or in teams. Register, then declare your matches like any challenge: the winner moves on in the bracket.",
+    "description": "Single-elimination tournaments, 1v1 or in teams. Once registered, your bracket matches land in your pending matches, where you declare them like a duel: the winner moves on in the bracket.",
     "organize": "Organize a tournament",
     "back": "Back to tournaments",
     "all": "All",
