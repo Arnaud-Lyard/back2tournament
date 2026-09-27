@@ -5,6 +5,7 @@ import { notFound } from "next/navigation"
 import { getFormatter, getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { PlayerAvatar } from "@/components/player-avatar"
+import { RatingCard } from "@/components/rating-card"
 import { ResultHistory } from "@/components/result-history"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { buttonVariants } from "@/components/ui/button"
@@ -22,6 +23,7 @@ import { loadClan, loadMyClans } from "@/features/clans/server/clans"
 import { loadPlayerHistory } from "@/features/fights/server/history"
 import { loadGame } from "@/features/games/server/games"
 import { loadPlayer } from "@/features/players/server/players"
+import { loadPlayerRating } from "@/features/rankings/server/rankings"
 import { readUuidSegment } from "@/libs/search-params"
 import { cn } from "@/libs/utils"
 import { ChallengeButton } from "./challenge-button"
@@ -47,15 +49,17 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const playerId = readUuidSegment(rawPlayerId)
   if (!gameId || !playerId) notFound()
 
-  const [t, format, player, game, user, myClans, history] = await Promise.all([
-    getTranslations("games.player"),
-    getFormatter(),
-    loadPlayer(playerId),
-    loadGame(gameId),
-    getCurrentUser(),
-    loadMyClans(),
-    loadPlayerHistory(playerId),
-  ])
+  const [t, format, player, game, user, myClans, history, rating] =
+    await Promise.all([
+      getTranslations("games.player"),
+      getFormatter(),
+      loadPlayer(playerId),
+      loadGame(gameId),
+      getCurrentUser(),
+      loadMyClans(),
+      loadPlayerHistory(playerId),
+      loadPlayerRating(playerId),
+    ])
 
   if (!player.ok) {
     if (player.status === 404) notFound()
@@ -138,6 +142,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           )}
         </CardContent>
       </Card>
+
+      <RatingCard rating={rating} gameId={gameId} subject="player" />
 
       <ResultHistory history={history} subject="player" />
     </PageContainer>

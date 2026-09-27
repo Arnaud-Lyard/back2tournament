@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
 import { PlayerAvatar } from "@/components/player-avatar"
+import { RatingCard } from "@/components/rating-card"
 import { ResultHistory } from "@/components/result-history"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -35,6 +36,7 @@ import type { ClanMember, Team } from "@/features/clans/types"
 import { formatLabel } from "@/features/fights/lib/challenge"
 import { loadClanHistory } from "@/features/fights/server/history"
 import { loadGame } from "@/features/games/server/games"
+import { loadClanRating } from "@/features/rankings/server/rankings"
 import { readUuidSegment } from "@/libs/search-params"
 import { cn } from "@/libs/utils"
 import { ChallengeTeamButton } from "./challenge-team-button"
@@ -63,13 +65,14 @@ export default async function ClanPage({ params }: ClanPageProps) {
   const clanId = readUuidSegment(rawClanId)
   if (!gameId || !clanId) notFound()
 
-  const [t, clan, game, user, myClans, history] = await Promise.all([
+  const [t, clan, game, user, myClans, history, rating] = await Promise.all([
     getTranslations("clans"),
     loadClan(clanId),
     loadGame(gameId),
     getCurrentUser(),
     loadMyClans(),
     loadClanHistory(clanId),
+    loadClanRating(clanId),
   ])
 
   if (!clan.ok) {
@@ -235,6 +238,8 @@ export default async function ClanPage({ params }: ClanPageProps) {
               )}
             </CardContent>
           </Card>
+
+          <RatingCard rating={rating} gameId={gameId} subject="clan" />
 
           <ResultHistory history={history} subject="clan" />
 

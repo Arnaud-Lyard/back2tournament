@@ -1,16 +1,22 @@
 "use client"
 
-import { ShieldIcon, UsersIcon, type LucideIcon } from "lucide-react"
+import {
+  ShieldIcon,
+  TrophyIcon,
+  UsersIcon,
+  type LucideIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/libs/utils"
 
-type SectionKey = "players" | "clans"
+type SectionKey = "players" | "clans" | "rankings"
 
 const SECTIONS: readonly { key: SectionKey; icon: LucideIcon }[] = [
   { key: "players", icon: UsersIcon },
   { key: "clans", icon: ShieldIcon },
+  { key: "rankings", icon: TrophyIcon },
 ]
 
 export function GameNav({ gameId, title }: { gameId: string; title: string }) {
