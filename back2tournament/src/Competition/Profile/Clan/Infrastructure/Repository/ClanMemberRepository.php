@@ -38,14 +38,15 @@ final class ClanMemberRepository extends ServiceEntityRepository implements Clan
             return [];
         }
 
+        // Not "member": MEMBER is a DQL keyword (MEMBER OF), refused as an alias.
         /** @var list<array{clan: string, members: int|string}> $rows */
-        $rows = $this->createQueryBuilder('member')
-            ->select('member.clan AS clan, COUNT(member.id) AS members')
-            ->andWhere('member.clan IN (:clanIds)')
-            ->andWhere('member.status = :active')
+        $rows = $this->createQueryBuilder('clanMember')
+            ->select('clanMember.clan AS clan, COUNT(clanMember.id) AS members')
+            ->andWhere('clanMember.clan IN (:clanIds)')
+            ->andWhere('clanMember.status = :active')
             ->setParameter('clanIds', $clanIds)
             ->setParameter('active', ClanMemberStatus::ACTIVE)
-            ->groupBy('member.clan')
+            ->groupBy('clanMember.clan')
             ->getQuery()
             ->getArrayResult();
 
