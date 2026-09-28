@@ -58,15 +58,16 @@ final class ImagickImageCompressorTest extends TestCase
         $this->assertSame('', (string) $image->getImageProperty('comment'));
     }
 
-    public function test_an_animation_keeps_its_first_frame(): void
+    public function test_an_animated_webp_keeps_its_first_frame(): void
     {
         $animation = new \Imagick();
         foreach (['red', 'blue'] as $colour) {
             $frame = new \Imagick();
             $frame->newImage(40, 30, new \ImagickPixel($colour));
-            $frame->setImageFormat('gif');
+            $frame->setImageFormat('webp');
             $animation->addImage($frame);
         }
+        $animation->setFormat('webp');
 
         $compressed = $this->compress($animation->getImagesBlob(), ImageKind::GAME);
 

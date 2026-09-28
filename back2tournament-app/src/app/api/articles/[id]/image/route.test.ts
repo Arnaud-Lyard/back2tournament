@@ -56,7 +56,7 @@ describe("POST /api/articles/[id]/image", () => {
 
   it("answers what the backend answers", async () => {
     backendPost.mockResolvedValue({
-      error: { error: "The file is not a JPEG, PNG, WebP or GIF image" },
+      error: { error: "The file is not a JPEG, PNG or WebP image" },
       response: new Response(null, { status: 400 }),
     })
 

@@ -32,13 +32,13 @@ describe("POST /api/users/me/avatar", () => {
   it("forwards the picture of the signed-in user, named by their token alone", async () => {
     backendPost.mockResolvedValue({ data: {}, response: new Response(null) })
 
-    await POST(upload(new File(["gif"], "me.gif", { type: "image/gif" })))
+    await POST(upload(new File(["png"], "me.png", { type: "image/png" })))
 
     const [path, options] = backendPost.mock.calls[0]
     expect(path).toBe("/api/user/me/avatar")
     expect(options.params).toBeUndefined()
     const form: FormData = options.bodySerializer(options.body)
-    expect((form.get("image") as File).name).toBe("me.gif")
+    expect((form.get("image") as File).name).toBe("me.png")
   })
 
   it("refuses a form without a picture, without asking the backend", async () => {

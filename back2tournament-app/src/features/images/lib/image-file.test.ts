@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest"
 import { imageFileProblem, MAX_IMAGE_BYTES, toImageForm } from "./image-file"
 
 describe("imageFileProblem", () => {
-  it("lets a JPEG, PNG, WebP or GIF image of 8 MB at most through", () => {
-    for (const type of ["image/jpeg", "image/png", "image/webp", "image/gif"]) {
+  it("lets a JPEG, PNG or WebP image of 8 MB at most through", () => {
+    for (const type of ["image/jpeg", "image/png", "image/webp"]) {
       expect(imageFileProblem({ type, size: 1024 })).toBeNull()
     }
     expect(
@@ -12,6 +12,7 @@ describe("imageFileProblem", () => {
   })
 
   it("stops any other type, an empty file and a file over 8 MB", () => {
+    expect(imageFileProblem({ type: "image/gif", size: 1024 })).toBe("type")
     expect(imageFileProblem({ type: "image/svg+xml", size: 1024 })).toBe("type")
     expect(imageFileProblem({ type: "application/pdf", size: 1024 })).toBe(
       "type"

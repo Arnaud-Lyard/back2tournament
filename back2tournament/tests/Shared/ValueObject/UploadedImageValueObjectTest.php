@@ -30,12 +30,11 @@ final class UploadedImageValueObjectTest extends TestCase
     {
         yield 'a PNG' => [self::PNG, 'image/png'];
         yield 'a JPEG' => [self::JPEG, 'image/jpeg'];
-        yield 'a GIF' => [self::GIF, 'image/gif'];
         yield 'a WebP' => [self::WEBP, 'image/webp'];
     }
 
     #[DataProvider('acceptedImages')]
-    public function test_a_jpeg_png_webp_or_gif_is_read_with_its_type_and_its_size(string $base64, string $type): void
+    public function test_a_jpeg_png_or_webp_is_read_with_its_type_and_its_size(string $base64, string $type): void
     {
         $image = new UploadedImageValueObject(base64_decode($base64, true));
 
@@ -48,10 +47,11 @@ final class UploadedImageValueObjectTest extends TestCase
     public static function refusedFiles(): iterable
     {
         yield 'no file' => ['', 'No image was received'];
-        yield 'a few bytes' => ['GIF89a', 'is not a JPEG, PNG, WebP or GIF image'];
-        yield 'some text' => ['This is not an image, only words that go on and on.', 'is not a JPEG, PNG, WebP or GIF image'];
-        yield 'an SVG, which may carry scripts' => ['<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><script>alert(1)</script></svg>', 'is not a JPEG, PNG, WebP or GIF image'];
-        yield 'a BMP' => [base64_decode(self::BMP, true), 'is not a JPEG, PNG, WebP or GIF image'];
+        yield 'a few bytes' => ['GIF89a', 'is not a JPEG, PNG or WebP image'];
+        yield 'some text' => ['This is not an image, only words that go on and on.', 'is not a JPEG, PNG or WebP image'];
+        yield 'an SVG, which may carry scripts' => ['<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><script>alert(1)</script></svg>', 'is not a JPEG, PNG or WebP image'];
+        yield 'a BMP' => [base64_decode(self::BMP, true), 'is not a JPEG, PNG or WebP image'];
+        yield 'a GIF' => [base64_decode(self::GIF, true), 'is not a JPEG, PNG or WebP image'];
         yield 'a PNG cut in its header' => [substr(base64_decode(self::PNG, true), 0, 20), 'cannot be read'];
         yield 'an image under 16 pixels a side' => [base64_decode(self::TINY_PNG, true), '16 pixels a side at least'];
         yield 'an image over 40 megapixels' => [base64_decode(self::HUGE_PNG, true), '40 megapixels at most'];
@@ -76,6 +76,6 @@ final class UploadedImageValueObjectTest extends TestCase
 
     public function test_the_type_comes_from_the_content_whatever_the_file_claims(): void
     {
-        $this->assertSame('image/gif', new UploadedImageValueObject(base64_decode(self::GIF, true))->getType());
+        $this->assertSame('image/webp', new UploadedImageValueObject(base64_decode(self::WEBP, true))->getType());
     }
 }

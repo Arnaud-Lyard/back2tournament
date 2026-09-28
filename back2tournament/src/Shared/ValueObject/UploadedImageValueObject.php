@@ -11,7 +11,7 @@ final class UploadedImageValueObject
     public const MAX_BYTES = 8 * 1024 * 1024;
     public const MIN_SIDE = 16;
     public const MAX_PIXELS = 40_000_000;
-    public const TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    public const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
     private const MIN_BYTES = 12;
 
@@ -57,7 +57,7 @@ final class UploadedImageValueObject
     private function ensureIsValidUploadedImage(string $content): array
     {
         if ('' === $content) {
-            throw new ValidationException('No image was received: send a JPEG, PNG, WebP or GIF file of 8 MB at most');
+            throw new ValidationException('No image was received: send a JPEG, PNG or WebP file of 8 MB at most');
         }
         if (\strlen($content) > self::MAX_BYTES) {
             throw new ValidationException(\sprintf('The image weighs more than %d MB', self::MAX_BYTES / 1024 / 1024));
@@ -65,7 +65,7 @@ final class UploadedImageValueObject
 
         $type = \strlen($content) < self::MIN_BYTES ? null : new \finfo(\FILEINFO_MIME_TYPE)->buffer($content);
         if (!\in_array($type, self::TYPES, true)) {
-            throw new ValidationException('The file is not a JPEG, PNG, WebP or GIF image');
+            throw new ValidationException('The file is not a JPEG, PNG or WebP image');
         }
 
         $size = @getimagesizefromstring($content);

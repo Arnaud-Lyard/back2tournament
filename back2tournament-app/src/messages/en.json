@@ -449,13 +449,13 @@
     "changeLabel": "Change the image of {name}",
     "removeLabel": "Remove the image of {name}",
     "confirmRemoveLabel": "Confirm removing the image of {name}",
-    "hint": "JPEG, PNG, WebP or GIF of 8 MB at most. The image is saved as soon as you choose it, resized and compressed.",
+    "hint": "JPEG, PNG or WebP of 8 MB at most. The image is saved as soon as you choose it, resized and compressed.",
     "uploaded": "Image saved",
     "removed": "Image removed",
     "uploadError": "Could not send the image",
     "removeError": "Could not remove the image",
     "problems": {
-      "type": "Choose a JPEG, PNG, WebP or GIF image.",
+      "type": "Choose a JPEG, PNG or WebP image.",
       "empty": "This file is empty.",
       "size": "The image weighs more than 8 MB.",
       "unreadable": "The image could not be read: it must be 16 pixels a side at least and 40 megapixels at most."

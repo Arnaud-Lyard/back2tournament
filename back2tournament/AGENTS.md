@@ -130,7 +130,7 @@ Each context (except `Shared`) has three layers:
 ## Images
 
 An uploaded file goes through `UploadedImageValueObject` (`src/Shared/ValueObject/`)
-first: a JPEG, PNG, WebP or GIF by its content, whatever its name or declared type, of
+first: a JPEG, PNG or WebP by its content, whatever its name or declared type, of
 8 MB and 40 megapixels at most, 16 pixels a side at least. `ImageProviderInterface`
 (`Media/Shared/Domain/Provider/`) then stores it for an `ImageKind`:
 

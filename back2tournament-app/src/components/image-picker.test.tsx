@@ -52,7 +52,7 @@ describe("ImagePicker", () => {
 
     expect(fileInput()).toHaveAttribute(
       "accept",
-      "image/jpeg,image/png,image/webp,image/gif"
+      "image/jpeg,image/png,image/webp"
     )
     await userEvent.upload(fileInput(), png())
 
@@ -86,7 +86,7 @@ describe("ImagePicker", () => {
     expect(add).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "error",
-        description: "Choose a JPEG, PNG, WebP or GIF image.",
+        description: "Choose a JPEG, PNG or WebP image.",
       })
     )
     expect(fetchMock).not.toHaveBeenCalled()

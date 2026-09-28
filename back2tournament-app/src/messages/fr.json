@@ -449,13 +449,13 @@
     "changeLabel": "Changer l'image de {name}",
     "removeLabel": "Retirer l'image de {name}",
     "confirmRemoveLabel": "Confirmer le retrait de l'image de {name}",
-    "hint": "JPEG, PNG, WebP ou GIF de 8 Mo au plus. L'image est enregistrée dès que vous la choisissez, redimensionnée et compressée.",
+    "hint": "JPEG, PNG ou WebP de 8 Mo au plus. L'image est enregistrée dès que vous la choisissez, redimensionnée et compressée.",
     "uploaded": "Image enregistrée",
     "removed": "Image retirée",
     "uploadError": "Envoi de l'image impossible",
     "removeError": "Retrait de l'image impossible",
     "problems": {
-      "type": "Choisissez une image JPEG, PNG, WebP ou GIF.",
+      "type": "Choisissez une image JPEG, PNG ou WebP.",
       "empty": "Ce fichier est vide.",
       "size": "L'image pèse plus de 8 Mo.",
       "unreadable": "L'image n'a pas pu être lue : elle doit mesurer au moins 16 pixels de côté et 40 mégapixels au plus."
