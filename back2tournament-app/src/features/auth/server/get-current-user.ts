@@ -18,7 +18,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   const payload = decodeSymfonyJwt(token)
   if (!payload?.username) return null
 
-  const me = await loadApiResult(createApiClient(token).GET("/api/users/me"))
+  const me = await loadApiResult(createApiClient(token).GET("/api/user/me"))
   if (me.ok) return toAuthUser(me.data)
 
   if (me.status === 401) return null

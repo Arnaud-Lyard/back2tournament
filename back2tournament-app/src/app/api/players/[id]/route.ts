@@ -21,7 +21,7 @@ export async function PATCH(request: Request, { params }: PlayerContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.PATCH("/api/players/{id}", {
+    client.PATCH("/api/user/players/{id}", {
       params: { path: { id } },
       body: parsed.data,
     })
@@ -34,7 +34,7 @@ export async function DELETE(_request: Request, { params }: PlayerContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/players/{id}", { params: { path: { id } } })
+    client.DELETE("/api/user/players/{id}", { params: { path: { id } } })
   )
 }
 

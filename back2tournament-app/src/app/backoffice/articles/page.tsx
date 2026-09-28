@@ -58,7 +58,7 @@ export default async function BackofficeArticlesPage({
   const [articles, categories, edited] = await Promise.all([
     loadArticles({ page, status: "all" }),
     loadCategories(),
-    editing ? loadArticle(selectedId) : undefined,
+    editing ? loadArticle(selectedId, { drafts: true }) : undefined,
   ])
   const categoryList = categories.ok ? categories.data : []
   const previewHref = listHref(PATHNAME, { page, articleId: selectedId })

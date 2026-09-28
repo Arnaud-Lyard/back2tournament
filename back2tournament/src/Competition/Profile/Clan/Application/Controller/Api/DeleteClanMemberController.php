@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/clans/{id}/members/{playerid}', name: 'api_clan_member_delete', methods: ['DELETE'])]
+#[Route('/api/user/clans/{id}/members/{playerid}', name: 'api_clan_member_delete', methods: ['DELETE'])]
 #[OA\Tag(name: 'Clan')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Clan ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Parameter(name: 'playerid', in: 'path', required: true, description: 'Player profile whose membership or invitation ends', schema: new OA\Schema(type: 'string', format: 'uuid'))]

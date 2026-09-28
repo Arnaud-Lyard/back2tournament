@@ -46,7 +46,7 @@ describe("POST /api/articles/[id]/image", () => {
 
     expect(backendPost).toHaveBeenCalledOnce()
     const [path, options] = backendPost.mock.calls[0]
-    expect(path).toBe("/api/articles/{id}/image")
+    expect(path).toBe("/api/editor/articles/{id}/image")
     expect(options.params.path).toEqual({ id: ARTICLE_ID })
     const form: FormData = options.bodySerializer(options.body)
     const image = form.get("image") as File
@@ -116,7 +116,7 @@ describe("DELETE /api/articles/[id]/image", () => {
     )
 
     const [path, options] = backendDelete.mock.calls[0]
-    expect(path).toBe("/api/articles/{id}/image")
+    expect(path).toBe("/api/editor/articles/{id}/image")
     expect(options.params.path).toEqual({ id: ARTICLE_ID })
   })
 })

@@ -9,7 +9,7 @@ export async function POST() {
 
   try {
     if (token) {
-      await fetch(`${env.SYMFONY_API_URL}/api/logout`, {
+      await fetch(`${env.SYMFONY_API_URL}/api/user/logout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         signal: AbortSignal.timeout(3000),

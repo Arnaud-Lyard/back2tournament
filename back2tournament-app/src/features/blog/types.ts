@@ -9,12 +9,12 @@ export type ArticleStatus = NonNullable<ArticleSummary["status"]>
 export type ArticleStatusFilter = ArticleStatus | "all"
 
 export type CreatedCategory =
-  paths["/api/categories/"]["post"]["responses"][200]["content"]["application/json"]
+  paths["/api/admin/categories/"]["post"]["responses"][200]["content"]["application/json"]
 
 export type CreatedArticle =
-  paths["/api/articles/"]["post"]["responses"][200]["content"]["application/json"]
+  paths["/api/editor/articles/"]["post"]["responses"][200]["content"]["application/json"]
 
 export type CreatedComment =
-  paths["/api/comments/"]["post"]["responses"][200]["content"]["application/json"]
+  paths["/api/user/comments/"]["post"]["responses"][200]["content"]["application/json"]
 
 export const ARTICLES_PER_PAGE = 6

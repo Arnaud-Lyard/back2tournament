@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: ArticleContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/articles/{id}/image", {
+    client.POST("/api/editor/articles/{id}/image", {
       params: { path: { id } },
       body: { image: upload.image },
       bodySerializer: toImageForm,
@@ -31,6 +31,8 @@ export async function DELETE(_request: Request, { params }: ArticleContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/articles/{id}/image", { params: { path: { id } } })
+    client.DELETE("/api/editor/articles/{id}/image", {
+      params: { path: { id } },
+    })
   )
 }

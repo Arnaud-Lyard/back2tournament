@@ -55,7 +55,7 @@ final class ArticleFinderHandlerTest extends TestCase
 
     public function test_an_editor_reads_a_draft_which_has_no_author_yet(): void
     {
-        $payload = $this->read($this->handler($this->draft(), editor: true));
+        $payload = $this->read($this->handler($this->draft(), editor: true), includesDrafts: true);
 
         $this->assertSame('draft', $payload['status']);
         $this->assertNull($payload['author']);
@@ -63,11 +63,25 @@ final class ArticleFinderHandlerTest extends TestCase
         $this->assertSame([], $payload['comments']);
     }
 
+    public function test_the_public_blog_finds_no_draft_not_even_for_an_editor(): void
+    {
+        $this->expectException(NotFoundException::class);
+
+        $this->handler($this->draft(), editor: true)(new FindArticleQuery(self::ARTICLE_ID));
+    }
+
     public function test_a_draft_is_not_found_by_anyone_but_an_editor(): void
     {
         $this->expectException(NotFoundException::class);
 
-        $this->handler($this->draft())(new FindArticleQuery(self::ARTICLE_ID));
+        $this->handler($this->draft())(new FindArticleQuery(self::ARTICLE_ID, true));
+    }
+
+    public function test_an_editor_reads_a_published_article_the_same_way(): void
+    {
+        $payload = $this->read($this->handler($this->published(), editor: true), includesDrafts: true);
+
+        $this->assertSame('published', $payload['status']);
     }
 
     public function test_an_unknown_article_is_not_found(): void
@@ -102,9 +116,9 @@ final class ArticleFinderHandlerTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function read(ArticleFinderHandler $handler): array
+    private function read(ArticleFinderHandler $handler, bool $includesDrafts = false): array
     {
-        return json_decode($handler(new FindArticleQuery(self::ARTICLE_ID)), true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($handler(new FindArticleQuery(self::ARTICLE_ID, $includesDrafts)), true, 512, JSON_THROW_ON_ERROR);
     }
 
     private function draft(): Article

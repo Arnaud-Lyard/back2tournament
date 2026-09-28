@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { isPublished } from "@/features/blog/lib/publication"
-import { loadArticle, loadArticleComments } from "@/features/blog/server/blog"
+import { loadArticle } from "@/features/blog/server/blog"
 import type { Category } from "@/features/blog/types"
 import { cn } from "@/libs/utils"
 import { ArticleStatusBadge } from "./article-status-badge"
@@ -37,11 +37,10 @@ export async function ArticlePreview({
   canPublish,
   canIllustrate,
 }: ArticlePreviewProps) {
-  const [t, format, loaded, comments] = await Promise.all([
+  const [t, format, loaded] = await Promise.all([
     getTranslations("backoffice.articles.preview"),
     getFormatter(),
-    loadArticle(articleId),
-    loadArticleComments(articleId),
+    loadArticle(articleId, { drafts: true }),
   ])
 
   if (!loaded.ok) {
@@ -55,6 +54,7 @@ export async function ArticlePreview({
   }
 
   const article = loaded.data
+  const comments = article.comments ?? []
   const published = isPublished(article)
   const categoryId = article.category?.value
   const category = categories.find((candidate) => candidate.id === categoryId)
@@ -125,40 +125,34 @@ export async function ArticlePreview({
         </dl>
         <Separator />
         <section className="flex flex-col gap-3">
-          {comments.ok ? (
-            <>
-              <h3 className="font-medium">
-                {t("comments", { count: comments.data.length })}
-              </h3>
-              {comments.data.length > 0 && (
-                <ul className="flex flex-col gap-3">
-                  {comments.data.map((comment, index) => (
-                    <li
-                      key={comment.id?.value ?? index}
-                      className="flex flex-col gap-0.5"
-                    >
-                      <span className="text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">
-                          {comment.authorName ?? t("anonymous")}
-                        </span>
-                        {comment.createdAt && (
-                          <>
-                            {" · "}
-                            {format.dateTime(new Date(comment.createdAt), {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                            })}
-                          </>
-                        )}
-                      </span>
-                      <p>{comment.message}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
-          ) : (
-            <p className="text-muted-foreground">{t("commentsError")}</p>
+          <h3 className="font-medium">
+            {t("comments", { count: comments.length })}
+          </h3>
+          {comments.length > 0 && (
+            <ul className="flex flex-col gap-3">
+              {comments.map((comment, index) => (
+                <li
+                  key={comment.id?.value ?? index}
+                  className="flex flex-col gap-0.5"
+                >
+                  <span className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      {comment.authorName ?? t("anonymous")}
+                    </span>
+                    {comment.createdAt && (
+                      <>
+                        {" · "}
+                        {format.dateTime(new Date(comment.createdAt), {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </>
+                    )}
+                  </span>
+                  <p>{comment.message}</p>
+                </li>
+              ))}
+            </ul>
           )}
         </section>
       </CardContent>

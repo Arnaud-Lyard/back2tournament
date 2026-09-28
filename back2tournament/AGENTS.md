@@ -146,8 +146,8 @@ An entity keeps the key only. A property marked `#[StoredImage]` is normalized a
 URL browsers read it from (`S3_PUBLIC_URL` + key) by `StoredImageNormalizer`, so every
 response carrying the entity carries the URL, and null when there is no image. The
 handler that changes an image removes the former one once the entity no longer points
-to it. The endpoints are `POST`/`DELETE` `/api/articles/{id}/image` (an editor),
-`/api/games/{id}/image` (an administrator) and `/api/users/me/avatar` (the signed-in
+to it. The endpoints are `POST`/`DELETE` `/api/editor/articles/{id}/image` (an editor),
+`/api/admin/games/{id}/image` (an administrator) and `/api/user/me/avatar` (the signed-in
 user): `multipart/form-data` with one `image` field.
 
 **Configuration**: `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`,
@@ -257,6 +257,16 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
 - `final class`, extends `AbstractController`, a single `__invoke`.
 - `#[Route('/api/…', name: 'api_…', methods: ['…'])]`. Route names follow
   `api_<resource>_<action>`; keep the same shape across a resource's routes.
+- **The path starts with the role it requires**: `/api/admin/…` for an administrator,
+  `/api/editor/…` for an editor, `/api/user/…` for any signed-in user.
+  `config/packages/security.yaml` grants each prefix to its role
+  (`ROLE_ADMIN` > `ROLE_EDITOR` > `ROLE_USER`). Anything else under `/api` is public
+  for `GET` only (plus `POST /api/login` and `POST /api/register`); any other method
+  there is refused, so a write route always lives under a prefix. A public read that
+  shows more to a role gets a route of its own under that role's prefix:
+  `GET /api/articles/{id}` finds a published article, `GET /api/editor/articles/{id}`
+  a draft as well. The handler still checks what the role alone does not settle: who
+  owns the resource, and what state it is in.
 - Every `{placeholder}` in the path is a `__invoke` argument **and** an
   `#[OA\Parameter(in: 'path')]`. Never document a parameter the route does not have.
 - Body: `json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)`.

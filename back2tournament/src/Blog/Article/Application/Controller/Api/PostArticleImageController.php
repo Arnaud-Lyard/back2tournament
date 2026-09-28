@@ -14,7 +14,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/{id}/image', name: 'api_article_image_post', methods: ['POST'])]
+#[Route('/api/editor/articles/{id}/image', name: 'api_article_image_post', methods: ['POST'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(

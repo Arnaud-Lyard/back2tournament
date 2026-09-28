@@ -13,12 +13,12 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/clans/{id}/invitations', name: 'api_clan_invitation_post', methods: ['POST'])]
+#[Route('/api/user/clans/{id}/invitations', name: 'api_clan_invitation_post', methods: ['POST'])]
 #[OA\Tag(name: 'Clan')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Clan ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(
     required: true,
-    description: 'Only the clan leader invites. The player must play the game of the clan; they become a member once they accept with `POST /api/clans/{id}/members`.',
+    description: 'Only the clan leader invites. The player must play the game of the clan; they become a member once they accept with `POST /api/user/clans/{id}/members`.',
     content: new OA\JsonContent(
         required: ['player'],
         properties: [

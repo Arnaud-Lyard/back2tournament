@@ -9,7 +9,7 @@ export async function POST(request: Request) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/users/me/avatar", {
+    client.POST("/api/user/me/avatar", {
       body: { image: upload.image },
       bodySerializer: toImageForm,
     })
@@ -18,5 +18,5 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   const client = await getServerApiClient()
-  return relayApiResult(client.DELETE("/api/users/me/avatar"))
+  return relayApiResult(client.DELETE("/api/user/me/avatar"))
 }

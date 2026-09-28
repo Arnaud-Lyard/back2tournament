@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/', name: 'api_article_post', methods: ['POST'])]
+#[Route('/api/editor/articles/', name: 'api_article_post', methods: ['POST'])]
 #[OA\Tag(name: 'Article')]
 #[OA\RequestBody(
     required: true,
@@ -29,7 +29,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(
     response: 200,
-    description: 'The article created, as a draft: it has no author until an editor publishes it (`PATCH /api/articles/{id}/status`)',
+    description: 'The article created, as a draft: it has no author until an editor publishes it (`PATCH /api/editor/articles/{id}/status`)',
     content: new OA\JsonContent(ref: '#/components/schemas/Article'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]

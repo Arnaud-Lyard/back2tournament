@@ -38,7 +38,7 @@ describe("PATCH /api/fights/[id]/status", () => {
     )
 
     const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/fights/{id}/status")
+    expect(path).toBe("/api/admin/fights/{id}/status")
     expect(options.params.path).toEqual({ id: FIGHT_ID })
     expect(options.body).toEqual({
       status: "finished",

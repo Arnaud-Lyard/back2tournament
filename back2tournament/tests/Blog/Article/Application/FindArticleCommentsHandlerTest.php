@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Blog\Article\Application;
 
-use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Blog\Article\Application\Model\FindArticleCommentsQuery;
 use App\Blog\Article\Application\Service\FindArticleCommentsHandler;
 use App\Blog\Article\Domain\Entity\Article;
@@ -67,7 +66,7 @@ final class FindArticleCommentsHandlerTest extends TestCase
         $this->assertSame(['value' => self::FIRST_COMMENTER_ID], $listed[0]['author']);
     }
 
-    public function test_the_comments_of_a_draft_are_not_found_by_anyone_but_an_editor(): void
+    public function test_the_comments_of_a_draft_are_not_found(): void
     {
         $commentRepository = $this->createMock(CommentRepositoryInterface::class);
         $commentRepository->expects($this->never())->method('findBy');
@@ -102,7 +101,6 @@ final class FindArticleCommentsHandlerTest extends TestCase
             $articleRepository,
             $commentRepository,
             $authorProvider,
-            $this->createStub(CurrentUserProviderInterface::class),
             $normalizer ?? new Serializer([new DateTimeNormalizer(), new ObjectNormalizer()]),
         );
     }

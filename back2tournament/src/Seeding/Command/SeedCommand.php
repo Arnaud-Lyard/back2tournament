@@ -234,7 +234,7 @@ final class SeedCommand extends Command
             ['Ranked' => \sprintf('%d ratings, one per player profile or clan and format, from %d settled fights', $rankings['ratings'], $rankings['fights'])],
         );
         $io->listing([
-            \sprintf('GET /api/results/users/fights — at least %d waiting, %d pages', $challenges, $this->pages($challenges)),
+            \sprintf('GET /api/user/results/fights — at least %d waiting, %d pages', $challenges, $this->pages($challenges)),
             \sprintf('GET /api/players/%s/games — %d pages', $firstGame, $this->pages(1 + self::PLAYERS_PER_GAME)),
             \sprintf('GET /api/games/%s/clans', $firstGame),
             \sprintf('GET /api/rankings/games/%s/players and /clans', $firstGame),

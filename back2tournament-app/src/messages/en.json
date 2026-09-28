@@ -625,7 +625,6 @@
           "title": "The article could not be loaded",
           "description": "The server did not answer. Try again in a moment."
         },
-        "commentsError": "The comments could not be loaded.",
         "edit": "Edit",
         "viewOnBlog": "View on the blog",
         "english": "English version",

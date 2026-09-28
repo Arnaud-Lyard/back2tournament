@@ -20,7 +20,7 @@ export async function PATCH(request: Request, { params }: ArticleContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.PATCH("/api/articles/{id}/status", {
+    client.PATCH("/api/editor/articles/{id}/status", {
       params: { path: { id } },
       body: parsed.data,
     })

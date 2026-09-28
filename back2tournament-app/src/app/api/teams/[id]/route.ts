@@ -12,6 +12,6 @@ export async function DELETE(_request: Request, { params }: TeamContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/teams/{id}", { params: { path: { id } } })
+    client.DELETE("/api/user/teams/{id}", { params: { path: { id } } })
   )
 }

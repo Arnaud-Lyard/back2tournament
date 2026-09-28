@@ -16,6 +16,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { hasPermission } from "@/features/auth/rbac/can"
+import { getCurrentUser } from "@/features/auth/server/get-current-user"
 import { toExcerpt } from "@/features/blog/lib/excerpt"
 import { localizeArticle } from "@/features/blog/lib/localize"
 import { articleDate, isPublished } from "@/features/blog/lib/publication"
@@ -33,6 +35,13 @@ async function readArticleId(params: ArticlePageProps["params"]) {
   return readUuidSegment((await params).articleId)
 }
 
+async function loadVisibleArticle(articleId: string) {
+  const user = await getCurrentUser()
+  return loadArticle(articleId, {
+    drafts: hasPermission(user?.permissions, "article:edit"),
+  })
+}
+
 export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
@@ -40,7 +49,7 @@ export async function generateMetadata({
   if (!articleId) return {}
 
   const [article, locale] = await Promise.all([
-    loadArticle(articleId),
+    loadVisibleArticle(articleId),
     getLocale(),
   ])
   if (!article.ok) return {}
@@ -78,7 +87,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     getTranslations("blog"),
     getFormatter(),
     getLocale(),
-    loadArticle(articleId),
+    loadVisibleArticle(articleId),
     loadCategories(),
   ])
 

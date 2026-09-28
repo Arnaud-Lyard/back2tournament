@@ -11,12 +11,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-#[Route('/api/fights/{id}/results/confirmation', name: 'api_fight_results_confirmation_post', methods: ['POST'])]
+#[Route('/api/user/fights/{id}/results/confirmation', name: 'api_fight_results_confirmation_post', methods: ['POST'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Fight ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(
     response: 200,
-    description: 'The side that did not declare agrees with the scores exactly as they were declared — read them with `GET /api/fights/{id}` first. No body is read. Both sides are settled on their final `status`; in a tournament, the winner moves on in the bracket. A side that disagrees does not confirm, and settles it with an admin.',
+    description: 'The side that did not declare agrees with the scores exactly as they were declared — read them with `GET /api/user/fights/{id}` first. No body is read. Both sides are settled on their final `status`; in a tournament, the winner moves on in the bracket. A side that disagrees does not confirm, and settles it with an admin.',
     content: new OA\JsonContent(ref: '#/components/schemas/FightSummary'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]

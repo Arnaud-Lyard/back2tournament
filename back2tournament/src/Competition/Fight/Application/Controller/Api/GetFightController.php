@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/fights/{id}', name: 'api_fight', methods: ['GET'])]
+#[Route('/api/user/fights/{id}', name: 'api_fight', methods: ['GET'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Fight ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(

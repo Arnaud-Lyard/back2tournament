@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-#[Route('/api/teams/', name: 'api_team_post', methods: ['POST'])]
+#[Route('/api/user/teams/', name: 'api_team_post', methods: ['POST'])]
 #[OA\Tag(name: 'Team')]
 #[OA\RequestBody(
     required: true,

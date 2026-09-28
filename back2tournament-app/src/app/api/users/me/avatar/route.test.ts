@@ -35,7 +35,7 @@ describe("POST /api/users/me/avatar", () => {
     await POST(upload(new File(["gif"], "me.gif", { type: "image/gif" })))
 
     const [path, options] = backendPost.mock.calls[0]
-    expect(path).toBe("/api/users/me/avatar")
+    expect(path).toBe("/api/user/me/avatar")
     expect(options.params).toBeUndefined()
     const form: FormData = options.bodySerializer(options.body)
     expect((form.get("image") as File).name).toBe("me.gif")
@@ -55,7 +55,7 @@ describe("DELETE /api/users/me/avatar", () => {
 
     const response = await DELETE()
 
-    expect(backendDelete).toHaveBeenCalledWith("/api/users/me/avatar")
+    expect(backendDelete).toHaveBeenCalledWith("/api/user/me/avatar")
     expect(response.status).toBe(200)
   })
 })

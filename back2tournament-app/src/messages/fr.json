@@ -625,7 +625,6 @@
           "title": "Impossible de charger l'article",
           "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
         },
-        "commentsError": "Impossible de charger les commentaires.",
         "edit": "Modifier",
         "viewOnBlog": "Voir sur le blog",
         "english": "Version anglaise",

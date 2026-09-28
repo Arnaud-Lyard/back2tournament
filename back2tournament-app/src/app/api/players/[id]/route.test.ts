@@ -42,7 +42,7 @@ describe("PATCH /api/players/[id]", () => {
 
     expect(backendPatch).toHaveBeenCalledOnce()
     const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/players/{id}")
+    expect(path).toBe("/api/user/players/{id}")
     expect(options.params.path).toEqual({ id: PLAYER_ID })
     expect(options.body).toEqual({ battletag: "PlayerTwo#5678" })
   })
@@ -81,7 +81,7 @@ describe("DELETE /api/players/[id]", () => {
 
     expect(backendDelete).toHaveBeenCalledOnce()
     const [path, options] = backendDelete.mock.calls[0]
-    expect(path).toBe("/api/players/{id}")
+    expect(path).toBe("/api/user/players/{id}")
     expect(options.params.path).toEqual({ id: PLAYER_ID })
   })
 

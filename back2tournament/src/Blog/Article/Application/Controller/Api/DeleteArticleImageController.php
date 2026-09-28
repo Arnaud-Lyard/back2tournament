@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/{id}/image', name: 'api_article_image_delete', methods: ['DELETE'])]
+#[Route('/api/editor/articles/{id}/image', name: 'api_article_image_delete', methods: ['DELETE'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(response: 200, description: 'Requires an editor or an administrator. The article, without a cover; one that had none is answered as it is.', content: new OA\JsonContent(ref: '#/components/schemas/Article'))]

@@ -16,7 +16,7 @@ export async function DELETE(
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/tournaments/{id}/participants/{participantid}", {
+    client.DELETE("/api/user/tournaments/{id}/participants/{participantid}", {
       params: { path: { id, participantid: participantId } },
     })
   )

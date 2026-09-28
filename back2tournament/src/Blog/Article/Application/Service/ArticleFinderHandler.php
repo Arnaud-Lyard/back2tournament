@@ -45,7 +45,8 @@ final class ArticleFinderHandler
 
         $article = $this->articleRepository->findOneBy(['id' => $articleId]);
         if (!$article instanceof Article
-            || (ArticleStatus::PUBLISHED !== $article->getStatus() && !$this->currentUserProvider->isGranted('ROLE_EDITOR'))) {
+            || (ArticleStatus::PUBLISHED !== $article->getStatus()
+                && (!$findArticleQuery->includesDrafts() || !$this->currentUserProvider->isGranted('ROLE_EDITOR')))) {
             throw new NotFoundException('article not found');
         }
 

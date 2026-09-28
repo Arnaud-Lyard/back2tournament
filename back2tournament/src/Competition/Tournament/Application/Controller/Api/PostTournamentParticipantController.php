@@ -14,7 +14,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/tournaments/{id}/participants', name: 'api_tournament_participant_post', methods: ['POST'])]
+#[Route('/api/user/tournaments/{id}/participants', name: 'api_tournament_participant_post', methods: ['POST'])]
 #[OA\Tag(name: 'Tournament')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Tournament ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(

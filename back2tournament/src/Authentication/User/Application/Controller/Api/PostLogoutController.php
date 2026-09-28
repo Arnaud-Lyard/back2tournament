@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-#[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
+#[Route('/api/user/logout', name: 'api_logout', methods: ['POST'])]
 #[OA\Tag(name: 'Authentication')]
 #[OA\Response(
     response: 200,

@@ -12,7 +12,7 @@ export async function POST(_request: Request, { params }: FightContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/fights/{id}/results/confirmation", {
+    client.POST("/api/user/fights/{id}/results/confirmation", {
       params: { path: { id } },
     })
   )

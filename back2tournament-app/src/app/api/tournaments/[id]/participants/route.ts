@@ -20,7 +20,7 @@ export async function POST(request: Request, { params }: TournamentContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/tournaments/{id}/participants", {
+    client.POST("/api/user/tournaments/{id}/participants", {
       params: { path: { id } },
       body: parsed.data,
     })

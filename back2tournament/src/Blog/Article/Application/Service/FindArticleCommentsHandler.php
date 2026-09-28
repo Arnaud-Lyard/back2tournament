@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Blog\Article\Application\Service;
 
-use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Blog\Article\Application\Model\FindArticleCommentsQuery;
 use App\Blog\Article\Domain\Entity\Article;
 use App\Blog\Article\Domain\Entity\Comment;
@@ -22,20 +21,17 @@ final class FindArticleCommentsHandler
     private ArticleRepositoryInterface $articleRepository;
     private CommentRepositoryInterface $commentRepository;
     private AuthorProviderInterface $authorProvider;
-    private CurrentUserProviderInterface $currentUserProvider;
     private NormalizerInterface $serializer;
 
     public function __construct(
         ArticleRepositoryInterface $articleRepository,
         CommentRepositoryInterface $commentRepository,
         AuthorProviderInterface $authorProvider,
-        CurrentUserProviderInterface $currentUserProvider,
         NormalizerInterface $serializer,
     ) {
         $this->articleRepository = $articleRepository;
         $this->commentRepository = $commentRepository;
         $this->authorProvider = $authorProvider;
-        $this->currentUserProvider = $currentUserProvider;
         $this->serializer = $serializer;
     }
 
@@ -44,8 +40,7 @@ final class FindArticleCommentsHandler
         $articleId = $findArticleCommentsQuery->getArticleId();
 
         $article = $this->articleRepository->findOneBy(['id' => $articleId]);
-        if (!$article instanceof Article
-            || (ArticleStatus::PUBLISHED !== $article->getStatus() && !$this->currentUserProvider->isGranted('ROLE_EDITOR'))) {
+        if (!$article instanceof Article || ArticleStatus::PUBLISHED !== $article->getStatus()) {
             throw new NotFoundException('article not found');
         }
 
