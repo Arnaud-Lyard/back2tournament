@@ -25,8 +25,9 @@ make start
 ```
 
 It also starts [Garage](https://garagehq.deuxfleurs.fr), the S3 storage the images
-are uploaded to, and prepares its bucket (`docker/garage/init.sh`). Browsers read the
-images on `http://localhost:3902`.
+are uploaded to, and prepares its bucket (`docker/garage/init.sh`). Browsers read an
+image on `http://localhost:3902/<key>`, and the bucket is browsed on
+`http://localhost:3909` ([Garage Web UI](https://github.com/khairul169/garage-webui)).
 
 Then:
 
