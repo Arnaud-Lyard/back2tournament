@@ -10,13 +10,6 @@ interface ParseResult {
   error?: z.ZodError
 }
 
-/**
- * Per-field errors for a form validated with one of the shared Zod schemas.
- * Pass the schema's result for the current values: errors stay hidden until
- * `reveal()` (a first submit), then follow every keystroke, so a fixed field
- * clears at once. Schema messages are `validation.*` keys, translated here;
- * `messagesFor` returns what `<FieldError errors>` expects.
- */
 export function useFieldErrors<TField extends string>(result: ParseResult) {
   const t = useTranslations("validation")
   const [revealed, setRevealed] = useState(false)

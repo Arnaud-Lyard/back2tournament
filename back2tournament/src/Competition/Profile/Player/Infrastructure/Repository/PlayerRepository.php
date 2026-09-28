@@ -10,9 +10,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Player>
- */
+/** @extends ServiceEntityRepository<Player> */
 final class PlayerRepository extends ServiceEntityRepository implements PlayerRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

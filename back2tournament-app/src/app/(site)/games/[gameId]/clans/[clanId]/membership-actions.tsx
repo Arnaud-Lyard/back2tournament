@@ -12,12 +12,10 @@ import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 
 interface MembershipActionsProps {
   clanId: string
-  /** The caller's own player profile in the clan's game. */
   playerId: string
   status: "invited" | "active"
 }
 
-/** What the caller does with their own place: accept or decline, or leave. */
 export function MembershipActions({
   clanId,
   playerId,

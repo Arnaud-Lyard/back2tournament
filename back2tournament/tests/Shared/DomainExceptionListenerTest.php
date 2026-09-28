@@ -34,9 +34,7 @@ final class DomainExceptionListenerTest extends TestCase
         return $event;
     }
 
-    /**
-     * @return array<string, array{\Throwable, int}>
-     */
+    /** @return array<string, array{\Throwable, int}> */
     public static function domainExceptionProvider(): array
     {
         return [
@@ -57,11 +55,6 @@ final class DomainExceptionListenerTest extends TestCase
         self::assertSame(['error' => $exception->getMessage()], json_decode($response->getContent(), true));
     }
 
-    /**
-     * Controllers using HandleTrait get the cause wrapped by Messenger, so the
-     * listener has to look down the previous-exception chain.
-     *
-     */
     #[DataProvider('domainExceptionProvider')]
     public function test_maps_domain_exception_wrapped_by_messenger(\Throwable $exception, int $expectedStatus): void
     {
@@ -76,8 +69,6 @@ final class DomainExceptionListenerTest extends TestCase
 
     public function test_leaves_a_plain_invalid_argument_exception_alone(): void
     {
-        // Doctrine, Symfony and other libraries throw this for real bugs.
-        // Turning those into a 400 would hide them, so they must stay a 500.
         self::assertNull($this->handle(new \InvalidArgumentException('internal bug'))->getResponse());
     }
 
@@ -89,8 +80,6 @@ final class DomainExceptionListenerTest extends TestCase
 
     public function test_unwraps_a_messenger_wrapped_http_exception(): void
     {
-        // Regression guard: ArticleFinderHandler used to throw NotFoundHttpException
-        // inside a Messenger handler, which surfaced as a 500 instead of a 404.
         $wrapped = new HandlerFailedException(
             new Envelope(new \stdClass()),
             [new NotFoundHttpException('article not found')]
@@ -105,7 +94,6 @@ final class DomainExceptionListenerTest extends TestCase
 
     public function test_leaves_a_top_level_http_exception_to_symfony(): void
     {
-        // Routing 404s and the like are already handled correctly upstream.
         self::assertNull($this->handle(new NotFoundHttpException('No route found'))->getResponse());
     }
 
@@ -113,7 +101,6 @@ final class DomainExceptionListenerTest extends TestCase
     {
         $first = new \RuntimeException('a');
         $second = new \RuntimeException('b', 0, $first);
-        // Force a cycle: $first->previous = $second
         $property = new \ReflectionProperty(\Exception::class, 'previous');
         $property->setValue($first, $second);
 

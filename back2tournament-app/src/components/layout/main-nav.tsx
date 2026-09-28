@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/navigation-menu"
 import { useSiteNav } from "./use-site-nav"
 
-/** Desktop navigation; below `md` the MobileNav sheet takes over. */
 export function MainNav() {
   const t = useTranslations("nav")
   const items = useSiteNav()

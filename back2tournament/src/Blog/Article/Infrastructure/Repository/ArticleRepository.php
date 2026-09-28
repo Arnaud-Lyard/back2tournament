@@ -1,5 +1,4 @@
 <?php
-// src/Blog/Article/Infrastructure/Repository/ArticleRepository.php
 
 declare(strict_types=1);
 
@@ -12,9 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Article>
- */
+/** @extends ServiceEntityRepository<Article> */
 class ArticleRepository extends ServiceEntityRepository implements ArticleRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -30,7 +27,6 @@ class ArticleRepository extends ServiceEntityRepository implements ArticleReposi
 
     public function findPage(?string $search, ?string $categoryId, ?ArticleStatus $status, int $limit, int $offset): array
     {
-        // Published articles by publication date; a draft by the day it was written.
         return $this->filtered($search, $categoryId, $status)
             ->addSelect('COALESCE(article.publishedAt, article.createdAt) AS HIDDEN listedAt')
             ->orderBy('listedAt', 'DESC')
@@ -61,7 +57,6 @@ class ArticleRepository extends ServiceEntityRepository implements ArticleReposi
 
         if (null !== $search) {
             $queryBuilder
-                // In either language.
                 ->andWhere('LOWER(article.title) LIKE :search OR LOWER(article.body) LIKE :search OR LOWER(article.titleEn) LIKE :search OR LOWER(article.bodyEn) LIKE :search')
                 ->setParameter('search', '%'.mb_strtolower($search).'%');
         }

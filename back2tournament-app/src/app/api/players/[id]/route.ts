@@ -8,7 +8,6 @@ import {
 import { updatePlayerSchema } from "@/features/players/schemas/update-player.schema"
 import { uuid } from "@/libs/validation"
 
-/** The caller's own profile, named by its backend identifier. */
 interface PlayerContext {
   params: Promise<{ id: string }>
 }
@@ -39,7 +38,6 @@ export async function DELETE(_request: Request, { params }: PlayerContext) {
   )
 }
 
-/** The identifier, or undefined when the path does not carry a backend one. */
 async function readPlayerId(
   params: PlayerContext["params"]
 ): Promise<string | undefined> {

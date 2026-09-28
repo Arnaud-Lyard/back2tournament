@@ -8,9 +8,6 @@ use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 
-/**
- * The place one player holds in one clan: invited until they accept, active after.
- */
 class ClanMember
 {
     private string $id;

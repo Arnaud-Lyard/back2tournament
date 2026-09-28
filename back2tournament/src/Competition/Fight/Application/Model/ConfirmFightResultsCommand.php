@@ -21,9 +21,6 @@ final class ConfirmFightResultsCommand
         return $this->fightId;
     }
 
-    /**
-     * The caller, as the User context verified it.
-     */
     public function getUser(): string
     {
         return $this->user;

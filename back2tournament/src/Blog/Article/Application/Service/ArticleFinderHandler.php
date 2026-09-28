@@ -44,7 +44,6 @@ final class ArticleFinderHandler
         $articleId = $findArticleQuery->getArticleId();
 
         $article = $this->articleRepository->findOneBy(['id' => $articleId]);
-        // A draft exists for the editors only.
         if (!$article instanceof Article
             || (ArticleStatus::PUBLISHED !== $article->getStatus() && !$this->currentUserProvider->isGranted('ROLE_EDITOR'))) {
             throw new NotFoundException('article not found');
@@ -75,9 +74,7 @@ final class ArticleFinderHandler
     }
 
     /**
-     * The comment, and the name of the user who wrote it.
-     *
-     * @param array<string, string> $usernames keyed by user id
+     * @param array<string, string> $usernames
      *
      * @return array<string, mixed>
      */

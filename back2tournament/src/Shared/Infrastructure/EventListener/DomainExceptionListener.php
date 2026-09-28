@@ -10,10 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-/**
- * Turns business failures into the HTTP status they mean, for every controller.
- *
- */
 #[AsEventListener(event: ExceptionEvent::class)]
 final class DomainExceptionListener
 {
@@ -43,9 +39,7 @@ final class DomainExceptionListener
         return new JsonResponse(['error' => $message], $status);
     }
 
-    /**
-     * @return iterable<\Throwable>
-     */
+    /** @return iterable<\Throwable> */
     private function causeChain(\Throwable $throwable): iterable
     {
         $seen = [];

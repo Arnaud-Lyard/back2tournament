@@ -63,9 +63,7 @@ final class TeamTest extends TestCase
         new TeamNameValueObject('');
     }
 
-    /**
-     * @param list<string> $players
-     */
+    /** @param list<string> $players */
     private function team(int $size, string $leader, array $players): Team
     {
         return Team::create(

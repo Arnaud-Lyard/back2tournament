@@ -19,10 +19,6 @@ final class FightResultConfirmationEventSubscriberTest extends TestCase
     private const FIGHT_ID = '55555555-5555-4555-8555-555555555555';
     private const CONFIRMED_FIGHT = '{"status":"finished"}';
 
-    /**
-     * Downstream, the confirming side is the one this user speaks for; the
-     * payload has no say in it.
-     */
     public function test_the_authenticated_caller_is_the_one_carried_downstream(): void
     {
         $dispatched = null;

@@ -43,7 +43,6 @@ final class RebuildRankingsServiceTest extends TestCase
         });
         $ratingRepository->method('count')->willReturn(4);
 
-        // Settled results, oldest first: each fight shows twice.
         $resultRepository = $this->createMock(ResultRepositoryInterface::class);
         $resultRepository
             ->expects($this->once())

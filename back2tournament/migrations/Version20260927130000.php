@@ -16,8 +16,6 @@ final class Version20260927130000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // Empty at first: `bin/console app:rankings:rebuild` counts the fights
-        // settled before this migration.
         $this->addSql('CREATE TABLE rating (subject_type VARCHAR(16) NOT NULL, subject UUID NOT NULL, game UUID NOT NULL, value INT NOT NULL, fights INT NOT NULL, wins INT NOT NULL, draws INT NOT NULL, losses INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, id UUID NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE INDEX idx_rating_ranking ON rating (subject_type, game, value)');
         $this->addSql('CREATE UNIQUE INDEX uniq_rating_subject ON rating (subject_type, subject)');

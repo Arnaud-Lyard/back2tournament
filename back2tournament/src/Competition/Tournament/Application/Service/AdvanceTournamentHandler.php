@@ -16,10 +16,6 @@ use App\Competition\Tournament\Domain\Repository\TournamentRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
- * A fight of a bracket is settled: its winner moves on, and the fight of the
- * next round opens as soon as both its sides are known.
- */
 #[AsMessageHandler]
 final class AdvanceTournamentHandler
 {
@@ -42,7 +38,6 @@ final class AdvanceTournamentHandler
 
     public function __invoke(AdvanceTournamentCommand $advanceTournamentCommand): void
     {
-        // A tournament fight cannot end in a draw; nothing moves on without a winner.
         if (null === $advanceTournamentCommand->getWinner()) {
             return;
         }

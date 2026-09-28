@@ -34,26 +34,16 @@ class Article extends AggregateRoot
 
     private string $title;
 
-    /**
-     * The user who published the article, not the one who wrote it. Null for a draft.
-     */
     private ?string $author = null;
 
     private ArticleStatus $status = ArticleStatus::DRAFT;
 
     private ?\DateTimeImmutable $publishedAt = null;
 
-    /**
-     * The English version of the article: both its title and its body, or
-     * neither when it has none. The site reads it in English.
-     */
     private ?string $titleEn = null;
 
     private ?string $bodyEn = null;
 
-    /**
-     * The key of its cover in the image storage; null when it has none.
-     */
     #[StoredImage]
     private ?string $image = null;
 
@@ -180,10 +170,6 @@ class Article extends AggregateRoot
         return $this;
     }
 
-    /**
-     * A new article is a draft: it has no author until someone publishes it.
-     * Its English version is optional, but whole: a title and a body, or neither.
-     */
     public static function create(
         ArticleId $articleId,
         ArticleTitleValueObject $title,
@@ -206,9 +192,6 @@ class Article extends AggregateRoot
         return $article;
     }
 
-    /**
-     * Changes what is given; a null argument keeps the field as it is.
-     */
     public static function update(
         Article $article,
         ?ArticleTitleValueObject $title,
@@ -229,10 +212,6 @@ class Article extends AggregateRoot
         $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));
     }
 
-    /**
-     * Gives the article its English version, or takes it away when both are
-     * null. A title without a body, or a body without a title, is refused.
-     */
     public static function translate(
         Article $article,
         ?ArticleTitleValueObject $titleEn,
@@ -244,10 +223,6 @@ class Article extends AggregateRoot
         $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));
     }
 
-    /**
-     * Gives the article its cover, as the key of the stored image, or takes
-     * it away with null.
-     */
     public static function illustrate(Article $article, ?string $image): void
     {
         $article->image = $image;
@@ -256,9 +231,6 @@ class Article extends AggregateRoot
         $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));
     }
 
-    /**
-     * The user who publishes the article becomes its author.
-     */
     public static function publish(Article $article, AuthorId $publisher): void
     {
         if (ArticleStatus::PUBLISHED === $article->getStatus()) {
@@ -274,10 +246,6 @@ class Article extends AggregateRoot
         $article->recordDomainEvent(new ArticlePublishedEvent($article->getId()));
     }
 
-    /**
-     * Back to draft: the article leaves the public blog, and loses its author
-     * until it is published again.
-     */
     public static function unpublish(Article $article): void
     {
         if (ArticleStatus::DRAFT === $article->getStatus()) {

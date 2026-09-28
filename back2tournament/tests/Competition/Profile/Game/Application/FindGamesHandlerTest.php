@@ -60,9 +60,7 @@ final class FindGamesHandlerTest extends TestCase
         $this->assertSame('[]', $handler(new FindGamesQuery()));
     }
 
-    /**
-     * @param list<Game> $games
-     */
+    /** @param list<Game> $games */
     private function gameRepository(array $games): GameRepositoryInterface
     {
         $gameRepository = $this->createStub(GameRepositoryInterface::class);

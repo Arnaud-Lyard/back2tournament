@@ -87,7 +87,6 @@ final class SeedCommand extends Command
 
     private const COMMENTED_ARTICLES = 5;
 
-    /** The last articles stay drafts, for the backoffice to publish. */
     private const DRAFT_ARTICLES = 3;
 
     private const COMMENTS_PER_ARTICLE = 3;
@@ -96,9 +95,6 @@ final class SeedCommand extends Command
 
     private const RANDOM_SEED = 20260922;
 
-    /**
-     * Each game and the formats it is played in, as players per side.
-     */
     private const GAMES = [
         'Street Fighter 6' => [1],
         'Rocket League' => [1, 2, 3],
@@ -123,9 +119,6 @@ final class SeedCommand extends Command
         'Wraith', 'Zenith', 'Apex', 'Basilisk', 'Comet',
     ];
 
-    /**
-     * Each headline in French, the language the site is written in, and in English.
-     */
     private const HEADLINES = [
         ['Le match d\'ouverture que tout le monde a sous-estimé', 'The season opener everyone underestimated'],
         ['Comment l\'équipe outsider a atteint la finale', 'How the underdog roster reached the final'],
@@ -134,9 +127,6 @@ final class SeedCommand extends Command
         ['Le tableau qui a bouleversé le classement', 'The bracket that rewrote the standings'],
     ];
 
-    /**
-     * Every fourth article is left in French only.
-     */
     private const FRENCH_ONLY_EVERY = 4;
 
     private const TABLES = [
@@ -156,13 +146,7 @@ final class SeedCommand extends Command
 
     private int $moment = 0;
 
-    /**
-     * The clan each competitor plays for, keyed by competitor id, once the
-     * clans are seeded: the fights opened from then on record it, as the
-     * platform does. The fights seeded before were played before the clans.
-     *
-     * @var array<string, ClanId>
-     */
+    /** @var array<string, ClanId> */
     private array $clanOfCompetitor = [];
 
     public function __construct(
@@ -222,7 +206,6 @@ final class SeedCommand extends Command
             $clans += $seededClans;
             $fights += $clanFights;
 
-            // The tournaments are played in the first game, between its seeded players.
             if (0 === $index) {
                 $fights += $this->seedTournaments($game, $mine, $me, $opponents);
             }
@@ -231,8 +214,6 @@ final class SeedCommand extends Command
         $this->seedArticles($mine, $rivals, $categories);
         $this->entityManager->flush();
 
-        // The seeded fights were settled without going through a confirmation:
-        // they are counted into the rankings the way a deployment counts old ones.
         $rankings = $this->rebuildRankingsService->rebuild();
 
         $challenges = \count($games) * (self::MINE_PENDING + self::MINE_REPORTING);
@@ -264,9 +245,7 @@ final class SeedCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * @return list<Game>
-     */
+    /** @return list<Game> */
     private function seedGames(): array
     {
         $games = [];
@@ -290,9 +269,7 @@ final class SeedCommand extends Command
         return $games;
     }
 
-    /**
-     * @return list<Category>
-     */
+    /** @return list<Category> */
     private function seedCategories(): array
     {
         $categories = [];
@@ -314,9 +291,7 @@ final class SeedCommand extends Command
         return $categories;
     }
 
-    /**
-     * @return list<User>
-     */
+    /** @return list<User> */
     private function seedRivals(string $password): array
     {
         $rivals = [];
@@ -328,9 +303,7 @@ final class SeedCommand extends Command
         return $rivals;
     }
 
-    /**
-     * @param list<string> $roles
-     */
+    /** @param list<string> $roles */
     private function seedUser(string $email, string $username, string $password, array $roles): User
     {
         $existing = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
@@ -356,8 +329,6 @@ final class SeedCommand extends Command
     }
 
     /**
-     * The demo account's profile in the game, and its rivals'.
-     *
      * @param list<User> $rivals
      *
      * @return array{Player, list<Player>}
@@ -383,9 +354,7 @@ final class SeedCommand extends Command
         return [$me, $opponents];
     }
 
-    /**
-     * @param list<Player> $opponents
-     */
+    /** @param list<Player> $opponents */
     private function seedGamePlayground(Game $game, Player $mePlayer, array $opponents): int
     {
         $gameId = (string) $game->getId();
@@ -413,15 +382,9 @@ final class SeedCommand extends Command
     }
 
     /**
-     * Two clans per game: the demo account leads one, a rival the other. Each
-     * fields a team in every format of the game above 1v1, and the two teams
-     * of a format meet in a fight the rivals declared, for the demo to confirm.
-     * In 1v1, members of the two clans settled two duels, which rank the clans
-     * in 1v1 as their team fights rank them in the other formats.
-     *
      * @param list<Player> $opponents
      *
-     * @return array{int, int} how many clans and clan fights were seeded
+     * @return array{int, int}
      */
     private function seedClans(Game $game, Player $me, array $opponents): array
     {
@@ -436,7 +399,6 @@ final class SeedCommand extends Command
         $mine = $this->seedClan($game, 'Demo Squad', 'DMO', $me, \array_slice($opponents, 0, $squad - 1));
         $theirs = $this->seedClan($game, 'Rival Crew', 'RIV', $opponents[$squad], \array_slice($opponents, $squad + 1, $squad - 1));
 
-        // One invitation left for the demo account to see pending.
         $invited = $opponents[\count($opponents) - 1];
         $this->entityManager->persist(Clan::invite($mine, new ClanMemberId(Uuid::v4()->toString()), $invited->getId()));
 
@@ -467,13 +429,11 @@ final class SeedCommand extends Command
             $this->clanOfCompetitor[(string) $theirSide] = $theirs->getId();
             $this->clanOfCompetitor[(string) $mySide] = $mine->getId();
 
-            // Two settled fights, for the history on the clan pages.
             for ($settled = 0; $settled < 2; ++$settled) {
                 $this->seedFight($mySide, $theirSide, $gameId, $size, ResultStatus::WIN);
                 ++$fights;
             }
 
-            // The rivals declared: the demo account, leading its team, confirms.
             $this->seedFight($theirSide, $mySide, $gameId, $size, ResultStatus::REPORTING);
             ++$fights;
         }
@@ -483,9 +443,7 @@ final class SeedCommand extends Command
         return [2, $fights];
     }
 
-    /**
-     * @param list<Player> $members
-     */
+    /** @param list<Player> $members */
     private function seedClan(Game $game, string $name, string $tag, Player $leader, array $members): Clan
     {
         $clan = Clan::create(new ClanId(Uuid::v4()->toString()), new ClanNameValueObject($name), new ClanTagValueObject($tag), $game->getId(), $leader->getId());
@@ -504,9 +462,7 @@ final class SeedCommand extends Command
         return $clan;
     }
 
-    /**
-     * @param list<Player> $lineup the leader first
-     */
+    /** @param list<Player> $lineup */
     private function seedTeam(Clan $clan, string $name, array $lineup): Team
     {
         $team = Team::create(
@@ -529,14 +485,7 @@ final class SeedCommand extends Command
         return $team;
     }
 
-    /**
-     * Two 1v1 tournaments organized by the demo account: one open for
-     * registrations, one whose bracket is drawn and first round under way.
-     *
-     * @param list<Player> $opponents
-     *
-     * @return int how many fights the bracket opened
-     */
+    /** @param list<Player> $opponents */
     private function seedTournaments(Game $game, User $organizer, Player $me, array $opponents): int
     {
         if (null !== $this->entityManager->getRepository(Tournament::class)->findOneBy(['name' => 'Seed Cup'])) {
@@ -579,9 +528,7 @@ final class SeedCommand extends Command
         return $fights;
     }
 
-    /**
-     * @param list<Player> $players registered in this order
-     */
+    /** @param list<Player> $players */
     private function seedTournament(Game $game, User $organizer, string $name, array $players): Tournament
     {
         $tournament = Tournament::create(
@@ -609,9 +556,7 @@ final class SeedCommand extends Command
         return $tournament;
     }
 
-    /**
-     * @return list<ResultStatus>
-     */
+    /** @return list<ResultStatus> */
     private function states(int $pending, int $reporting, int $finished): array
     {
         return array_merge(
@@ -656,9 +601,6 @@ final class SeedCommand extends Command
         return new CompetitorId((string) $competitor->getId());
     }
 
-    /**
-     * $one declares whatever is past pending.
-     */
     private function seedFight(
         CompetitorId $one,
         CompetitorId $two,
@@ -728,15 +670,8 @@ final class SeedCommand extends Command
         $result->setUpdatedAt($at);
     }
 
-    /**
-     * @param list<Category> $categories
-     */
-    /**
-     * Articles published by the demo account, but the last few, left as drafts;
-     * the first ones commented by the rivals.
-     *
-     * @param list<User> $commenters
-     */
+    /** @param list<Category> $categories */
+    /** @param list<User> $commenters */
     private function seedArticles(User $publisher, array $commenters, array $categories): void
     {
         $publisherId = new AuthorId((string) $publisher->getId());

@@ -23,7 +23,6 @@ interface BackofficeNavGroup {
 
 export const BACKOFFICE_HOME = "/backoffice"
 
-/** Each section names the permission its page requires, so the menu never offers a 403. */
 export const backofficeNav: readonly BackofficeNavGroup[] = [
   {
     labelKey: "general",
@@ -72,7 +71,6 @@ export const backofficeNav: readonly BackofficeNavGroup[] = [
   },
 ]
 
-/** The groups and sections these permissions open; empty groups are dropped. */
 export function visibleBackofficeNav(permissions: readonly AuthPermission[]) {
   return backofficeNav
     .map((group) => ({

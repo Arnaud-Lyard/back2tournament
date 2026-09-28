@@ -47,7 +47,6 @@ final class ImagickImageCompressorTest extends TestCase
 
     public function test_a_photo_is_turned_upright_and_loses_its_metadata(): void
     {
-        // Taken with the phone on its side: 400 x 200 pixels, to be turned a quarter.
         $photo = $this->image(400, 200, 'jpeg', comment: 'taken at home');
 
         $compressed = $this->compress($this->withExifOrientation($photo, 6), ImageKind::GAME);
@@ -74,7 +73,6 @@ final class ImagickImageCompressorTest extends TestCase
         $image = new \Imagick();
         $image->readImageBlob($compressed->getContent());
         $this->assertSame(1, $image->getNumberImages());
-        // Red, give or take what a lossy encoding moves.
         $colour = $image->getImagePixelColor(20, 15)->getColor();
         $this->assertGreaterThan(240, $colour['r']);
         $this->assertLessThan(15, $colour['b']);
@@ -104,9 +102,6 @@ final class ImagickImageCompressorTest extends TestCase
         return $image->getImageBlob();
     }
 
-    /**
-     * A JPEG given the EXIF orientation a camera writes, right after its JFIF header.
-     */
     private function withExifOrientation(string $jpeg, int $orientation): string
     {
         $tiff = "MM\x00\x2a".pack('N', 8).pack('n', 1).pack('nnN', 0x0112, 3, 1).pack('nn', $orientation, 0).pack('N', 0);
@@ -116,9 +111,7 @@ final class ImagickImageCompressorTest extends TestCase
         return substr($jpeg, 0, 4 + $jfifLength)."\xff\xe1".pack('n', \strlen($exif) + 2).$exif.substr($jpeg, 4 + $jfifLength);
     }
 
-    /**
-     * @return array{string, int, int} the format and the size the compressed image reads as
-     */
+    /** @return array{string, int, int} */
     private function read(CompressedImage $compressed): array
     {
         $image = new \Imagick();

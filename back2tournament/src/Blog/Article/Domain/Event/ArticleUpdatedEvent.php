@@ -8,9 +8,6 @@ use App\Blog\Article\Domain\Entity\ArticleId;
 use App\Shared\Event\DomainEventInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-/**
- * The title, the body or the category of an article changed.
- */
 final class ArticleUpdatedEvent extends Event implements DomainEventInterface
 {
     protected \DateTimeImmutable $occur;

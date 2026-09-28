@@ -14,7 +14,6 @@ describe("ThemeProvider hotkey", () => {
 
   it("ignores a keydown without a key, as Chrome's autofill sends", () => {
     renderWithProviders(<div />)
-    // A throwing listener does not reach dispatchEvent: it is reported here.
     const errors: unknown[] = []
     const onError = (event: ErrorEvent) => {
       errors.push(event.error)

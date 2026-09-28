@@ -22,9 +22,6 @@ final class OnFightResultConfirmationEvent extends Event
         return $this->fight;
     }
 
-    /**
-     * The fight once confirmed, as the handler serialized it, handed back to the controller.
-     */
     public function getConfirmedFight(): string
     {
         return $this->confirmedFight;

@@ -21,7 +21,6 @@ export async function requirePermission(
   return user
 }
 
-/** Used by (auth) layouts so an already-logged-in user can't reach /login or /register. */
 export async function requireGuest(redirectTo = "/"): Promise<void> {
   const user = await getCurrentUser()
   if (user) redirect(redirectTo)

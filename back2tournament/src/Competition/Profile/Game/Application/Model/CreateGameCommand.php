@@ -8,14 +8,10 @@ final class CreateGameCommand
 {
     private string $title;
 
-    /**
-     * @var list<int>
-     */
+    /** @var list<int> */
     private array $teamSizes;
 
-    /**
-     * @param list<int> $teamSizes
-     */
+    /** @param list<int> $teamSizes */
     public function __construct(string $title, array $teamSizes)
     {
         $this->title = $title;
@@ -27,9 +23,7 @@ final class CreateGameCommand
         return $this->title;
     }
 
-    /**
-     * @return list<int>
-     */
+    /** @return list<int> */
     public function getTeamSizes(): array
     {
         return $this->teamSizes;

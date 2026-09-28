@@ -11,7 +11,6 @@ import { useCreateFight } from "@/features/fights/hooks/use-create-fight"
 import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 
 interface ChallengeTeamButtonProps {
-  /** A team the caller leads, of the same format. */
   myTeamId: string
   myTeamName: string
   theirTeamId: string

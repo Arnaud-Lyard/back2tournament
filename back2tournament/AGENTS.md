@@ -199,6 +199,23 @@ Imagick loads them at run time, and reads nothing but a blob without them.
 - Apply: `docker compose exec php bin/console doctrine:migrations:migrate`.
 - Keep `doctrine:schema:validate` green.
 
+## Comments
+
+No comments: names, types and tests say what the code does. What a tool reads stays:
+
+- the OpenAPI attributes;
+- PHPDoc types that say more than the native declaration: `list<…>`, `array{…}`,
+  generics such as `@extends ServiceEntityRepository<Rating>`, `@template`,
+  `@param-out`, an inline `@var` assertion. A tag that repeats the native type, and
+  any prose, goes;
+- tool directives: `// @vitest-environment`, the comment oxlint's `no-empty` wants in
+  an otherwise empty `catch`, `# hadolint ignore=`;
+- Symfony Flex recipe markers (`###> vendor/package ###`), shebangs, the Dockerfile's
+  `#syntax=` line and the makefile's `##` help.
+
+Generated files keep theirs: `config/reference.php`, and the front's
+`src/libs/api/schema.d.ts`, whose doc comments are the OpenAPI descriptions.
+
 ## Commit conventions
 
 Short `Type: summary` subjects, matching git history: `Feat:`, `Fix:`, `Refactor:`,

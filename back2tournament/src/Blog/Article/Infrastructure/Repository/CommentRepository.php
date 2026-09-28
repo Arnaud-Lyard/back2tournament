@@ -9,9 +9,7 @@ use App\Blog\Article\Domain\Repository\CommentRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Comment>
- */
+/** @extends ServiceEntityRepository<Comment> */
 final class CommentRepository extends ServiceEntityRepository implements CommentRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

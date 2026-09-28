@@ -7,10 +7,6 @@ const FILTERS: readonly FightStatusFilter[] = [
   "all",
 ]
 
-/**
- * The fights the backoffice lists: those waiting for a confirmation unless
- * another status is asked for, since the disputes are among them.
- */
 export function readFightStatusFilter(
   value: string | string[] | undefined
 ): FightStatusFilter {

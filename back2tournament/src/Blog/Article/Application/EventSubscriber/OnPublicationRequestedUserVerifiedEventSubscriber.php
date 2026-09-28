@@ -43,7 +43,6 @@ final class OnPublicationRequestedUserVerifiedEventSubscriber implements EventSu
             $this->categoryIdProvider->bySlug($event->getCategorySlug())
         );
 
-        // A new article is a draft: whoever publishes it later becomes its author.
         $event->setCreatedArticle($this->handle($createArticleCommand));
     }
 }

@@ -51,7 +51,6 @@ final class JoinClanHandler
             throw new NotFoundException('clan not found');
         }
 
-        // The profile joining is the caller's own in the clan's game: there is only one.
         $player = $this->playerRepository->findOneBy([
             'user' => (string) $this->currentUserProvider->getUser()->getId(),
             'game' => $clan->getGame()->getValue(),
@@ -88,11 +87,7 @@ final class JoinClanHandler
         return json_encode($this->normalizeMembership($membership, $player), JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * A place in a clan, the player named by battletag.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function normalizeMembership(ClanMember $membership, ?Player $player): array
     {
         return [

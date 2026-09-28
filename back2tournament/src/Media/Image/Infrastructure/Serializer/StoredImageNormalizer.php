@@ -10,26 +10,15 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-/**
- * Normalizes an entity as usual, then gives each #[StoredImage] property the
- * public address of its image instead of its storage key: a response never
- * tells where an image is stored, only where it is read from.
- */
 final class StoredImageNormalizer implements NormalizerInterface, NormalizerAwareInterface
 {
     use NormalizerAwareTrait;
 
-    /**
-     * Set while the entity is handed to the other normalizers, which must not
-     * hand it back.
-     */
     private const NORMALIZING = 'stored_image_normalizing';
 
     private ImageProviderInterface $imageProvider;
 
-    /**
-     * @var array<class-string, list<string>>
-     */
+    /** @var array<class-string, list<string>> */
     private array $properties = [];
 
     public function __construct(ImageProviderInterface $imageProvider)
@@ -68,7 +57,7 @@ final class StoredImageNormalizer implements NormalizerInterface, NormalizerAwar
     /**
      * @param class-string $class
      *
-     * @return list<string> the properties of the class marked #[StoredImage]
+     * @return list<string>
      */
     private function storedImages(string $class): array
     {

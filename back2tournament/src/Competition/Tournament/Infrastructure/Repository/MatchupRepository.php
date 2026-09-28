@@ -9,9 +9,7 @@ use App\Competition\Tournament\Domain\Repository\MatchupRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Matchup>
- */
+/** @extends ServiceEntityRepository<Matchup> */
 final class MatchupRepository extends ServiceEntityRepository implements MatchupRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Competition\Ranking\Application\Model;
 
-/**
- * Counts a settled fight in the rankings of its two sides.
- */
 final class RateFightCommand
 {
     private string $fightId;

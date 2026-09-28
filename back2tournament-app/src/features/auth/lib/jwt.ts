@@ -8,12 +8,6 @@ interface SymfonyJwtPayload {
   iat?: number
 }
 
-/**
- * Decodes the JWT's payload WITHOUT verifying its signature — this app does
- * not hold the Symfony backend's signing key. This is only ever used for
- * fast-path UI/redirect decisions; Symfony remains the sole authorization
- * enforcer on every real API call.
- */
 export function decodeSymfonyJwt(token: string): SymfonyJwtPayload | null {
   try {
     return decodeJwt(token) as SymfonyJwtPayload
@@ -22,7 +16,6 @@ export function decodeSymfonyJwt(token: string): SymfonyJwtPayload | null {
   }
 }
 
-/** Seconds remaining until the token's `exp` claim, for the cookie's maxAge. */
 export function getJwtExpirySeconds(token: string): number {
   const payload = decodeSymfonyJwt(token)
   if (!payload?.exp) return FALLBACK_COOKIE_MAX_AGE

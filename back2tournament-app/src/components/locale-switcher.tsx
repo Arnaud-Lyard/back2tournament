@@ -14,17 +14,11 @@ import {
 import { setLocale } from "@/features/i18n/actions"
 import { supportedLocales } from "@/features/site/config"
 
-/** Each language is named in itself, so a visitor finds theirs whatever the page is in. */
 const LANGUAGE_NAMES: Record<string, string> = {
   fr: "Français",
   en: "English",
 }
 
-/**
- * Shows the current language's flag. Picking another one stores it in the
- * locale cookie, which also decides the language of the verification email
- * sent on sign-up.
- */
 export function LocaleSwitcher() {
   const t = useTranslations("locale")
   const locale = useLocale()

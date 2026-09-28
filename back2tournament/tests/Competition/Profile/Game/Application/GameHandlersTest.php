@@ -86,9 +86,6 @@ final class GameHandlersTest extends TestCase
         $this->updateHandler($gameRepository, admin: false)(new UpdateGameCommand(self::GAME_ID, 'Valorant', null));
     }
 
-    /**
-     * The administrator role is checked upstream, by GameCreationRequestedEventSubscriber.
-     */
     private function createHandler(GameRepositoryInterface $gameRepository): CreateGameHandler
     {
         return new CreateGameHandler(

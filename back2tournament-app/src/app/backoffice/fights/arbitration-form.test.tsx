@@ -55,7 +55,6 @@ describe("ArbitrationForm", () => {
       screen.getByRole("button", { name: "Impose this result" })
     )
 
-    // Nothing is sent before the confirmation.
     expect(fetchMock).not.toHaveBeenCalled()
     expect(
       screen.getByText("Impose Alpha#0001 0 – 1 Bravo#0002?")

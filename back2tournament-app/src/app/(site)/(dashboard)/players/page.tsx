@@ -33,8 +33,6 @@ export default async function PlayerProfilesPage() {
           </Link>
         }
       />
-      {/* The profiles come from the session, so they stay manageable even
-          when the game titles could not be loaded. */}
       {!games.ok && (
         <Alert variant="destructive">
           <AlertTitle>{t("loadError.title")}</AlertTitle>

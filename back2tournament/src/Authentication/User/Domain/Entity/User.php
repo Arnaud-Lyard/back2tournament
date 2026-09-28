@@ -31,9 +31,6 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
     #[Ignore]
     private ?string $verificationToken = null;
 
-    /**
-     * The key of the user's picture in the image storage; null when they have none.
-     */
     #[StoredImage]
     private ?string $avatar = null;
 
@@ -71,21 +68,15 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
         return $this;
     }
 
-    // Required by UserInterface, but it only duplicates username and belongs to
-    // Symfony's security plumbing, not to the API contract.
     #[Ignore]
     public function getUserIdentifier(): string
     {
         return $this->username;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -118,8 +109,6 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
 
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
     }
 
     public function isVerified(): bool
@@ -151,10 +140,6 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
         return $this->avatar;
     }
 
-    /**
-     * Gives the user their picture, as the key of the stored image, or takes
-     * it away with null.
-     */
     public static function changeAvatar(User $user, ?string $avatar): void
     {
         $user->avatar = $avatar;

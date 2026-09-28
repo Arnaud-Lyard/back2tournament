@@ -6,10 +6,6 @@ namespace App\Competition\Ranking\Domain\Entity;
 
 use App\Competition\Fight\Domain\Entity\FightId;
 
-/**
- * What one settled fight did to one rating. A fight moves each rating once:
- * its changes are also the proof that it was counted.
- */
 class RatingChange
 {
     private string $id;
@@ -59,9 +55,6 @@ class RatingChange
         return $this->after;
     }
 
-    /**
-     * The points won, or lost when negative.
-     */
     public function getPoints(): int
     {
         return $this->after - $this->before;

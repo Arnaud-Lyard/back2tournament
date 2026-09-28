@@ -25,7 +25,6 @@ interface FightPanelProps {
   gameTitle?: string
 }
 
-/** One fight, as a dispute reaches it: who declared what, and what to do. */
 export async function FightPanel({
   fightId,
   fight: loaded,

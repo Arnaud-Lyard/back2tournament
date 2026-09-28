@@ -11,9 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Tournament>
- */
+/** @extends ServiceEntityRepository<Tournament> */
 final class TournamentRepository extends ServiceEntityRepository implements TournamentRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

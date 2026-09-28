@@ -6,15 +6,8 @@ namespace App\Competition\Shared\Domain\Provider;
 
 use App\Competition\Fight\Domain\Entity\Fight;
 
-/**
- * Opens fights, for a challenge between two sides as well as for a tournament bracket.
- */
 interface FightSchedulerProviderInterface
 {
-    /**
-     * A fight between two competitors, with a pending result for each side
-     * that records the clan the side plays for.
-     */
     public function schedule(
         string $competitorOne,
         string $competitorTwo,

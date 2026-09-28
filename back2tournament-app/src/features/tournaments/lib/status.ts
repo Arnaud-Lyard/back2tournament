@@ -1,6 +1,5 @@
 import { TOURNAMENT_STATUSES, type TournamentStatus } from "../types"
 
-/** How each state reads as a badge: open registrations stand out. */
 export const STATUS_VARIANT = {
   upcoming: "default",
   ongoing: "secondary",

@@ -10,8 +10,6 @@ function keysOf(messages: object, prefix = ""): string[] {
   )
 }
 
-// Only fr.json types the `t()` keys (src/global.d.ts): this keeps the other
-// locales from silently missing one.
 describe("messages", () => {
   it("defines the same keys in every locale", () => {
     expect(keysOf(en).sort()).toEqual(keysOf(fr).sort())

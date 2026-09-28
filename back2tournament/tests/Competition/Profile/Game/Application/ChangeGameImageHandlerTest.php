@@ -28,10 +28,9 @@ final class ChangeGameImageHandlerTest extends TestCase
 {
     private const GAME_ID = '11111111-1111-4111-8111-111111111111';
 
-    /** A 32 x 24 PNG. */
     private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAYCAIAAAAUMWhjAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAJklEQVRIiWM8oaHBQEvARFPTRy0YtWDUglELRi0YtWDUglELqAYA1J4BSIDvLE0AAAAASUVORK5CYII=';
 
-    /** @var list<string> what happened, in order */
+    /** @var list<string> */
     private array $log = [];
 
     public function test_an_admin_gives_a_game_its_picture_and_the_former_one_goes_once_it_is_saved(): void
@@ -84,9 +83,6 @@ final class ChangeGameImageHandlerTest extends TestCase
         $this->handler(null, untouched: true)(new ChangeGameImageCommand(self::GAME_ID, base64_decode(self::PNG, true)));
     }
 
-    /**
-     * @param bool $untouched whether nothing may be stored, saved, removed or announced
-     */
     private function handler(?Game $game, bool $admin = true, bool $untouched = false): ChangeGameImageHandler
     {
         [$gameRepository, $imageProvider, $eventDispatcher] = $untouched ? $this->untouched() : $this->logged();
@@ -101,9 +97,7 @@ final class ChangeGameImageHandlerTest extends TestCase
         return new ChangeGameImageHandler($gameRepository, $currentUserProvider, $imageProvider, $eventDispatcher, $serializer);
     }
 
-    /**
-     * @return array{GameRepositoryInterface&Stub, ImageProviderInterface, EventDispatcherInterface}
-     */
+    /** @return array{(GameRepositoryInterface & Stub), ImageProviderInterface, EventDispatcherInterface} */
     private function logged(): array
     {
         $gameRepository = $this->createStub(GameRepositoryInterface::class);
@@ -131,9 +125,7 @@ final class ChangeGameImageHandlerTest extends TestCase
         return [$gameRepository, $imageProvider, $eventDispatcher];
     }
 
-    /**
-     * @return array{GameRepositoryInterface&MockObject, ImageProviderInterface, EventDispatcherInterface}
-     */
+    /** @return array{(GameRepositoryInterface & MockObject), ImageProviderInterface, EventDispatcherInterface} */
     private function untouched(): array
     {
         $gameRepository = $this->createMock(GameRepositoryInterface::class);

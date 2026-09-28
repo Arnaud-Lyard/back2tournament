@@ -22,7 +22,6 @@ interface FightsListProps {
   fights: FightSummary[]
   games: Game[]
   status: FightStatusFilter
-  /** The filters of the page, kept when a fight is opened. */
   params: Record<string, string | number | undefined>
   selectedId?: string
 }
@@ -81,7 +80,6 @@ export async function FightsList({
                     scroll={false}
                     className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 font-medium underline-offset-4 hover:underline"
                   >
-                    {/* A tag stays with its name: the line breaks between the sides. */}
                     <span className="inline-flex min-w-0 items-center gap-1">
                       <ClanTag tag={one?.tag} />
                       <span className="truncate">

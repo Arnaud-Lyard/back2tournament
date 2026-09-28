@@ -10,14 +10,10 @@ interface ClanRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Clan>
-     */
+    /** @return list<Clan> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
-    /**
-     * @return list<Clan> the clans of a game, by name, whose name or tag contains $search when it is given
-     */
+    /** @return list<Clan> */
     public function findPage(string $gameId, ?string $search, int $limit, int $offset): array;
 
     public function countPage(string $gameId, ?string $search): int;

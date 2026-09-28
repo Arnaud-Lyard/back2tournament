@@ -9,9 +9,7 @@ use App\Competition\Tournament\Domain\Repository\ParticipantRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Participant>
- */
+/** @extends ServiceEntityRepository<Participant> */
 final class ParticipantRepository extends ServiceEntityRepository implements ParticipantRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -37,7 +35,7 @@ final class ParticipantRepository extends ServiceEntityRepository implements Par
             return [];
         }
 
-        /** @var list<array{tournament: string, participants: int|string}> $rows */
+        /** @var list<array{tournament: string, participants: (int | string)}> $rows */
         $rows = $this->createQueryBuilder('participant')
             ->select('participant.tournament AS tournament, COUNT(participant.id) AS participants')
             ->andWhere('participant.tournament IN (:tournamentIds)')

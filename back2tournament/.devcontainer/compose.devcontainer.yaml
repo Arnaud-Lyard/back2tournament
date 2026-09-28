@@ -1,5 +1,4 @@
 ---
-# Dev Container-specific overrides: enable XDebug
 services:
   php:
     environment:

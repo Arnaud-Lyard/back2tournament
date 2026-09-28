@@ -58,9 +58,6 @@ final class FindRatingHandler
             $ratings[$rating->getTeamSize()] = $rating;
         }
 
-        // One rating per format of the game. In a format where the player
-        // profile or the clan has no settled fight yet, it stands at the
-        // initial rating, unranked.
         $perFormat = [];
         foreach ($formats as $teamSize) {
             $rating = $ratings[$teamSize] ?? null;
@@ -90,9 +87,7 @@ final class FindRatingHandler
         ], JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * @return array{id: string, game: string, name: string, tag: ?string}
-     */
+    /** @return array{id: string, game: string, name: string, tag: ?string} */
     private function player(string $playerId): array
     {
         $player = $this->playerRepository->findOneBy(['id' => new PlayerId($playerId)->getValue()]);
@@ -110,9 +105,7 @@ final class FindRatingHandler
         ];
     }
 
-    /**
-     * @return array{id: string, game: string, name: string, tag: string}
-     */
+    /** @return array{id: string, game: string, name: string, tag: string} */
     private function clan(string $clanId): array
     {
         $clan = $this->clanRepository->findOneBy(['id' => new ClanId($clanId)->getValue()]);

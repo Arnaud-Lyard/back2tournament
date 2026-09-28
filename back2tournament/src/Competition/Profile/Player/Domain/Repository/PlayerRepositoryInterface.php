@@ -10,24 +10,15 @@ interface PlayerRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Player>
-     */
+    /** @return list<Player> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
-    /**
-     * @return list<Player>
-     */
+    /** @return list<Player> */
     public function findPage(string $gameId, ?string $search, int $limit, int $offset): array;
 
     public function countPage(string $gameId, ?string $search): int;
 
-    /**
-     * The player profiles whose battletag holds $search, in one game or in
-     * all of them; $limit at most.
-     *
-     * @return list<Player>
-     */
+    /** @return list<Player> */
     public function findNamed(string $search, ?string $gameId, int $limit): array;
 
     public function save(Player $player): void;

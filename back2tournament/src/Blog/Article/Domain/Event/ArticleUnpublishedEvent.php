@@ -8,9 +8,6 @@ use App\Blog\Article\Domain\Entity\ArticleId;
 use App\Shared\Event\DomainEventInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-/**
- * An article went back to draft: it left the public blog.
- */
 final class ArticleUnpublishedEvent extends Event implements DomainEventInterface
 {
     protected \DateTimeImmutable $occur;

@@ -61,12 +61,7 @@ final class PatchArticleController extends AbstractController
         )));
     }
 
-    /**
-     * Null when the key is left out, to keep what the article has; an empty
-     * string when it is sent empty or null, to remove the English version.
-     *
-     * @param array<string, mixed> $parameters
-     */
+    /** @param array<string, mixed> $parameters */
     private static function englishField(array $parameters, string $key): ?string
     {
         return \array_key_exists($key, $parameters) ? ($parameters[$key] ?? '') : null;

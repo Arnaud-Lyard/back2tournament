@@ -16,16 +16,12 @@ final class Version20260927120000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // The articles written so far were public from the start: they are
-        // published, on the day they were written, by the user who wrote them.
         $this->addSql('ALTER TABLE article ADD status VARCHAR(16) DEFAULT \'published\' NOT NULL');
         $this->addSql('ALTER TABLE article ALTER status DROP DEFAULT');
         $this->addSql('ALTER TABLE article ADD published_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL');
         $this->addSql('UPDATE article SET published_at = created_at');
-        // A draft has no author until someone publishes it.
         $this->addSql('ALTER TABLE article ALTER author DROP NOT NULL');
 
-        // Older comments never recorded their author: they keep none.
         $this->addSql('ALTER TABLE comment ADD author UUID DEFAULT NULL');
     }
 

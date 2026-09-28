@@ -7,7 +7,6 @@ import { cn } from "@/libs/utils"
 
 type Side = NonNullable<NonNullable<TournamentMatchup["sides"]>[number]>
 
-/** The bracket, one column per round, the final on the right. */
 export async function Bracket({
   matchups,
   rounds,

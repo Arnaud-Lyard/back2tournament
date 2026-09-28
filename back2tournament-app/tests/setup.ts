@@ -1,9 +1,6 @@
 import "@testing-library/jest-dom/vitest"
 import { vi } from "vitest"
 
-// AuthProvider calls useRouter() and the navigation components usePathname();
-// plain RTL renders have no App Router context mounted, so this needs a global
-// mock for any test that renders them.
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -16,10 +13,6 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }))
 
-// jsdom implements neither of these; next-themes reads matchMedia and several
-// shadcn/base-ui primitives use ResizeObserver — without these, component
-// tests touching the theme provider or a popover/dialog throw. A test run in
-// the node environment (a route handler reading an upload) has no window.
 if (typeof window !== "undefined") {
   if (!window.matchMedia) {
     window.matchMedia = (query: string) => ({

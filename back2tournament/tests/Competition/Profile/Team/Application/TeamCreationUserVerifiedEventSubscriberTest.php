@@ -20,10 +20,6 @@ final class TeamCreationUserVerifiedEventSubscriberTest extends TestCase
     private const MATE_ID = '11111111-1111-4111-8111-111111111111';
     private const CREATED_TEAM = '{"name":"Falcons Duo"}';
 
-    /**
-     * The verified user lands in the command: the handler checks that this
-     * user leads the clan.
-     */
     public function test_the_verified_request_creates_the_team_for_the_verified_user(): void
     {
         $dispatched = null;

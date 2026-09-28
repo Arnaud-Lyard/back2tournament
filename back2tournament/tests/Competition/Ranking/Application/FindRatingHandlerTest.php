@@ -74,7 +74,6 @@ final class FindRatingHandlerTest extends TestCase
     public function test_a_rating_of_another_subject_or_player_is_not_read(): void
     {
         $someoneElse = $this->rating(RankingSubject::PLAYER, '55555555-5555-4555-8555-555555555555', teamSize: 1);
-        // A clan and a player profile never share an id, but a rating reads by both.
         $sameIdAsClan = $this->rating(RankingSubject::CLAN, self::PLAYER_ID, teamSize: 1);
 
         $read = $this->read($this->handler([$someoneElse, $sameIdAsClan], above: [], total: [])(FindRatingQuery::ofPlayer(self::PLAYER_ID)));
@@ -106,9 +105,9 @@ final class FindRatingHandlerTest extends TestCase
     }
 
     /**
-     * @param list<Rating>     $ratings
-     * @param array<int, int> $above   per format, how many rate higher
-     * @param array<int, int> $total   per format, how many are ranked
+     * @param list<Rating> $ratings
+     * @param array<int, int> $above
+     * @param array<int, int> $total
      */
     private function handler(array $ratings, array $above, array $total): FindRatingHandler
     {
@@ -120,7 +119,6 @@ final class FindRatingHandlerTest extends TestCase
             static fn (RankingSubject $subjectType, string $gameId, int $teamSize): int => $total[$teamSize] ?? 0
         );
 
-        // The profile leads the clan: its tag is the clan's.
         $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID);
 
         return new FindRatingHandler(
@@ -135,9 +133,6 @@ final class FindRatingHandlerTest extends TestCase
         );
     }
 
-    /**
-     * One win against a newcomer: 1016.
-     */
     private function rating(RankingSubject $subjectType, string $subject, int $teamSize): Rating
     {
         $rating = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
@@ -153,9 +148,7 @@ final class FindRatingHandlerTest extends TestCase
         return $rating;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);

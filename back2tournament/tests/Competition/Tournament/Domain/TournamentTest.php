@@ -135,13 +135,11 @@ final class TournamentTest extends TestCase
         $this->assertCount(7, $bracket);
         $this->assertSame([1, 1, 1, 1, 2, 2, 3], array_map(static fn (Matchup $matchup): int => $matchup->getRound(), $bracket));
 
-        // Round 1, top to bottom: 1-8, 4-5, 2-7, 3-6; seeds 6 to 8 do not exist.
         $this->assertSame([$one, null], $this->sides($bracket[0]));
         $this->assertSame([$four, $five], $this->sides($bracket[1]));
         $this->assertSame([$two, null], $this->sides($bracket[2]));
         $this->assertSame([$three, null], $this->sides($bracket[3]));
 
-        // Byes move on at once.
         $this->assertSame($one, $bracket[0]->getWinner()?->getValue());
         $this->assertSame([$one, null], $this->sides($bracket[4]));
         $this->assertSame([$two, $three], $this->sides($bracket[5]));
@@ -159,7 +157,6 @@ final class TournamentTest extends TestCase
         [$one, $two, $three, $four] = array_map(static fn (Participant $participant): CompetitorId => $participant->getCompetitor(), $participants);
         $bracket = Tournament::start($tournament, $participants, $this->ids(3));
 
-        // 1-4 and 2-3 play first.
         $this->assertSame([$one->getValue(), $four->getValue()], $this->sides($bracket[0]));
         $this->assertSame([$two->getValue(), $three->getValue()], $this->sides($bracket[1]));
 
@@ -244,9 +241,7 @@ final class TournamentTest extends TestCase
         );
     }
 
-    /**
-     * @return list<Participant>
-     */
+    /** @return list<Participant> */
     private function register(Tournament $tournament, int $count): array
     {
         $participants = [];
@@ -262,17 +257,13 @@ final class TournamentTest extends TestCase
         return new CompetitorId(Uuid::v4()->toString());
     }
 
-    /**
-     * @return list<MatchupId>
-     */
+    /** @return list<MatchupId> */
     private function ids(int $count): array
     {
         return array_map(static fn (): MatchupId => new MatchupId(Uuid::v4()->toString()), range(1, $count));
     }
 
-    /**
-     * @return array{?string, ?string}
-     */
+    /** @return array{?string, ?string} */
     private function sides(Matchup $matchup): array
     {
         return [$matchup->getCompetitorOne()?->getValue(), $matchup->getCompetitorTwo()?->getValue()];

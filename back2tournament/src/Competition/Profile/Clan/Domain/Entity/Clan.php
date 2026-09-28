@@ -18,10 +18,6 @@ use App\Shared\Exception\NotFoundException;
 use App\Shared\ValueObject\ClanNameValueObject;
 use App\Shared\ValueObject\ClanTagValueObject;
 
-/**
- * A group of players of one game, run by its leader. Players come in by
- * invitation only and are members once they accept it.
- */
 class Clan extends AggregateRoot
 {
     private string $id;
@@ -112,9 +108,6 @@ class Clan extends AggregateRoot
         return $clan;
     }
 
-    /**
-     * The founder's own membership: the leader is a member from the start.
-     */
     public static function createLeaderMembership(Clan $clan, ClanMemberId $clanMemberId): ClanMember
     {
         $membership = new ClanMember($clanMemberId);
@@ -149,9 +142,6 @@ class Clan extends AggregateRoot
         return $membership;
     }
 
-    /**
-     * The invited player accepts: the invitation becomes a membership.
-     */
     public static function join(Clan $clan, ClanMember $membership): ClanMember
     {
         self::ensureBelongs($clan, $membership);
@@ -169,10 +159,6 @@ class Clan extends AggregateRoot
         return $membership;
     }
 
-    /**
-     * A member leaves, an invitation is declined, or the leader lets someone go:
-     * the membership is to be removed. The leader never leaves their own clan.
-     */
     public static function remove(Clan $clan, ClanMember $membership): ClanMember
     {
         self::ensureBelongs($clan, $membership);

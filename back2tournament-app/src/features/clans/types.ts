@@ -8,7 +8,6 @@ export type ClanDetail = components["schemas"]["ClanDetail"]
 
 export type ClanMember = components["schemas"]["ClanMember"]
 
-/** One place the caller holds in a clan, as GET /api/users/me/clans lists it. */
 export type MyClan =
   paths["/api/users/me/clans"]["get"]["responses"][200]["content"]["application/json"][number]
 

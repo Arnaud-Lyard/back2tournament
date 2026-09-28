@@ -32,9 +32,7 @@ import { useFieldErrors } from "@/hooks/use-field-errors"
 
 interface CreateTeamFormProps {
   clanId: string
-  /** The formats above 1v1 the game is played in. */
   formats: number[]
-  /** The active members of the clan, leader first. */
   members: { id: string; battletag: string }[]
   leaderId: string
 }

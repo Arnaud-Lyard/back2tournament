@@ -64,7 +64,6 @@ final class ChangeGameImageHandler
                 $this->eventDispatcher->dispatch($domainEvent);
             }
 
-            // The former picture goes once the game no longer points to it.
             $this->imageProvider->remove($previous);
         }
 

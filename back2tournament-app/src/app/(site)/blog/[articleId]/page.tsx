@@ -49,7 +49,6 @@ export async function generateMetadata({
   const description = toExcerpt(body, 160)
   const { authorName, image } = article.data
 
-  // A draft reaches the editors only: it has nothing to share yet.
   if (!isPublished(article.data)) {
     return { title, robots: { index: false, follow: false } }
   }
@@ -66,7 +65,6 @@ export async function generateMetadata({
       url: `${baseUrl}/blog/${articleId}`,
       publishedTime: article.data.publishedAt ?? undefined,
       ...(authorName ? { authors: [authorName] } : {}),
-      // The cover, when it has one, is what a shared link shows.
       ...(image ? { images: [{ url: image, alt: title }] } : {}),
     },
   }

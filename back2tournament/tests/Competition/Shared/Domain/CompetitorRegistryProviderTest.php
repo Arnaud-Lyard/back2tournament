@@ -116,7 +116,6 @@ final class CompetitorRegistryProviderTest extends TestCase
         ]));
 
         $this->assertEqualsCanonicalizing([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR], $registry->competitorsOfPlayer(self::PLAYER_ID));
-        // A teammate who never played a duel competes only through the team.
         $this->assertSame([self::TEAM_COMPETITOR], $registry->competitorsOfPlayer(self::MATE_PLAYER));
     }
 
@@ -139,7 +138,6 @@ final class CompetitorRegistryProviderTest extends TestCase
             [
                 self::PLAYER_COMPETITOR => ['players' => [self::PLAYER_ID], 'clan' => self::CLAN_ID],
                 self::TEAM_COMPETITOR => ['players' => [self::PLAYER_ID, self::MATE_PLAYER], 'clan' => self::CLAN_ID],
-                // In no clan: it ranks alone.
                 self::MATE_COMPETITOR => ['players' => [self::MATE_PLAYER], 'clan' => null],
             ],
             $registry->lineups([self::PLAYER_COMPETITOR, self::TEAM_COMPETITOR, self::MATE_COMPETITOR, self::GAME_ID]),
@@ -154,7 +152,6 @@ final class CompetitorRegistryProviderTest extends TestCase
             self::aCompetitor(self::TEAM_COMPETITOR, CompetitorType::TEAM, self::TEAM_ID),
         ]));
 
-        // The stubs name Leader#0001 for "lead", and the Falcons for "falc".
         $this->assertSame([self::PLAYER_COMPETITOR], $registry->named('lead'));
         $this->assertSame([self::TEAM_COMPETITOR], $registry->named('falc', self::GAME_ID));
         $this->assertSame([], $registry->named('nobody'));

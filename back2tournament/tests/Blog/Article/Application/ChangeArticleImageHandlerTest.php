@@ -36,10 +36,9 @@ final class ChangeArticleImageHandlerTest extends TestCase
     private const AUTHOR_ID = '33333333-3333-4333-8333-333333333333';
     private const CATEGORY_ID = '44444444-4444-4444-8444-444444444444';
 
-    /** A 32 x 24 PNG. */
     private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAYCAIAAAAUMWhjAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAJklEQVRIiWM8oaHBQEvARFPTRy0YtWDUglELRi0YtWDUglELqAYA1J4BSIDvLE0AAAAASUVORK5CYII=';
 
-    /** @var list<string> what happened, in order */
+    /** @var list<string> */
     private array $log = [];
 
     public function test_an_editor_gives_an_article_its_cover_and_the_former_one_goes_once_it_is_saved(): void
@@ -92,9 +91,6 @@ final class ChangeArticleImageHandlerTest extends TestCase
         $this->handler(null, untouched: true)(new ChangeArticleImageCommand(self::ARTICLE_ID, base64_decode(self::PNG, true)));
     }
 
-    /**
-     * @param bool $untouched whether nothing may be stored, saved, removed or announced
-     */
     private function handler(?Article $article, bool $editor = true, bool $untouched = false): ChangeArticleImageHandler
     {
         [$articleRepository, $imageProvider, $eventDispatcher] = $untouched ? $this->untouched() : $this->logged();
@@ -113,11 +109,7 @@ final class ChangeArticleImageHandlerTest extends TestCase
         return new ChangeArticleImageHandler($articleRepository, $currentUserProvider, $imageProvider, $authorProvider, $eventDispatcher, $normalizer);
     }
 
-    /**
-     * Collaborators that write what they are asked to in the log.
-     *
-     * @return array{ArticleRepositoryInterface&Stub, ImageProviderInterface, EventDispatcherInterface}
-     */
+    /** @return array{(ArticleRepositoryInterface & Stub), ImageProviderInterface, EventDispatcherInterface} */
     private function logged(): array
     {
         $articleRepository = $this->createStub(ArticleRepositoryInterface::class);
@@ -145,11 +137,7 @@ final class ChangeArticleImageHandlerTest extends TestCase
         return [$articleRepository, $imageProvider, $eventDispatcher];
     }
 
-    /**
-     * Collaborators that must not be asked anything.
-     *
-     * @return array{ArticleRepositoryInterface&MockObject, ImageProviderInterface, EventDispatcherInterface}
-     */
+    /** @return array{(ArticleRepositoryInterface & MockObject), ImageProviderInterface, EventDispatcherInterface} */
     private function untouched(): array
     {
         $articleRepository = $this->createMock(ArticleRepositoryInterface::class);
@@ -182,9 +170,7 @@ final class ChangeArticleImageHandlerTest extends TestCase
         return $article;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);

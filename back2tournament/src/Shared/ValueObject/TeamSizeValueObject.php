@@ -6,9 +6,6 @@ namespace App\Shared\ValueObject;
 
 use App\Shared\Exception\ValidationException;
 
-/**
- * How many players stand on each side of a fight: 1 for a 1v1, 5 for a 5v5.
- */
 final class TeamSizeValueObject
 {
     public const MIN = 1;

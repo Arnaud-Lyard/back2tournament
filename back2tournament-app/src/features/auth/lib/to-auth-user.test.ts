@@ -45,7 +45,6 @@ describe("toAuthUser", () => {
 
     expect(toAuthUser(me([], avatar)).avatar).toBe(avatar)
     expect(toAuthUser(me([], null)).avatar).toBeNull()
-    // An API older than pictures leaves the field out.
     expect(toAuthUser(me()).avatar).toBeNull()
   })
 

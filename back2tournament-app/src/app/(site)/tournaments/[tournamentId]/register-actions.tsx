@@ -19,7 +19,6 @@ export interface RegistrationOption {
 
 interface RegisterActionsProps {
   tournamentId: string
-  /** The caller's profile for a 1v1 tournament, or the teams they lead in its format. */
   options: RegistrationOption[]
 }
 

@@ -14,16 +14,12 @@ const isLocalHost = ["localhost", "127.0.0.1"].includes(
 )
 
 if (isLocalHost) {
-  // The local Symfony dev server uses a self-signed certificate. Only ever
-  // relax TLS verification for localhost/127.0.0.1 — never for a real host.
   console.warn(
     `[generate-api-types] ${schemaUrl} looks like a local dev host — disabling TLS verification for this fetch only.`
   )
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 }
 
-// A file sent as multipart/form-data (`format: binary`) is a Blob, not a
-// string: a File can then go in a typed body, serialized into a form.
 const BLOB = ts.factory.createTypeReferenceNode(
   ts.factory.createIdentifier("Blob")
 )

@@ -44,9 +44,6 @@ final class OnPublicationRequestedEvent extends Event
         return $this->categorySlug;
     }
 
-    /**
-     * The English title, null when the article is written in French only.
-     */
     public function getTitleEn(): ?string
     {
         return $this->titleEn;
@@ -57,9 +54,6 @@ final class OnPublicationRequestedEvent extends Event
         return $this->bodyEn;
     }
 
-    /**
-     * The created article, as the handler serialized it, handed back to the controller.
-     */
     public function getCreatedArticle(): string
     {
         return $this->createdArticle;

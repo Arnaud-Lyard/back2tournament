@@ -6,10 +6,6 @@ namespace App\Competition\Ranking\Application\Model;
 
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 
-/**
- * One page of a game's ranking of player profiles, or of clans, in one of the
- * formats the game is played in: its smallest one when none is asked for.
- */
 final class FindRankingQuery
 {
     private RankingSubject $subjectType;
@@ -51,10 +47,6 @@ final class FindRankingQuery
         return $this->gameId;
     }
 
-    /**
-     * The format, as the number of players per side; null for the smallest
-     * format of the game.
-     */
     public function getTeamSize(): ?int
     {
         return $this->teamSize;

@@ -9,15 +9,8 @@ use App\Media\Image\Domain\Service\ImageCompressorInterface;
 use App\Media\Image\Domain\ValueObject\CompressedImage;
 use App\Shared\ValueObject\UploadedImageValueObject;
 
-/**
- * Compresses with ImageMagick: turned upright, brought to sRGB, resized to its
- * kind, stripped of its metadata (EXIF, GPS…) and encoded as WebP.
- */
 final class ImagickImageCompressor implements ImageCompressorInterface
 {
-    /**
-     * WebP quality: visually close to the original for about a third of a JPEG's weight.
-     */
     private const QUALITY = 82;
 
     public function compress(UploadedImageValueObject $image, ImageKind $kind): CompressedImage
@@ -25,7 +18,6 @@ final class ImagickImageCompressor implements ImageCompressorInterface
         $imagick = new \Imagick();
         $imagick->readImageBlob($image->getContent());
 
-        // An animation keeps its first frame.
         $imagick->setIteratorIndex(0);
         $frame = $imagick->getImage();
         $imagick->clear();
@@ -35,7 +27,6 @@ final class ImagickImageCompressor implements ImageCompressorInterface
 
         $maxSide = $kind->maxSide();
         if ($kind->isSquare()) {
-            // Never enlarged: a small picture makes a small square.
             $side = min($maxSide, $frame->getImageWidth(), $frame->getImageHeight());
             $frame->cropThumbnailImage($side, $side);
             $frame->setImagePage(0, 0, 0, 0);

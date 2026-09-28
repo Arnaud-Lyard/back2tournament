@@ -16,7 +16,6 @@ function FlagFr() {
 }
 
 function FlagGb() {
-  // Two Union Jacks on one page (trigger and menu) need distinct clip ids.
   const clipId = `gb-${useId().replace(/[^\w-]/g, "")}`
 
   return (
@@ -52,10 +51,6 @@ interface LocaleFlagProps {
   className?: string
 }
 
-/**
- * Drawn inline rather than as an emoji: Windows renders flag emojis as two
- * bare letters.
- */
 export function LocaleFlag({ locale, className }: LocaleFlagProps) {
   const Flag = FLAGS[locale]
 

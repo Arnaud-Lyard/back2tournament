@@ -37,7 +37,6 @@ final class CreateArticleHandler
     {
         $title = new ArticleTitleValueObject($createArticleCommand->getTitle());
         $body = new ArticleBodyValueObject($createArticleCommand->getBody());
-        // A blank English field is no English field.
         $titleEn = self::isBlank($createArticleCommand->getTitleEn()) ? null : new ArticleTitleValueObject((string) $createArticleCommand->getTitleEn());
         $bodyEn = self::isBlank($createArticleCommand->getBodyEn()) ? null : new ArticleBodyValueObject((string) $createArticleCommand->getBodyEn());
 
@@ -58,7 +57,6 @@ final class CreateArticleHandler
 
         /** @var array<string, mixed> $normalized */
         $normalized = $this->serializer->normalize($article);
-        // A draft has no author yet.
         $normalized['authorName'] = null;
 
         return json_encode($normalized, JSON_THROW_ON_ERROR);

@@ -1,5 +1,4 @@
 // @vitest-environment node
-// Node's own Request, FormData and File: the ones a route handler receives.
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { MAX_IMAGE_BYTES } from "@/features/images/lib/image-file"
 import { DELETE, POST } from "./route"

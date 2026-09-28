@@ -20,15 +20,10 @@ import { cn } from "@/libs/utils"
 type Shape = "wide" | "square" | "round"
 
 interface ImagePickerProps {
-  /** The route handler that takes the image (POST) and takes it away (DELETE). */
   endpoint: string
-  /** Where the current image is read from; null while there is none. */
   image?: string | null
-  /** What the image illustrates, named in its alternative text and the buttons' labels. */
   name: string
-  /** A 16/9 cover, a square picture or a round avatar. */
   shape?: Shape
-  /** A thumbnail and icon buttons, to fit in a table row. */
   compact?: boolean
 }
 
@@ -38,11 +33,6 @@ const FRAMES: Record<Shape, string> = {
   round: "size-24 rounded-full",
 }
 
-/**
- * Shows an image and changes it on the spot: the chosen file is checked,
- * sent to the API, which resizes and compresses it, then the page reloads to
- * show it wherever it appears.
- */
 export function ImagePicker({
   endpoint,
   image,
@@ -66,7 +56,6 @@ export function ImagePicker({
 
   function onChosen(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
-    // Lets the same file be chosen again, after a refusal for instance.
     event.target.value = ""
     if (!file) return
 

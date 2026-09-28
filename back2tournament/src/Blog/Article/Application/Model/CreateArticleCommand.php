@@ -46,9 +46,6 @@ final class CreateArticleCommand
         $this->category = $category;
     }
 
-    /**
-     * The English title; null or blank when the article is written in French only.
-     */
     public function getTitleEn(): ?string
     {
         return $this->titleEn;

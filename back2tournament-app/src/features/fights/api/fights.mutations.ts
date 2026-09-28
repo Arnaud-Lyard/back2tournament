@@ -29,7 +29,6 @@ export type ChangeFightStatusVariables = ChangeFightStatusInput & {
   fightId: string
 }
 
-/** Admin only: settles a fight in dispute, or sets its declaration aside. */
 export function changeFightStatus({
   fightId,
   ...input

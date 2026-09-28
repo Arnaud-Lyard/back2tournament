@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 const COPIED_FEEDBACK_MS = 2000
 
-/** Copies text and reports `copied` for a moment, to swap the button's icon. */
 export function useCopyToClipboard() {
   const [copied, setCopied] = useState(false)
   const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined)

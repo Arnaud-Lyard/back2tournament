@@ -11,16 +11,10 @@ interface ArticleRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Article>
-     */
+    /** @return list<Article> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
-    /**
-     * One page of articles, newest first. A null status reads drafts and published articles alike.
-     *
-     * @return list<Article>
-     */
+    /** @return list<Article> */
     public function findPage(?string $search, ?string $categoryId, ?ArticleStatus $status, int $limit, int $offset): array;
 
     public function countPage(?string $search, ?string $categoryId, ?ArticleStatus $status): int;

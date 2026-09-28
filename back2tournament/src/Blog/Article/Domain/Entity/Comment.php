@@ -19,9 +19,6 @@ class Comment
 
     private string $articleId;
 
-    /**
-     * The user who wrote the comment. Null for a comment older than this field.
-     */
     private ?string $author = null;
 
     public function __construct(CommentId $commentId)

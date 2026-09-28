@@ -51,7 +51,6 @@ final class UpdateArticleHandler
         $articleId = new ArticleId($updateArticleCommand->getArticleId());
         $title = null === $updateArticleCommand->getTitle() ? null : new ArticleTitleValueObject($updateArticleCommand->getTitle());
         $body = null === $updateArticleCommand->getBody() ? null : new ArticleBodyValueObject($updateArticleCommand->getBody());
-        // The English version: null keeps it, blank removes it.
         $titleEnGiven = $updateArticleCommand->getTitleEn();
         $bodyEnGiven = $updateArticleCommand->getBodyEn();
         $titleEn = self::isBlank($titleEnGiven) ? null : new ArticleTitleValueObject((string) $titleEnGiven);
@@ -74,7 +73,6 @@ final class UpdateArticleHandler
             Article::update($article, $title, $body, $categoryId);
         }
         if ($translates) {
-            // A field left out keeps its English value, so the version stays whole.
             Article::translate(
                 $article,
                 null === $titleEnGiven ? self::englishTitleOf($article) : $titleEn,

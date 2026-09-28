@@ -19,10 +19,8 @@ import { useFieldErrors } from "@/hooks/use-field-errors"
 interface ChallengeActionsProps {
   fightId: string
   stage: ChallengeStage
-  /** What is declared so far, to start a correction from. */
   score: number
   opponentScore: number
-  /** Where players reach an administrator in a dispute, when the site has one. */
   discordUrl?: string
 }
 
@@ -223,7 +221,6 @@ function ConfirmButton({
   )
 }
 
-/** A number input's text as a number, or undefined while it holds none. */
 function toNumber(value: string): number | undefined {
   return value.trim() === "" ? undefined : Number(value)
 }

@@ -12,8 +12,5 @@ interface RatingChangeRepositoryInterface
 
     public function save(RatingChange $ratingChange): void;
 
-    /**
-     * Forgets which fights were counted, before they are counted again.
-     */
     public function removeAll(): void;
 }

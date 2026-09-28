@@ -8,7 +8,6 @@ export type CreatedFight =
 
 export type FightSummary = components["schemas"]["FightSummary"]
 
-/** Which fights the backoffice lists: the disputes are among the `reporting` ones. */
 export type FightStatusFilter = "reporting" | "pending" | "finished" | "all"
 
 export const ADMIN_FIGHTS_PER_PAGE = 20
@@ -21,5 +20,4 @@ export type SettledResult = components["schemas"]["SettledResult"]
 
 export type Outcome = SettledResult["outcome"]
 
-/** How many settled fights a profile or a clan page shows. */
 export const HISTORY_SIZE = 10

@@ -25,7 +25,6 @@ const registration = {
   passwordConfirmation: "Password1!",
 }
 
-/** Registers through the route and returns what it sent to the backend. */
 async function register() {
   backendPost.mockResolvedValue({ data: {}, response: new Response(null) })
 

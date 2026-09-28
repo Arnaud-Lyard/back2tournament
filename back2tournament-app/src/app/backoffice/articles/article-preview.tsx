@@ -25,14 +25,11 @@ import { ArticleStatusButton } from "./article-status-button"
 interface ArticlePreviewProps {
   articleId: string
   categories: Category[]
-  /** Where the "Edit" button leads; none when the caller may not edit. */
   editHref?: string
   canPublish: boolean
-  /** Whether the caller may change the cover, right on the preview. */
   canIllustrate: boolean
 }
 
-/** Server Component: reads one article, then its comments, straight from the API. */
 export async function ArticlePreview({
   articleId,
   categories,

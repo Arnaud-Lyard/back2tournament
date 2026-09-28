@@ -13,7 +13,6 @@ import { SiteBrand } from "./site-brand"
 import { UserMenu } from "./user-menu"
 
 interface SiteHeaderProps {
-  /** Spans the full width (backoffice shell) instead of the page container. */
   fluid?: boolean
 }
 

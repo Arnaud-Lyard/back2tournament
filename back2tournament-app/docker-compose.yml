@@ -1,6 +1,3 @@
-# Local container-parity testing only. Coolify builds and runs the image
-# directly from the Dockerfile — this compose file is not the deployment
-# mechanism.
 services:
   app:
     build:

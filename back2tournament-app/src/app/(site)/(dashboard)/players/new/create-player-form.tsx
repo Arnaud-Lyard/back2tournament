@@ -45,7 +45,6 @@ export function CreatePlayerForm({
   const { playerFor } = useAuth()
   const describeError = useApiErrorMessage()
   const createPlayer = useCreatePlayer()
-  // A game the caller already holds a profile in is never preselected.
   const [game, setGame] = useState(
     defaultGameId && !playerFor(defaultGameId) ? defaultGameId : ""
   )
@@ -65,7 +64,6 @@ export function CreatePlayerForm({
       onSuccess: (created) => {
         toast.add({ type: "success", title: t("success") })
         setPlayer(created)
-        // Reloads the caller's profiles, so this game now reads as taken.
         router.refresh()
       },
       onError: (error) => {

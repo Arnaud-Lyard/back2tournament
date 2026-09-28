@@ -59,7 +59,6 @@ final class FindRankingHandlerTest extends TestCase
             ],
             $page['items'][0],
         );
-        // Alice leads a clan, Bob is in none.
         $this->assertSame([2, 'Bob#0002', null], [$page['items'][1]['rank'], $page['items'][1]['subject']['name'], $page['items'][1]['subject']['tag']]);
         $this->assertSame([2, 1, 20, 1], [$page['total'], $page['page'], $page['limit'], $page['pages']]);
     }
@@ -107,7 +106,6 @@ final class FindRankingHandlerTest extends TestCase
 
     public function test_a_later_page_ranks_from_where_the_ranking_stands(): void
     {
-        // The second page of two entries: its first one ties with the last of page one.
         $page = $this->read($this->handler(
             [$this->rating(self::CAROL, wins: 1), $this->rating(self::DAVE, losses: 1)],
             above: [1016 => 1, 984 => 3],
@@ -150,10 +148,10 @@ final class FindRankingHandlerTest extends TestCase
     }
 
     /**
-     * @param list<Rating>                                   $ratings  the page, highest first
-     * @param array<int, int>|null                           $above    how many rate higher than each value; computed from $ratings when null
-     * @param list<int>                                      $formats  the formats the game is played in
-     * @param list<array{RankingSubject, string, int}>|null $rankings filled with each ranking read: who, in which game and format
+     * @param list<Rating> $ratings
+     * @param (array<int, int> | null) $above
+     * @param list<int> $formats
+     * @param (list<array{RankingSubject, string, int}> | null) $rankings
      *
      * @param-out list<array{RankingSubject, string, int}> $rankings
      */
@@ -193,10 +191,6 @@ final class FindRankingHandlerTest extends TestCase
         );
     }
 
-    /**
-     * A rating made by $wins wins, then $losses losses, each against a newcomer
-     * at 1000: one win makes 1016, two 1031; one loss 984, two 969.
-     */
     private function rating(string $subject, RankingSubject $subjectType = RankingSubject::PLAYER, int $wins = 0, int $losses = 0, int $teamSize = 1): Rating
     {
         $rating = Rating::start(new RatingId(Uuid::v4()->toString()), $subjectType, $subject, new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
@@ -215,9 +209,7 @@ final class FindRankingHandlerTest extends TestCase
         return $rating;
     }
 
-    /**
-     * @return array{teamSize: int, items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int}
-     */
+    /** @return array{teamSize: int, items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int} */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);

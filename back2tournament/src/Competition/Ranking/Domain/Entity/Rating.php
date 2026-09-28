@@ -13,20 +13,10 @@ use App\Competition\Ranking\Domain\Event\RatingUpdatedEvent;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\ValueObject\TeamSizeValueObject;
 
-/**
- * The Elo rating of a player profile or a clan in one game and one format
- * (1v1, 2v2…), and the record of the settled fights that made it.
- */
 class Rating extends AggregateRoot
 {
-    /**
-     * Where every player profile and every clan starts.
-     */
     public const INITIAL = 1000;
 
-    /**
-     * The most a single fight can move a rating by.
-     */
     public const K_FACTOR = 32;
 
     private string $id;
@@ -37,9 +27,6 @@ class Rating extends AggregateRoot
 
     private string $game;
 
-    /**
-     * The format this rating is about, as the number of players per side.
-     */
     private int $teamSize;
 
     private int $value = self::INITIAL;
@@ -71,9 +58,6 @@ class Rating extends AggregateRoot
         return $this->subjectType;
     }
 
-    /**
-     * The id of the player profile or of the clan.
-     */
     public function getSubject(): string
     {
         return $this->subject;
@@ -124,11 +108,6 @@ class Rating extends AggregateRoot
         return $this->updatedAt;
     }
 
-    /**
-     * A player profile or a clan enters the ranking of its game in a format on
-     * its first settled fight in that format, at the initial rating. Each
-     * format is a ranking of its own.
-     */
     public static function start(RatingId $ratingId, RankingSubject $subjectType, string $subject, GameId $gameId, TeamSizeValueObject $teamSize): self
     {
         $rating = new self($ratingId);
@@ -145,18 +124,11 @@ class Rating extends AggregateRoot
     }
 
     /**
-     * A settled fight between two sides: a clan per side, or the player
-     * profiles of each side, one per player. A side rates as the average of
-     * its ratings, and every rating of a side moves by what the fight was
-     * worth to that average: the winners take what the win was worth, more
-     * when it was not expected, less when it was, and a draw lifts the lower
-     * side. Both sides move by the same points, in opposite directions.
+     * @param list<Rating> $sideOne
+     * @param list<Rating> $sideTwo
+     * @param list<RatingChangeId> $changeIds
      *
-     * @param list<Rating>         $sideOne
-     * @param list<Rating>         $sideTwo
-     * @param list<RatingChangeId> $changeIds one per rating, side one's first
-     *
-     * @return list<RatingChange> the change of each rating, in the order of $changeIds
+     * @return list<RatingChange>
      */
     public static function settle(array $sideOne, array $sideTwo, FightOutcome $outcome, FightId $fightId, array $changeIds): array
     {
@@ -197,11 +169,6 @@ class Rating extends AggregateRoot
         return $changes;
     }
 
-    /**
-     * What a fight is worth to a rating: K times the gap between the score it
-     * made (1 for a win, 0.5 for a draw, 0 for a loss) and the score it was
-     * expected to make against that opponent.
-     */
     public static function points(float $rating, float $opponentRating, float $score): int
     {
         $expected = 1 / (1 + 10 ** (($opponentRating - $rating) / 400));
@@ -209,9 +176,7 @@ class Rating extends AggregateRoot
         return (int) round(self::K_FACTOR * ($score - $expected));
     }
 
-    /**
-     * @param list<Rating> $side
-     */
+    /** @param list<Rating> $side */
     private static function average(array $side): float
     {
         return array_sum(array_map(static fn (Rating $rating): int => $rating->value, $side)) / \count($side);

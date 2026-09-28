@@ -16,9 +16,6 @@ final class ImageProvider implements ImageProviderInterface
     private ImageStorageInterface $imageStorage;
     private string $publicUrl;
 
-    /**
-     * @param string $publicUrl where the stored images are served from, the key appended
-     */
     public function __construct(
         ImageCompressorInterface $imageCompressor,
         ImageStorageInterface $imageStorage,
@@ -33,7 +30,6 @@ final class ImageProvider implements ImageProviderInterface
     {
         $compressed = $this->imageCompressor->compress($image, $kind);
 
-        // A new key for every image: none is ever overwritten.
         $key = \sprintf('%s/%s.%s', $kind->value, Uuid::v4()->toRfc4122(), $compressed->getExtension());
         $this->imageStorage->put($key, $compressed->getContent(), $compressed->getType());
 

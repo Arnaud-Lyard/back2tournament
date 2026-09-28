@@ -13,7 +13,6 @@ interface ArticlesQuery {
   search?: string
   category?: string
   limit?: number
-  /** The public blog by default; the drafts are for the editors. */
   status?: ArticleStatusFilter
 }
 

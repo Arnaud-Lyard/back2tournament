@@ -68,9 +68,7 @@ final class FindTournamentsHandler
     }
 
     /**
-     * A tournament as the list shows it; a winner is named by battletag or team name.
-     *
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the winners, keyed by competitor id
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */

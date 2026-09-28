@@ -10,7 +10,6 @@ import { useChangeArticleStatus } from "@/features/blog/hooks/use-change-article
 import type { ArticleStatus } from "@/features/blog/types"
 import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 
-/** Publishes a draft, the caller becoming its author, or takes an article back to draft. */
 export function ArticleStatusButton({
   articleId,
   status,

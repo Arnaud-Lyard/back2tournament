@@ -83,7 +83,6 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
   const status = data.status ?? "upcoming"
   const isOrganizer = !!user?.id && user.id === data.organizer?.value
 
-  // What the caller may register: their profile in 1v1, the teams they lead otherwise.
   const mine = await registrationOptions(data, user)
   const registeredIds = new Set(
     participants.map((participant) => participant.reference?.value)
@@ -251,7 +250,6 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
   )
 }
 
-/** The caller's profile in the game for 1v1, or the teams they lead in the tournament's format. */
 async function registrationOptions(
   tournament: TournamentDetail,
   user: AuthUser | null

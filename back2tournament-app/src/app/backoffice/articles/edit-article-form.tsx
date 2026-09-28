@@ -37,11 +37,9 @@ interface EditArticleFormProps {
   articleId: string
   article: ArticleSummary
   categories: Category[]
-  /** Where the form leaves to, saved or cancelled: the article's preview. */
   previewHref: string
 }
 
-/** Changes the title, the category or the body; the status and the author stay as they are. */
 export function EditArticleForm({
   articleId,
   article,
@@ -60,7 +58,6 @@ export function EditArticleForm({
   const [body, setBody] = useState(article.body ?? "")
   const [titleEn, setTitleEn] = useState(article.titleEn ?? "")
   const [bodyEn, setBodyEn] = useState(article.bodyEn ?? "")
-  // Both English fields emptied remove the English version.
   const parsed = updateArticleSchema.safeParse({
     title,
     categorySlug,

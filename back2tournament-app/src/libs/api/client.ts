@@ -6,12 +6,6 @@ import { env } from "@/libs/env"
 import { AUTH_COOKIE_NAME } from "@/features/auth/lib/cookie"
 import type { paths } from "./schema"
 
-/**
- * Typed fetch client for the Symfony backend. Server Components/Route
- * Handlers call this directly (see getServerApiClient) — Client Components
- * never call this, they go through same-origin Route Handlers instead, so
- * the JWT (held only in the httpOnly cookie) never needs to reach the browser.
- */
 export function createApiClient(bearerToken?: string) {
   const client = createClient<paths>({ baseUrl: env.SYMFONY_API_URL })
 

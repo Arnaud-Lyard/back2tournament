@@ -11,9 +11,7 @@ interface TournamentRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Tournament> soonest first, filtered by game and status when they are given
-     */
+    /** @return list<Tournament> */
     public function findPage(?string $gameId, ?TournamentStatus $status, int $limit, int $offset): array;
 
     public function countPage(?string $gameId, ?TournamentStatus $status): int;

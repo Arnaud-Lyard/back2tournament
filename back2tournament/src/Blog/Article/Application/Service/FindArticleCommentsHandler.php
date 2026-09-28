@@ -44,7 +44,6 @@ final class FindArticleCommentsHandler
         $articleId = $findArticleCommentsQuery->getArticleId();
 
         $article = $this->articleRepository->findOneBy(['id' => $articleId]);
-        // A draft exists for the editors only.
         if (!$article instanceof Article
             || (ArticleStatus::PUBLISHED !== $article->getStatus() && !$this->currentUserProvider->isGranted('ROLE_EDITOR'))) {
             throw new NotFoundException('article not found');

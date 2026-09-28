@@ -16,9 +16,6 @@ final class Version20260927160000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // A rating made of every format cannot be split: the rankings start
-        // empty, and `bin/console app:rankings:rebuild` counts the settled
-        // fights again, each in the ranking of its format.
         $this->addSql('DELETE FROM rating_change');
         $this->addSql('DELETE FROM rating');
         $this->addSql('DROP INDEX idx_rating_ranking');

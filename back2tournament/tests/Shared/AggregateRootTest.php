@@ -12,8 +12,6 @@ final class AggregateRootTest extends TestCase
 {
     public function test_an_aggregate_that_recorded_nothing_pulls_no_event(): void
     {
-        // Doctrine hydrates aggregates without their constructor: nothing may
-        // depend on a constructor having prepared the event list.
         $aggregate = new class extends AggregateRoot {
         };
 

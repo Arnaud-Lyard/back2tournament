@@ -25,7 +25,6 @@ export async function POST(request: Request) {
   }
 
   if (!result.response.ok) {
-    // An unverified account also answers 401: its code tells them apart.
     const apiError = toApiError(result.response.status, result.error)
     return NextResponse.json(
       { message: apiError.message, code: apiError.code },

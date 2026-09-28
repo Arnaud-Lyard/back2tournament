@@ -9,7 +9,6 @@ export const createTournamentSchema = z.object({
     .int(message("invalidCapacity"))
     .min(2, message("invalidCapacity"))
     .max(128, message("invalidCapacity")),
-  /** An ISO 8601 date-time with its offset, in the future. */
   startsAt: z.iso
     .datetime({ offset: true, message: message("invalidDate") })
     .refine(

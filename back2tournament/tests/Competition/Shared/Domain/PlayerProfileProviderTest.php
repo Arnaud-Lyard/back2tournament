@@ -55,9 +55,7 @@ final class PlayerProfileProviderTest extends TestCase
         $this->assertSame([], $provider->byUser(self::USER_ID));
     }
 
-    /**
-     * @param list<Player> $players
-     */
+    /** @param list<Player> $players */
     private function playerRepository(array $players): PlayerRepositoryInterface
     {
         $playerRepository = $this->createStub(PlayerRepositoryInterface::class);

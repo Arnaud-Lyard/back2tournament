@@ -87,9 +87,7 @@ final class CreateArticleHandlerTest extends TestCase
         return new CreateArticleHandler($articleRepository, $this->createStub(EventDispatcherInterface::class), $normalizer);
     }
 
-    /**
-     * @param callable(CreateArticleCommand): CreateArticleCommand $prepare
-     */
+    /** @param callable(CreateArticleCommand): CreateArticleCommand $prepare */
     private function saved(callable $prepare): Article
     {
         $saved = null;

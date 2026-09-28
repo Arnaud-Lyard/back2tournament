@@ -95,9 +95,7 @@ final class GameTest extends TestCase
         yield 'too many' => [65];
     }
 
-    /**
-     * @return list<TeamSizeValueObject>
-     */
+    /** @return list<TeamSizeValueObject> */
     private function sizes(int ...$sizes): array
     {
         return array_map(static fn (int $size): TeamSizeValueObject => new TeamSizeValueObject($size), $sizes);

@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 
 final class ImageProviderTest extends TestCase
 {
-    /** A 32 x 24 PNG. */
     private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAYCAIAAAAUMWhjAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAJklEQVRIiWM8oaHBQEvARFPTRy0YtWDUglELRi0YtWDUglELqAYA1J4BSIDvLE0AAAAASUVORK5CYII=';
 
     public function test_an_image_is_compressed_for_its_kind_and_stored_under_a_key_of_its_own(): void

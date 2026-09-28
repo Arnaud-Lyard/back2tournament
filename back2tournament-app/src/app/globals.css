@@ -118,7 +118,6 @@
 
 @layer base {
   :root {
-    /* Sticky site header; the backoffice sidebar starts below it. */
     --header-height: calc(var(--spacing) * 14);
   }
   * {

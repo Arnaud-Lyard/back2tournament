@@ -57,9 +57,6 @@ final class OnPublicationRequestedUserVerifiedEvent extends Event
         return $this->bodyEn;
     }
 
-    /**
-     * The created article, as the handler serialized it, handed back to the controller.
-     */
     public function getCreatedArticle(): string
     {
         return $this->createdArticle;

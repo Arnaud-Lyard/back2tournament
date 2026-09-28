@@ -11,9 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Result>
- */
+/** @extends ServiceEntityRepository<Result> */
 final class ResultRepository extends ServiceEntityRepository implements ResultRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -50,7 +48,6 @@ final class ResultRepository extends ServiceEntityRepository implements ResultRe
     {
         $settled = [ResultStatus::WIN, ResultStatus::LOSS, ResultStatus::DRAW];
 
-        // The other side of the same fight played for a clan, and not this one.
         return $this->createQueryBuilder('result')
             ->andWhere('result.clan = :clan')
             ->andWhere('result.status IN (:settled)')

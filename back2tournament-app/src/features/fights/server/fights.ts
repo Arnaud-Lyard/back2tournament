@@ -20,7 +20,6 @@ export async function loadChallenges({
   )
 }
 
-/** Admin only: one page of every fight, by status and by the name of a side. */
 export async function loadFights({
   status,
   search = "",
@@ -45,7 +44,6 @@ export async function loadFights({
   )
 }
 
-/** One fight and both its sides. */
 export async function loadFight(fightId: string) {
   const client = await getServerApiClient()
   return loadApiResult(

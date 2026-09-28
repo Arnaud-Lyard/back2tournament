@@ -19,9 +19,6 @@ final class Version20260927170000 extends AbstractMigration
         $this->addSql('ALTER TABLE result ADD clan UUID DEFAULT NULL');
         $this->addSql('CREATE INDEX idx_result_clan ON result (clan)');
 
-        // The fights opened before: a team played for its clan, which never
-        // changes. A player profile is taken to have played for the clan it
-        // is an active member of today, the only one known.
         $this->addSql(<<<'SQL'
             UPDATE result SET clan = team.clan
             FROM competitor, team

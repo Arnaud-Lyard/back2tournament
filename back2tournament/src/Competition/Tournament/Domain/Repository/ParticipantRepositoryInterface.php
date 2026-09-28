@@ -10,9 +10,7 @@ interface ParticipantRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Participant>
-     */
+    /** @return list<Participant> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
     public function count(array $criteria = []): int;
@@ -20,7 +18,7 @@ interface ParticipantRepositoryInterface
     /**
      * @param list<string> $tournamentIds
      *
-     * @return array<string, int> how many participants each tournament counts, keyed by tournament id
+     * @return array<string, int>
      */
     public function countByTournament(array $tournamentIds): array;
 

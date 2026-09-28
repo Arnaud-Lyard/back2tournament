@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\Media\Image\Domain\ValueObject;
 
-/**
- * An image ready to be stored: resized, stripped of its metadata and encoded
- * for the web.
- */
 final class CompressedImage
 {
     private string $content;
@@ -34,17 +30,11 @@ final class CompressedImage
         return $this->content;
     }
 
-    /**
-     * The MIME type it is encoded in.
-     */
     public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * The file extension that goes with its type.
-     */
     public function getExtension(): string
     {
         return $this->extension;

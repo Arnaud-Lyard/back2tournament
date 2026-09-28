@@ -21,7 +21,6 @@ interface GameFormatsEditorProps {
   teamSizes: number[]
 }
 
-/** The formats of a game, as badges; an admin edits them in place. */
 export function GameFormatsEditor({
   gameId,
   title,

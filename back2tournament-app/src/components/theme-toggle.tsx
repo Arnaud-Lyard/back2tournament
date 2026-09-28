@@ -11,11 +11,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-/**
- * Switches between the light and dark themes. The icon follows the `.dark`
- * class next-themes sets before hydration, so the server markup never has to
- * guess the theme.
- */
 export function ThemeToggle() {
   const t = useTranslations("theme")
   const { resolvedTheme, setTheme } = useTheme()

@@ -6,9 +6,6 @@ namespace App\Shared\ValueObject;
 
 use App\Shared\Exception\ValidationException;
 
-/**
- * The name of a clan, trimmed.
- */
 final class ClanNameValueObject
 {
     private const MAX_LENGTH = 50;

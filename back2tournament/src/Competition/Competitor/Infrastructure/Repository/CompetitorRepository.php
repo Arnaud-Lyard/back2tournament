@@ -9,9 +9,7 @@ use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Competitor>
- */
+/** @extends ServiceEntityRepository<Competitor> */
 final class CompetitorRepository extends ServiceEntityRepository implements CompetitorRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

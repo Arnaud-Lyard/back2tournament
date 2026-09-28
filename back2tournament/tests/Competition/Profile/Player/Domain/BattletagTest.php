@@ -11,9 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 final class BattletagTest extends TestCase
 {
-    /**
-     * @return iterable<string, array{string}>
-     */
+    /** @return iterable<string, array{string}> */
     public static function acceptedBattletags(): iterable
     {
         yield 'the usual shape' => ['PlayerOne#1234'];
@@ -27,9 +25,7 @@ final class BattletagTest extends TestCase
         self::assertSame($battletag, new Battletag($battletag)->getValue());
     }
 
-    /**
-     * @return iterable<string, array{string}>
-     */
+    /** @return iterable<string, array{string}> */
     public static function emptyBattletags(): iterable
     {
         yield 'nothing at all' => [''];

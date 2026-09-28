@@ -356,10 +356,6 @@ final class TournamentHandlersTest extends TestCase
         return $participant;
     }
 
-    /**
-     * Competitor ids in these tests read "competitor-of-<reference>"; they are
-     * mapped to stable UUIDs so that value objects accept them.
-     */
     private static function uuidFor(string $name): string
     {
         $hash = md5($name);
@@ -367,9 +363,7 @@ final class TournamentHandlersTest extends TestCase
         return \sprintf('%s-%s-4%s-8%s-%s', substr($hash, 0, 8), substr($hash, 8, 4), substr($hash, 13, 3), substr($hash, 17, 3), substr($hash, 20, 12));
     }
 
-    /**
-     * @return list<MatchupId>
-     */
+    /** @return list<MatchupId> */
     private function ids(int $count): array
     {
         return array_map(static fn (): MatchupId => new MatchupId(Uuid::v4()->toString()), range(1, $count));
@@ -454,9 +448,7 @@ final class TournamentHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<Participant> $participants
-     */
+    /** @param list<Participant> $participants */
     private function startHandler(
         Tournament $tournament,
         array $participants,
@@ -475,9 +467,7 @@ final class TournamentHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<Matchup> $bracket
-     */
+    /** @param list<Matchup> $bracket */
     private function advanceHandler(Tournament $tournament, array $bracket, FightSchedulerProviderInterface $scheduler): AdvanceTournamentHandler
     {
         return new AdvanceTournamentHandler(

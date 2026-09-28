@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Competition\Fight\Application\Model;
 
-/**
- * The settled results of a player profile, or of a clan's teams, newest first.
- */
 final class FindResultHistoryQuery
 {
     private ?string $playerId;

@@ -93,7 +93,6 @@ final class ArticleTest extends TestCase
         $this->assertSame('New title', $article->getTitle());
         $this->assertSame('Body', $article->getBody());
         $this->assertSame(self::OTHER_CATEGORY_ID, $article->getCategory()->getValue());
-        // Editing does not change who published it.
         $this->assertSame(ArticleStatus::PUBLISHED, $article->getStatus());
         $this->assertSame(self::PUBLISHER_ID, $article->getAuthor()?->getValue());
         $this->assertInstanceOf(ArticleUpdatedEvent::class, $article->pullDomainEvents()[0]);

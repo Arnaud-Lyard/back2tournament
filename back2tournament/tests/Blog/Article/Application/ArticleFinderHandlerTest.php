@@ -77,9 +77,7 @@ final class ArticleFinderHandlerTest extends TestCase
         $this->handler(null, editor: true)(new FindArticleQuery(self::ARTICLE_ID));
     }
 
-    /**
-     * @param list<Comment> $comments
-     */
+    /** @param list<Comment> $comments */
     private function handler(?Article $article, array $comments = [], bool $editor = false): ArticleFinderHandler
     {
         $articleRepository = $this->createStub(ArticleRepositoryInterface::class);
@@ -103,9 +101,7 @@ final class ArticleFinderHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(ArticleFinderHandler $handler): array
     {
         return json_decode($handler(new FindArticleQuery(self::ARTICLE_ID)), true, 512, JSON_THROW_ON_ERROR);

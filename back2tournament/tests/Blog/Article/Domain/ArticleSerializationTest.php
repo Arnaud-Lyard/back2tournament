@@ -84,9 +84,6 @@ final class ArticleSerializationTest extends KernelTestCase
         );
     }
 
-    /**
-     * Published by the user of AUTHOR_ID, who thereby becomes its author.
-     */
     private function article(): Article
     {
         $article = $this->draft();

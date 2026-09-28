@@ -2,7 +2,6 @@ import * as React from "react"
 import { ChevronDownIcon } from "lucide-react"
 import { cn } from "@/libs/utils"
 
-/** A native `<select>`, styled like Input: keyboard, mobile and autofill for free. */
 function NativeSelect({ className, ...props }: React.ComponentProps<"select">) {
   return (
     <div

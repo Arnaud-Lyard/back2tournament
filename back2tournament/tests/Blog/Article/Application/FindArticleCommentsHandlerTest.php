@@ -107,9 +107,7 @@ final class FindArticleCommentsHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @param list<Comment> $comments
-     */
+    /** @param list<Comment> $comments */
     private function commentRepository(array $comments): CommentRepositoryInterface
     {
         $commentRepository = $this->createStub(CommentRepositoryInterface::class);

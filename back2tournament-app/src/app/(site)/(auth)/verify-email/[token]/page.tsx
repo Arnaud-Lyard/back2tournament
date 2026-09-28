@@ -17,11 +17,6 @@ interface VerifyEmailPageProps {
   params: Promise<{ token: string }>
 }
 
-/**
- * Reached by a full-page navigation from the verification email link — not a
- * client-triggered fetch, and it doesn't touch the auth cookie, so this calls
- * the API client directly rather than going through a Route Handler.
- */
 export default async function VerifyEmailPage({
   params,
 }: VerifyEmailPageProps) {

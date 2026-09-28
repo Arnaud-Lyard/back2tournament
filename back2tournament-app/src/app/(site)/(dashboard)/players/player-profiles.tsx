@@ -47,11 +47,6 @@ interface Profile {
   battletag: string
 }
 
-/**
- * The caller's player profiles, renamed or deleted in place. They are read
- * from the session rather than fetched: GET /api/users/me already carries
- * them, and `router.refresh()` is what brings the list back up to date.
- */
 export function PlayerProfiles({ games }: { games: Game[] }) {
   const t = useTranslations("players.profiles")
   const tCommon = useTranslations("common")
@@ -102,7 +97,6 @@ export function PlayerProfiles({ games }: { games: Game[] }) {
             }),
           })
           stopEditing()
-          // Reloads the session, so the list shows the new battletag.
           router.refresh()
         },
         onError: (error) => {
@@ -282,10 +276,6 @@ export function PlayerProfiles({ games }: { games: Game[] }) {
   )
 }
 
-/**
- * The session's profiles as rows, by game title. A profile whose game is not
- * in the list keeps its game id, so it can still be managed.
- */
 function toProfiles(
   playersByGame:
     | Record<string, { id: string; battletag: string } | undefined>

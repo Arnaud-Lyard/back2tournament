@@ -46,7 +46,6 @@ final class CreateCommentHandler
         $user = $this->currentUserProvider->getUser();
 
         $article = $this->articleRepository->findOneBy(['id' => $createCommentCommand->getArticleId()]);
-        // A draft exists for the editors only.
         if (!$article instanceof Article
             || (ArticleStatus::PUBLISHED !== $article->getStatus() && !$this->currentUserProvider->isGranted('ROLE_EDITOR'))) {
             throw new NotFoundException('article not found');

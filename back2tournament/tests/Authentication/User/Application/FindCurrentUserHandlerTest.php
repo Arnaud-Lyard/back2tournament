@@ -70,9 +70,7 @@ final class FindCurrentUserHandlerTest extends TestCase
         return $currentUserProvider;
     }
 
-    /**
-     * @param list<array{id: string, battletag: string, game: string}> $profiles
-     */
+    /** @param list<array{id: string, battletag: string, game: string}> $profiles */
     private function playerProfileProvider(array $profiles): PlayerProfileProviderInterface
     {
         $playerProfileProvider = $this->createStub(PlayerProfileProviderInterface::class);

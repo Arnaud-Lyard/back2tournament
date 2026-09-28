@@ -19,10 +19,6 @@ use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\TeamSizeValueObject;
 
-/**
- * Two competitors, of the same game and format, and the outcome they agree on:
- * one side declares the scores, the other confirms them.
- */
 class Fight extends AggregateRoot
 {
     private string $id;
@@ -39,9 +35,6 @@ class Fight extends AggregateRoot
 
     private ?string $declaredBy = null;
 
-    /**
-     * An administrator settled the fight, after a dispute between its sides.
-     */
     private bool $arbitrated = false;
 
     private \DateTimeImmutable $createdAt;
@@ -136,9 +129,6 @@ class Fight extends AggregateRoot
         return $this;
     }
 
-    /**
-     * The other side of the fight, or null when $side is not one of its two.
-     */
     public function opponentOf(CompetitorId $side): ?CompetitorId
     {
         return match ($side->getValue()) {
@@ -148,12 +138,7 @@ class Fight extends AggregateRoot
         };
     }
 
-    /**
-     * The side of this fight among the competitors someone speaks for, or null
-     * when they speak for neither.
-     *
-     * @param list<string> $competitorIds
-     */
+    /** @param list<string> $competitorIds */
     public function sideAmong(array $competitorIds): ?CompetitorId
     {
         $sides = array_values(array_intersect([$this->competitorOne, $this->competitorTwo], $competitorIds));
@@ -191,10 +176,6 @@ class Fight extends AggregateRoot
         return $fight;
     }
 
-    /**
-     * The pending result of one side, which records the clan the side plays
-     * for as the fight opens; null for a profile in no clan.
-     */
     public static function createResult(
         Fight $fight,
         ResultId $resultId,
@@ -249,12 +230,6 @@ class Fight extends AggregateRoot
         return $result;
     }
 
-    /**
-     * One side declares the scores of both. The outcome follows from them:
-     * the higher score wins, equal scores draw. Until the other side confirms,
-     * the declaring side may correct its declaration; the other side may not
-     * overwrite it.
-     */
     public static function declareOutcome(
         Fight $fight,
         CompetitorId $declaringSide,
@@ -293,10 +268,6 @@ class Fight extends AggregateRoot
         $fight->setUpdatedAt(new \DateTimeImmutable('now'));
     }
 
-    /**
-     * The side that did not declare agrees: both results settle on the
-     * outcome that was declared.
-     */
     public static function confirmOutcome(
         Fight $fight,
         CompetitorId $confirmingSide,
@@ -341,12 +312,6 @@ class Fight extends AggregateRoot
         $fight->recordDomainEvent(new FightSettledEvent($fight->getId(), $winner, $fight->getTournament()));
     }
 
-    /**
-     * An administrator settles a fight its sides disagree on: the scores they
-     * impose stand, whatever was declared, and the fight is settled as if
-     * confirmed. `$resultOne` is the result of the first side, `$resultTwo`
-     * of the second.
-     */
     public static function arbitrate(
         Fight $fight,
         Result $resultOne,
@@ -384,10 +349,6 @@ class Fight extends AggregateRoot
         $fight->recordDomainEvent(new FightSettledEvent($fight->getId(), $winner, $fight->getTournament()));
     }
 
-    /**
-     * An administrator sets aside a declaration in dispute: both sides are
-     * back to pending, and one of them declares again.
-     */
     public static function reopen(Fight $fight, Result $resultOne, Result $resultTwo): void
     {
         self::ensureResultOf($fight, $resultOne, $fight->getCompetitorOne());

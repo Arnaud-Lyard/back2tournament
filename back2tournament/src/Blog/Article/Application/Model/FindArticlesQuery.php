@@ -16,9 +16,6 @@ final class FindArticlesQuery
 
     private string $status;
 
-    /**
-     * @param string $status `published` by default; `draft` or `all` for an editor
-     */
     public function __construct(int $page, int $limit, ?string $search = null, ?string $categorySlug = null, string $status = '')
     {
         $this->page = max(1, $page);

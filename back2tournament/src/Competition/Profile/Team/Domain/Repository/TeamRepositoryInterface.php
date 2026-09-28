@@ -10,17 +10,10 @@ interface TeamRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Team>
-     */
+    /** @return list<Team> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
-    /**
-     * The teams whose name holds $search, in one game or in all of them;
-     * $limit at most.
-     *
-     * @return list<Team>
-     */
+    /** @return list<Team> */
     public function findNamed(string $search, ?string $gameId, int $limit): array;
 
     public function save(Team $team): void;

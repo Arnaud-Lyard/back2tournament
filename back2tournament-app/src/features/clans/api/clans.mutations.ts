@@ -26,7 +26,6 @@ export function invitePlayer({
   )
 }
 
-/** Accepts the invitation the caller's profile holds in this clan. */
 export function joinClan(clanId: string): Promise<ClanMember> {
   return fetchJson<ClanMember>(
     `/api/clans/${encodeURIComponent(clanId)}/members`,
@@ -34,7 +33,6 @@ export function joinClan(clanId: string): Promise<ClanMember> {
   )
 }
 
-/** Leaving, declining, withdrawing an invitation or letting a member go. */
 export function removeMember({
   clanId,
   playerId,

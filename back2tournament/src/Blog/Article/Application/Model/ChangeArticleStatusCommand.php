@@ -10,9 +10,6 @@ final class ChangeArticleStatusCommand
 
     private string $status;
 
-    /**
-     * @param string $status `published` to publish the article, `draft` to take it back
-     */
     public function __construct(string $articleId, string $status)
     {
         $this->articleId = $articleId;
