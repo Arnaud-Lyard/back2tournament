@@ -22,6 +22,7 @@ function userWithProfile(gameId: string): AuthUser {
     role: "user",
     permissions: [],
     verified: true,
+    avatar: null,
     playersByGame: {
       [gameId]: { id: MY_PLAYER_ID, battletag: "Alpha#1234" },
     },

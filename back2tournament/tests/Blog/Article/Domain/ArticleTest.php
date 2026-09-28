@@ -156,6 +156,21 @@ final class ArticleTest extends TestCase
         $this->assertSame([null, null], [$article->getTitleEn(), $article->getBodyEn()]);
     }
 
+    public function test_an_article_is_given_a_cover_and_loses_it_and_both_are_announced(): void
+    {
+        $article = $this->published();
+        $article->pullDomainEvents();
+        $this->assertNull($article->getImage());
+
+        Article::illustrate($article, 'articles/cover.webp');
+        $this->assertSame('articles/cover.webp', $article->getImage());
+        $this->assertInstanceOf(ArticleUpdatedEvent::class, $article->pullDomainEvents()[0]);
+
+        Article::illustrate($article, null);
+        $this->assertNull($article->getImage());
+        $this->assertInstanceOf(ArticleUpdatedEvent::class, $article->pullDomainEvents()[0]);
+    }
+
     public function test_a_translation_without_a_body_is_refused(): void
     {
         $article = $this->published();

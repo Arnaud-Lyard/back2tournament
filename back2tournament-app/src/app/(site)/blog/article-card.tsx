@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { getFormatter, getLocale, getTranslations } from "next-intl/server"
-import { MediaPlaceholder } from "@/components/media-placeholder"
+import { StoredImage } from "@/components/stored-image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import { toExcerpt } from "@/features/blog/lib/excerpt"
@@ -36,7 +36,7 @@ export async function ArticleCard({ article, categories }: ArticleCardProps) {
           href={`/blog/${encodeURIComponent(id)}`}
           className="flex h-full flex-col rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <MediaPlaceholder />
+          <StoredImage src={article.image} />
           <div className="flex flex-1 flex-col gap-2 p-4">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {category && <Badge variant="secondary">{category.name}</Badge>}

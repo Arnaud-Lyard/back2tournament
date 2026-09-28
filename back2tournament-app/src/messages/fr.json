@@ -18,13 +18,14 @@
     "logout": "Déconnexion",
     "register": "S'inscrire",
     "playerProfile": "Profil joueur",
+    "account": "Mon compte",
     "backoffice": "Backoffice",
     "mainLabel": "Navigation principale",
     "openMenu": "Ouvrir le menu",
     "menuDescription": "Accédez aux différentes sections de la plateforme.",
     "accountMenu": "Menu du compte {username}",
     "blog": "Blog",
-    "challenges": "Demandes de défi",
+    "challenges": "Matchs en attente",
     "myClans": "Mes clans",
     "organizeTournament": "Organiser un tournoi",
     "tournaments": "Tournois"
@@ -265,7 +266,7 @@
       "disbandError": "Dissolution impossible",
       "challengeWith": "Défier avec {team}",
       "challengeSent": "Défi envoyé",
-      "challengeSentDescription": "Le match contre {team} est ouvert : déclarez son résultat depuis vos défis.",
+      "challengeSentDescription": "Le match contre {team} est ouvert : déclarez son résultat depuis vos matchs en attente.",
       "challengeError": "Défi impossible",
       "errors": {
         "competed": "Cette équipe a déjà joué : elle est conservée pour l'historique.",
@@ -275,8 +276,8 @@
     }
   },
   "challenges": {
-    "title": "Demandes de défi",
-    "description": "Les matchs qui attendent un résultat, tous jeux et formats confondus : déclarez le score, ou confirmez celui de l'adversaire.",
+    "title": "Matchs en attente",
+    "description": "Vos duels et vos matchs de tournoi qui attendent un résultat, tous jeux et formats confondus : déclarez le score, ou confirmez celui de l'adversaire.",
     "unknownPlayer": "Profil inconnu",
     "awaitingDeclaration": "Aucun résultat déclaré pour le moment.",
     "outcome": {
@@ -285,12 +286,12 @@
       "draw": "match nul"
     },
     "empty": {
-      "title": "Aucun défi en attente",
-      "description": "Quand vous défierez quelqu'un, ou qu'on vous défiera, le match apparaîtra ici.",
+      "title": "Aucun match en attente",
+      "description": "Quand vous défierez quelqu'un, qu'on vous défiera ou qu'un match de tournoi vous attendra, il apparaîtra ici.",
       "action": "Parcourir les jeux"
     },
     "loadError": {
-      "title": "Impossible de charger vos défis",
+      "title": "Impossible de charger vos matchs en attente",
       "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
     },
     "versus": "vs",
@@ -425,6 +426,41 @@
     },
     "back": "Retour à mes profils"
   },
+  "account": {
+    "title": "Mon compte",
+    "description": "Les informations de votre compte, communes à tous vos profils joueurs.",
+    "avatar": {
+      "title": "Photo de profil",
+      "description": "Elle apparaît dans le menu de votre compte, recadrée en carré."
+    },
+    "identity": {
+      "title": "Identité",
+      "username": "Nom d'utilisateur",
+      "role": "Rôle"
+    }
+  },
+  "images": {
+    "alt": "Image de {name}",
+    "choose": "Choisir une image",
+    "change": "Changer l'image",
+    "remove": "Retirer l'image",
+    "confirmRemove": "Retirer l'image ?",
+    "chooseLabel": "Choisir une image pour {name}",
+    "changeLabel": "Changer l'image de {name}",
+    "removeLabel": "Retirer l'image de {name}",
+    "confirmRemoveLabel": "Confirmer le retrait de l'image de {name}",
+    "hint": "JPEG, PNG, WebP ou GIF de 8 Mo au plus. L'image est enregistrée dès que vous la choisissez, redimensionnée et compressée.",
+    "uploaded": "Image enregistrée",
+    "removed": "Image retirée",
+    "uploadError": "Envoi de l'image impossible",
+    "removeError": "Retrait de l'image impossible",
+    "problems": {
+      "type": "Choisissez une image JPEG, PNG, WebP ou GIF.",
+      "empty": "Ce fichier est vide.",
+      "size": "L'image pèse plus de 8 Mo.",
+      "unreadable": "L'image n'a pas pu être lue : elle doit mesurer au moins 16 pixels de côté et 40 mégapixels au plus."
+    }
+  },
   "backoffice": {
     "nav": {
       "title": "Backoffice",
@@ -465,6 +501,7 @@
         "forbidden": "Seuls les administrateurs peuvent créer un jeu."
       },
       "columns": {
+        "image": "Image",
         "name": "Titre",
         "id": "Identifiant",
         "createdAt": "Créé le",
@@ -567,6 +604,10 @@
           "forbidden": "La modification d'articles est réservée aux éditeurs.",
           "notFound": "Cet article ou cette catégorie n'existe plus."
         }
+      },
+      "cover": {
+        "title": "Couverture",
+        "description": "Elle illustre l'article sur le blog : en tête de l'article et, recadrée en 16/9, dans les listes."
       },
       "preview": {
         "publishedAt": "Publié le {date}",
@@ -765,7 +806,7 @@
   },
   "tournaments": {
     "title": "Tournois",
-    "description": "Des tournois à élimination directe, en 1v1 comme en équipe. Inscrivez-vous, puis déclarez vos matchs comme n'importe quel défi : le vainqueur avance dans le tableau.",
+    "description": "Des tournois à élimination directe, en 1v1 comme en équipe. Une fois inscrit, vos matchs du tableau arrivent dans vos matchs en attente, où vous les déclarez comme un duel : le vainqueur avance dans le tableau.",
     "organize": "Organiser un tournoi",
     "back": "Retour aux tournois",
     "all": "Tous",

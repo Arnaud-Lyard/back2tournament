@@ -51,6 +51,21 @@ final class GameTest extends TestCase
         $this->assertSame([5], $game->getTeamSizes());
     }
 
+    public function test_a_game_is_given_a_picture_and_loses_it_and_both_are_announced(): void
+    {
+        $game = Game::create(new GameId(self::GAME_ID), 'Valorant', $this->sizes(1));
+        $game->pullDomainEvents();
+        $this->assertNull($game->getImage());
+
+        Game::illustrate($game, 'games/valorant.webp');
+        $this->assertSame('games/valorant.webp', $game->getImage());
+        $this->assertInstanceOf(GameUpdatedEvent::class, $game->pullDomainEvents()[0]);
+
+        Game::illustrate($game, null);
+        $this->assertNull($game->getImage());
+        $this->assertInstanceOf(GameUpdatedEvent::class, $game->pullDomainEvents()[0]);
+    }
+
     public function test_an_update_is_announced(): void
     {
         $game = Game::create(new GameId(self::GAME_ID), 'Valorant', $this->sizes(1));

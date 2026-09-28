@@ -24,6 +24,10 @@ architecture rules and coding conventions.
 make start
 ```
 
+It also starts [Garage](https://garagehq.deuxfleurs.fr), the S3 storage the images
+are uploaded to, and prepares its bucket (`docker/garage/init.sh`). Browsers read the
+images on `http://localhost:3902`.
+
 Then:
 
 1. Open `https://localhost` and accept the auto‑generated TLS certificate.
@@ -65,10 +69,17 @@ src/
   Competition/Fight/     fights, 1v1 to NvN, and their declare-then-confirm results
   Competition/Tournament/ single-elimination tournaments and their bracket
   Competition/Shared/    contracts shared by the Competition modules
+  Media/                 images: Imagick compression to WebP, S3 storage (Garage)
 ```
 
 Each context (except `Shared`) is layered `Domain / Application / Infrastructure`.
 Full conventions and the Deptrac ruleset are documented in [AGENTS.md](AGENTS.md).
+
+## Deployment
+
+The images live in the Garage service of `compose.yaml`. Before deploying (on
+Coolify, for instance), set your own `GARAGE_*` and `S3_*` secrets and give Garage's
+web endpoint a public domain: the steps are in [AGENTS.md](AGENTS.md#images).
 
 ## Tests & quality
 

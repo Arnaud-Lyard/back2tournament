@@ -6,6 +6,7 @@ import {
   UsersIcon,
   type LucideIcon,
 } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
@@ -19,7 +20,14 @@ const SECTIONS: readonly { key: SectionKey; icon: LucideIcon }[] = [
   { key: "rankings", icon: TrophyIcon },
 ]
 
-export function GameNav({ gameId, title }: { gameId: string; title: string }) {
+interface GameNavProps {
+  gameId: string
+  title: string
+  /** Where the game's picture is read from; null while it has none. */
+  image?: string | null
+}
+
+export function GameNav({ gameId, title, image }: GameNavProps) {
   const t = useTranslations("games.nav")
   const pathname = usePathname()
   const base = `/games/${encodeURIComponent(gameId)}`
@@ -27,7 +35,17 @@ export function GameNav({ gameId, title }: { gameId: string; title: string }) {
   return (
     <div className="sticky top-(--header-height) z-30 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-4 overflow-x-auto px-4">
-        <span className="hidden shrink-0 py-2.5 text-sm font-medium text-muted-foreground md:inline">
+        <span className="hidden shrink-0 items-center gap-2 py-2.5 text-sm font-medium text-muted-foreground md:inline-flex">
+          {image && (
+            <Image
+              src={image}
+              alt=""
+              width={20}
+              height={20}
+              unoptimized
+              className="size-5 rounded-sm object-cover"
+            />
+          )}
           {title}
         </span>
         <nav

@@ -7,6 +7,7 @@ namespace App\Competition\Profile\Game\Domain\Entity;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Event\GameCreatedEvent;
 use App\Competition\Profile\Game\Domain\Event\GameUpdatedEvent;
+use App\Media\Image\Domain\Attribute\StoredImage;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\TeamSizeValueObject;
@@ -21,6 +22,12 @@ class Game extends AggregateRoot
      * @var list<int> the formats this game is played in: 1 for 1v1, 5 for 5v5
      */
     private array $teamSizes = [1];
+
+    /**
+     * The key of its picture in the image storage; null when it has none.
+     */
+    #[StoredImage]
+    private ?string $image = null;
 
     private \DateTimeImmutable $createdAt;
 
@@ -74,6 +81,11 @@ class Game extends AggregateRoot
         $this->teamSizes = $sizes;
 
         return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
     }
 
     public function supportsTeamSize(int $teamSize): bool
@@ -144,6 +156,20 @@ class Game extends AggregateRoot
             $game->setTeamSizes($teamSizes);
         }
 
+        $game->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $game->recordDomainEvent(new GameUpdatedEvent(new GameId($game->id)));
+
+        return $game;
+    }
+
+    /**
+     * Gives the game its picture, as the key of the stored image, or takes it
+     * away with null.
+     */
+    public static function illustrate(Game $game, ?string $image): self
+    {
+        $game->image = $image;
         $game->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $game->recordDomainEvent(new GameUpdatedEvent(new GameId($game->id)));

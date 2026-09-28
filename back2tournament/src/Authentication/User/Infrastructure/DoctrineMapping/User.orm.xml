@@ -13,6 +13,7 @@
         <field name="password" column="password" length="180" />
         <field name="verified" type="boolean" column="is_verified" />
         <field name="verificationToken" type="string" column="verification_token" length="36" nullable="true" />
+        <field name="avatar" type="string" column="avatar" length="255" nullable="true" />
     </entity>
 
 </doctrine-mapping>

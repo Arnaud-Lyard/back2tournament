@@ -22,7 +22,7 @@ final class ArticleSerializationTest extends KernelTestCase
     public function test_exposes_exactly_the_fields_the_article_schema_documents(): void
     {
         self::assertSame(
-            ['category', 'id', 'createdAt', 'updatedAt', 'body', 'title', 'author', 'status', 'publishedAt', 'titleEn', 'bodyEn'],
+            ['category', 'id', 'createdAt', 'updatedAt', 'body', 'title', 'author', 'status', 'publishedAt', 'titleEn', 'bodyEn', 'image'],
             array_keys($this->normalized($this->article()))
         );
     }

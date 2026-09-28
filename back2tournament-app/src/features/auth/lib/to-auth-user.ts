@@ -11,6 +11,7 @@ export function toAuthUser(me: CurrentUser): AuthUser {
     username: me.username,
     ...mapSymfonyRoles(me.roles),
     verified: me.verified,
+    avatar: me.avatar ?? null,
     playersByGame: Object.fromEntries(
       me.players.map(({ game, ...player }) => [game, player])
     ),
@@ -19,7 +20,7 @@ export function toAuthUser(me: CurrentUser): AuthUser {
 
 /**
  * The identity a JWT alone carries, for when the backend cannot be asked:
- * no player profile is known then.
+ * no picture nor player profile is known then.
  */
 export function authUserFromJwt(
   username: string,
@@ -29,6 +30,7 @@ export function authUserFromJwt(
     username,
     ...mapSymfonyRoles(roles),
     verified: true,
+    avatar: null,
     playersByGame: {},
   }
 }

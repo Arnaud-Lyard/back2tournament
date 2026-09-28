@@ -19,6 +19,7 @@ const reader: AuthUser = {
   role: "user",
   permissions: [],
   verified: true,
+  avatar: null,
   playersByGame: {},
 }
 

@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class UserSerializationTest extends KernelTestCase
 {
-    private function serializedUser(): array
+    private function serializedUser(?string $avatar = null): array
     {
         self::bootKernel();
 
@@ -29,6 +29,7 @@ final class UserSerializationTest extends KernelTestCase
             new Locale('fr'),
         );
         $user->setPassword('$2y$13$fakehashthatmustneverleak');
+        User::changeAvatar($user, $avatar);
 
         return json_decode($serializer->serialize($user, 'json'), true, 512, JSON_THROW_ON_ERROR);
     }
@@ -48,6 +49,12 @@ final class UserSerializationTest extends KernelTestCase
         self::assertArrayNotHasKey('verificationToken', $payload);
     }
 
+    public function test_the_avatar_reads_as_where_the_picture_is_served_never_as_its_storage_key(): void
+    {
+        self::assertSame(rtrim($_SERVER['S3_PUBLIC_URL'], '/').'/avatars/me.webp', $this->serializedUser('avatars/me.webp')['avatar']);
+        self::assertNull($this->serializedUser()['avatar']);
+    }
+
     public function test_still_exposes_the_fields_the_client_needs(): void
     {
         $payload = $this->serializedUser();
@@ -62,7 +69,7 @@ final class UserSerializationTest extends KernelTestCase
     public function test_exposes_no_extra_field(): void
     {
         self::assertSame(
-            ['id', 'email', 'username', 'roles', 'verified'],
+            ['id', 'email', 'username', 'roles', 'verified', 'avatar'],
             array_keys($this->serializedUser())
         );
     }

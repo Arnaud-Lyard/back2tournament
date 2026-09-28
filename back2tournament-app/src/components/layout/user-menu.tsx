@@ -2,6 +2,7 @@
 
 import {
   ChevronDownIcon,
+  CircleUserRoundIcon,
   Gamepad2Icon,
   LogOutIcon,
   ShieldIcon,
@@ -11,7 +12,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,6 +40,7 @@ export function UserMenu() {
         render={<Button variant="ghost" />}
       >
         <Avatar size="sm">
+          {user.avatar && <AvatarImage src={user.avatar} alt="" />}
           <AvatarFallback>
             {user.username.slice(0, 2).toUpperCase()}
           </AvatarFallback>
@@ -57,6 +59,10 @@ export function UserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link href="/account" />}>
+            <CircleUserRoundIcon />
+            {t("account")}
+          </DropdownMenuItem>
           <DropdownMenuItem render={<Link href="/players" />}>
             <Gamepad2Icon />
             {t("playerProfile")}

@@ -16,11 +16,15 @@ export async function fetchJson<T>(
   input: string,
   { method = "GET", body }: FetchJsonOptions = {}
 ): Promise<T> {
+  // A form (an upload) goes as it is: the browser sets its multipart boundary.
+  const form = body instanceof FormData
   const response = await fetch(input, {
     method,
     headers:
-      body === undefined ? undefined : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
+      body === undefined || form
+        ? undefined
+        : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : form ? body : JSON.stringify(body),
   })
 
   if (!response.ok) {

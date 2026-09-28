@@ -1,7 +1,15 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
+import { ImagePicker } from "@/components/image-picker"
 import { PageHeader } from "@/components/layout/page-header"
 import { Pagination } from "@/components/pagination"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { hasPermission } from "@/features/auth/rbac/can"
 import { requirePermission } from "@/features/auth/rbac/require"
 import {
@@ -69,13 +77,30 @@ export default async function BackofficeArticlesPage({
         <div className="flex min-w-0 flex-col gap-6">
           {selectedId &&
             (edited?.ok ? (
-              <EditArticleForm
-                key={edited.data.updatedAt}
-                articleId={selectedId}
-                article={edited.data}
-                categories={categoryList}
-                previewHref={previewHref}
-              />
+              <>
+                {/* The cover is saved on its own, as soon as it is chosen:
+                    the form below keeps what is being typed meanwhile. */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("cover.title")}</CardTitle>
+                    <CardDescription>{t("cover.description")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ImagePicker
+                      endpoint={`/api/articles/${encodeURIComponent(selectedId)}/image`}
+                      image={edited.data.image}
+                      name={edited.data.title ?? ""}
+                    />
+                  </CardContent>
+                </Card>
+                <EditArticleForm
+                  key={selectedId}
+                  articleId={selectedId}
+                  article={edited.data}
+                  categories={categoryList}
+                  previewHref={previewHref}
+                />
+              </>
             ) : (
               <ArticlePreview
                 articleId={selectedId}
@@ -90,6 +115,7 @@ export default async function BackofficeArticlesPage({
                     : undefined
                 }
                 canPublish={canPublish}
+                canIllustrate={canEdit}
               />
             ))}
           {articles.ok ? (

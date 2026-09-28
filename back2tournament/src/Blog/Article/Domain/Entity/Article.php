@@ -16,6 +16,7 @@ use App\Blog\Article\Domain\Event\ArticleUpdatedEvent;
 use App\Blog\Article\Domain\Event\CommentCreatedEvent;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Blog\Shared\Domain\Entity\ValueObject\CategoryId;
+use App\Media\Image\Domain\Attribute\StoredImage;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\ArticleBodyValueObject;
@@ -49,6 +50,12 @@ class Article extends AggregateRoot
     private ?string $titleEn = null;
 
     private ?string $bodyEn = null;
+
+    /**
+     * The key of its cover in the image storage; null when it has none.
+     */
+    #[StoredImage]
+    private ?string $image = null;
 
     private string $category;
 
@@ -161,6 +168,11 @@ class Article extends AggregateRoot
         return $this->bodyEn;
     }
 
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
     public function setPublishedAt(?\DateTimeImmutable $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
@@ -227,6 +239,18 @@ class Article extends AggregateRoot
         ?ArticleBodyValueObject $bodyEn
     ): void {
         self::setEnglishVersion($article, $titleEn, $bodyEn);
+        $article->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));
+    }
+
+    /**
+     * Gives the article its cover, as the key of the stored image, or takes
+     * it away with null.
+     */
+    public static function illustrate(Article $article, ?string $image): void
+    {
+        $article->image = $image;
         $article->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $article->recordDomainEvent(new ArticleUpdatedEvent($article->getId()));

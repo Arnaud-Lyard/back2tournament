@@ -39,7 +39,11 @@ export default async function GameLayout({
 
   return (
     <>
-      <GameNav gameId={gameId} title={game.data.title ?? ""} />
+      <GameNav
+        gameId={gameId}
+        title={game.data.title ?? ""}
+        image={game.data.image}
+      />
       {children}
     </>
   )

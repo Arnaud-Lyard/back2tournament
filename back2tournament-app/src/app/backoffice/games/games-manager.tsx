@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 import { useState, type FormEvent } from "react"
 import { CopyButton } from "@/components/copy-button"
+import { ImagePicker } from "@/components/image-picker"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -152,6 +153,7 @@ export function GamesManager({ games }: { games: Game[] | null }) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>{t("columns.image")}</TableHead>
                 <TableHead>{t("columns.name")}</TableHead>
                 <TableHead>{t("columns.formats")}</TableHead>
                 <TableHead>{t("columns.id")}</TableHead>
@@ -165,6 +167,15 @@ export function GamesManager({ games }: { games: Game[] | null }) {
 
                 return (
                   <TableRow key={id}>
+                    <TableCell>
+                      <ImagePicker
+                        endpoint={`/api/games/${encodeURIComponent(id)}/image`}
+                        image={game.image}
+                        name={game.title ?? ""}
+                        shape="square"
+                        compact
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{game.title}</TableCell>
                     <TableCell>
                       <GameFormatsEditor

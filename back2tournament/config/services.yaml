@@ -25,3 +25,25 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Images: compressed by Imagick, kept in an S3 bucket (Garage) and served
+    # from S3_PUBLIC_URL.
+    Aws\S3\S3Client:
+        arguments:
+            -   version: '2006-03-01'
+                region: '%env(S3_REGION)%'
+                endpoint: '%env(S3_ENDPOINT)%'
+                use_path_style_endpoint: true
+                credentials:
+                    key: '%env(S3_ACCESS_KEY_ID)%'
+                    secret: '%env(S3_SECRET_ACCESS_KEY)%'
+
+    Aws\S3\S3ClientInterface: '@Aws\S3\S3Client'
+
+    App\Media\Image\Infrastructure\Storage\S3ImageStorage:
+        arguments:
+            $bucket: '%env(S3_BUCKET)%'
+
+    App\Media\Shared\Domain\Provider\ImageProvider:
+        arguments:
+            $publicUrl: '%env(S3_PUBLIC_URL)%'

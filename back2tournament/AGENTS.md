@@ -19,6 +19,8 @@ dependencies enforced by **Deptrac**.
 - PHPUnit 13
 - Deptrac 4
 - Docker Compose
+- ImageMagick through the `imagick` extension, the AWS SDK for PHP, and
+  [Garage](https://garagehq.deuxfleurs.fr) as the S3 storage of the images
 
 ## Running commands
 
@@ -93,6 +95,8 @@ make user           # seed a dev user via app:create-user
   fight in the order it was settled — run it after a migration that creates or empties
   the rankings, as `Version20260927160000` (ratings per format) does. A side counts for
   the clan its result recorded (`Result.clan`), so the replay lands on the same ratings.
+- `Media/Image/`, `Media/Shared/` — the images of the platform: an article's cover, a
+  user's picture (`avatar`), a game's picture. See **Images** below.
 - `Competition/Shared/` — `CompetitorId` and the contracts every
   Competition module reads directly, in `Domain/Provider/`:
   `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
@@ -122,6 +126,71 @@ Each context (except `Shared`) has three layers:
 - Pure unit tests with mocked collaborators (`$this->createMock(SomeInterface::class)`);
   the current suite touches neither the container nor the database.
 - PHPUnit is configured strictly: it fails on any deprecation, notice, or warning.
+
+## Images
+
+An uploaded file goes through `UploadedImageValueObject` (`src/Shared/ValueObject/`)
+first: a JPEG, PNG, WebP or GIF by its content, whatever its name or declared type, of
+8 MB and 40 megapixels at most, 16 pixels a side at least. `ImageProviderInterface`
+(`Media/Shared/Domain/Provider/`) then stores it for an `ImageKind`:
+
+- `ImagickImageCompressor` keeps the first frame of an animation, turns the image
+  upright from its EXIF orientation, converts it to sRGB, shrinks it to the size of
+  its kind without ever enlarging it (`ARTICLE` 1600 pixels a side at most, `GAME`
+  1200, `AVATAR` a centred square of 256 at most), strips its metadata (EXIF, GPS…)
+  and encodes it as WebP (quality 82).
+- `S3ImageStorage` puts it under `<kind>/<uuid>.webp` (`articles/`, `games/`,
+  `avatars/`), cached as immutable: a new image is a new key, never an overwrite.
+
+An entity keeps the key only. A property marked `#[StoredImage]` is normalized as the
+URL browsers read it from (`S3_PUBLIC_URL` + key) by `StoredImageNormalizer`, so every
+response carrying the entity carries the URL, and null when there is no image. The
+handler that changes an image removes the former one once the entity no longer points
+to it. The endpoints are `POST`/`DELETE` `/api/articles/{id}/image` (an editor),
+`/api/games/{id}/image` (an administrator) and `/api/users/me/avatar` (the signed-in
+user): `multipart/form-data` with one `image` field.
+
+**Configuration**: `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`,
+`S3_SECRET_ACCESS_KEY` for the S3 API the API writes through, and `S3_PUBLIC_URL` for
+where browsers read the images. The values in `.env` are for development only. In
+Docker Compose, `php` and `garage-init` both take them from the environment (`.env`
+by default), so that the API signs with the key and writes to the bucket the init
+prepared; `S3_ENDPOINT` is `http://garage:3900`, the service's own address.
+
+**Garage in Docker Compose.** The `garage` service keeps the images (S3 API on 3900,
+web endpoint on 3902, admin API on 3903; `docker/garage/garage.toml`), with
+`GARAGE_RPC_SECRET` and `GARAGE_ADMIN_TOKEN` from `.env`. `garage-init`
+(`docker/garage/init.sh`) prepares it through the admin API on every start and exits:
+a layout of one node, the key of `S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY`, the bucket
+of `S3_BUCKET`, and that bucket served on the web endpoint under the host of
+`S3_PUBLIC_URL` (Garage serves a bucket for the host names it is aliased to). Running
+it again changes nothing. `php` starts once it has exited successfully, which is also
+what lets `docker compose up --wait` treat its exit as a success. In development,
+`compose.override.yaml` publishes 3900 (for an API run outside Docker) and 3902
+(`S3_PUBLIC_URL=http://localhost:3902`).
+
+**Uploads.** `frankenphp/conf.d/10-app.ini` raises `upload_max_filesize` to 9M and
+`post_max_size` to 10M, just above the 8 MB an image may weigh. The production image
+copies ImageMagick's coders and configuration (`/usr/lib/…/ImageMagick-*`,
+`/etc/ImageMagick-*`, `/usr/share/ImageMagick-*`) along with the libraries it needs:
+Imagick loads them at run time, and reads nothing but a blob without them.
+
+**Deploying on Coolify.** Deploy the compose stack, then:
+
+- set your own secrets in the environment: `GARAGE_RPC_SECRET`
+  (`openssl rand -hex 32`), `GARAGE_ADMIN_TOKEN` (`openssl rand -base64 32`),
+  `S3_ACCESS_KEY_ID` (`GK` followed by 24 hexadecimal digits:
+  `echo "GK$(openssl rand -hex 12)"`) and `S3_SECRET_ACCESS_KEY`
+  (`openssl rand -hex 32`); `garage-init` creates that key, so pick it before the
+  first start;
+- set `S3_BUCKET` and `S3_REGION` (`garage`) there too, and give the `garage`
+  service a domain on its port 3902 (for instance `https://images.example.com:3902`),
+  with `S3_PUBLIC_URL` set to that domain (`https://images.example.com`): its host
+  becomes the alias the bucket is served under. Keep 3900 and 3903 private: the API
+  reaches Garage by its service name;
+- mark `garage-init` with `exclude_from_hc: true`, so that Coolify does not take a
+  one-shot container that has exited for an unhealthy stack;
+- keep the `garage_meta` and `garage_data` volumes in your backups.
 
 ## Migrations
 
@@ -243,8 +312,8 @@ interface under `src/<BC>/Shared/…`, implements it against its own repositorie
 the caller injects the interface. `CurrentUserProviderInterface`,
 `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
 `CompetitorRegistryProviderInterface`, `ClanTagProviderInterface`,
-`FightSchedulerProviderInterface`, `CategoryIdProviderInterface` and
-`AuthorProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
+`FightSchedulerProviderInterface`, `CategoryIdProviderInterface`,
+`AuthorProviderInterface` and `ImageProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a

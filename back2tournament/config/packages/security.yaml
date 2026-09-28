@@ -53,6 +53,8 @@ security:
         - { path: ^/api/articles, methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/articles/$, methods: [POST], roles: ROLE_EDITOR }
         - { path: ^/api/articles/, methods: [PATCH], roles: ROLE_EDITOR }
+        - { path: '^/api/articles/[^/]+/image$', methods: [POST, DELETE], roles: ROLE_EDITOR }
+        - { path: '^/api/games/[^/]+/image$', methods: [POST, DELETE], roles: ROLE_ADMIN }
         - { path: '^/api/players/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: '^/api/players/[^/]+/games$', methods: [GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/categories/$, methods: [GET], roles: PUBLIC_ACCESS }

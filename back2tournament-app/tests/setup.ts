@@ -18,24 +18,27 @@ vi.mock("next/navigation", () => ({
 
 // jsdom implements neither of these; next-themes reads matchMedia and several
 // shadcn/base-ui primitives use ResizeObserver — without these, component
-// tests touching the theme provider or a popover/dialog throw.
-if (!window.matchMedia) {
-  window.matchMedia = (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false,
-  })
-}
+// tests touching the theme provider or a popover/dialog throw. A test run in
+// the node environment (a route handler reading an upload) has no window.
+if (typeof window !== "undefined") {
+  if (!window.matchMedia) {
+    window.matchMedia = (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    })
+  }
 
-if (!window.ResizeObserver) {
-  window.ResizeObserver = class ResizeObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+  if (!window.ResizeObserver) {
+    window.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
   }
 }

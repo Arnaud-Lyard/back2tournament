@@ -18,13 +18,14 @@
     "logout": "Logout",
     "register": "Sign up",
     "playerProfile": "Player profile",
+    "account": "My account",
     "backoffice": "Backoffice",
     "mainLabel": "Main navigation",
     "openMenu": "Open menu",
     "menuDescription": "Browse the sections of the platform.",
     "accountMenu": "Account menu for {username}",
     "blog": "Blog",
-    "challenges": "Challenge requests",
+    "challenges": "Pending matches",
     "myClans": "My clans",
     "organizeTournament": "Organize a tournament",
     "tournaments": "Tournaments"
@@ -265,7 +266,7 @@
       "disbandError": "Could not disband",
       "challengeWith": "Challenge with {team}",
       "challengeSent": "Challenge sent",
-      "challengeSentDescription": "The match against {team} is open: declare its result from your challenges.",
+      "challengeSentDescription": "The match against {team} is open: declare its result from your pending matches.",
       "challengeError": "Could not challenge",
       "errors": {
         "competed": "This team has already played: it is kept for the record.",
@@ -275,8 +276,8 @@
     }
   },
   "challenges": {
-    "title": "Challenge requests",
-    "description": "The matches waiting for a result, whatever the game and format: declare the score, or confirm your opponent's.",
+    "title": "Pending matches",
+    "description": "Your duels and tournament matches waiting for a result, whatever the game and format: declare the score, or confirm your opponent's.",
     "unknownPlayer": "Unknown profile",
     "awaitingDeclaration": "No result declared yet.",
     "outcome": {
@@ -285,12 +286,12 @@
       "draw": "draw"
     },
     "empty": {
-      "title": "No challenge waiting",
-      "description": "When you challenge someone, or someone challenges you, the match shows up here.",
+      "title": "No pending match",
+      "description": "When you challenge someone, someone challenges you or a tournament match awaits you, it shows up here.",
       "action": "Browse the games"
     },
     "loadError": {
-      "title": "Your challenges could not be loaded",
+      "title": "Your pending matches could not be loaded",
       "description": "The server did not answer. Try again in a moment."
     },
     "versus": "vs",
@@ -425,6 +426,41 @@
     },
     "back": "Back to my profiles"
   },
+  "account": {
+    "title": "My account",
+    "description": "Your account's details, shared by all your player profiles.",
+    "avatar": {
+      "title": "Profile picture",
+      "description": "It appears in your account menu, cropped to a square."
+    },
+    "identity": {
+      "title": "Identity",
+      "username": "Username",
+      "role": "Role"
+    }
+  },
+  "images": {
+    "alt": "Image of {name}",
+    "choose": "Choose an image",
+    "change": "Change the image",
+    "remove": "Remove the image",
+    "confirmRemove": "Remove the image?",
+    "chooseLabel": "Choose an image for {name}",
+    "changeLabel": "Change the image of {name}",
+    "removeLabel": "Remove the image of {name}",
+    "confirmRemoveLabel": "Confirm removing the image of {name}",
+    "hint": "JPEG, PNG, WebP or GIF of 8 MB at most. The image is saved as soon as you choose it, resized and compressed.",
+    "uploaded": "Image saved",
+    "removed": "Image removed",
+    "uploadError": "Could not send the image",
+    "removeError": "Could not remove the image",
+    "problems": {
+      "type": "Choose a JPEG, PNG, WebP or GIF image.",
+      "empty": "This file is empty.",
+      "size": "The image weighs more than 8 MB.",
+      "unreadable": "The image could not be read: it must be 16 pixels a side at least and 40 megapixels at most."
+    }
+  },
   "backoffice": {
     "nav": {
       "title": "Backoffice",
@@ -465,6 +501,7 @@
         "forbidden": "Only administrators can create a game."
       },
       "columns": {
+        "image": "Image",
         "name": "Title",
         "id": "Identifier",
         "createdAt": "Created on",
@@ -567,6 +604,10 @@
           "forbidden": "Editing articles is reserved to editors.",
           "notFound": "This article or this category no longer exists."
         }
+      },
+      "cover": {
+        "title": "Cover",
+        "description": "It illustrates the article on the blog: at the top of the article and, cropped to 16/9, in the lists."
       },
       "preview": {
         "publishedAt": "Published on {date}",
@@ -765,7 +806,7 @@
   },
   "tournaments": {
     "title": "Tournaments",
-    "description": "Single-elimination tournaments, 1v1 or in teams. Register, then declare your matches like any challenge: the winner moves on in the bracket.",
+    "description": "Single-elimination tournaments, 1v1 or in teams. Once registered, your bracket matches land in your pending matches, where you declare them like a duel: the winner moves on in the bracket.",
     "organize": "Organize a tournament",
     "back": "Back to tournaments",
     "all": "All",
