@@ -1,24 +1,20 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         App\Authentication\User\Domain\Entity\User: 'auto'
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         app_user_provider:
             id: App\Authentication\User\Infrastructure\Security\UserProvider
 
     role_hierarchy:
         ROLE_ADMIN: [ROLE_EDITOR]
+        ROLE_EDITOR: [ROLE_USER]
 
     firewalls:
         dev:
-            # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
 
-        # POST /api/login: checked by the json_login authenticator below, which
-        # issues a JWT on success. Never reaches PostLoginController.
         login:
             pattern: ^/api/login
             stateless: true
@@ -31,7 +27,6 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-        # Every other /api/* request: stateless, authenticated via the Bearer JWT.
         api:
             pattern: ^/api
             stateless: true
@@ -43,38 +38,19 @@ security:
             lazy: true
             provider: app_user_provider
 
-    # Note: Only the *first* matching rule is applied
     access_control:
-        - { path: ^/api/doc, roles: PUBLIC_ACCESS }
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/verify-email, roles: PUBLIC_ACCESS }
-        - { path: ^/api/games, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/articles, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/articles/$, methods: [POST], roles: ROLE_EDITOR }
-        - { path: ^/api/articles/, methods: [PATCH], roles: ROLE_EDITOR }
-        - { path: '^/api/articles/[^/]+/image$', methods: [POST, DELETE], roles: ROLE_EDITOR }
-        - { path: '^/api/games/[^/]+/image$', methods: [POST, DELETE], roles: ROLE_ADMIN }
-        - { path: '^/api/players/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: '^/api/players/[^/]+/games$', methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/categories/$, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: '^/api/clans/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: '^/api/teams/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/tournaments, methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: '^/api/results/(players|clans)/[^/]+$', methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: '^/api/rankings/(games/[^/]+/(players|clans)|players/[^/]+|clans/[^/]+)$', methods: [GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/categories/$, methods: [POST], roles: ROLE_ADMIN }
-        - { path: ^/api/fights/$, methods: [GET], roles: ROLE_ADMIN }
-        - { path: '^/api/fights/[^/]+/status$', methods: [PATCH], roles: ROLE_ADMIN }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/editor, roles: ROLE_EDITOR }
+        - { path: ^/api/user, roles: ROLE_USER }
+        - { path: ^/api/(login|register)$, methods: [POST], roles: PUBLIC_ACCESS }
+        - { path: ^/api, methods: [GET, HEAD], roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: ROLE_NO_ACCESS }
 
 when@test:
     security:
         password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
             App\Authentication\User\Domain\Entity\User:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

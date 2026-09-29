@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/users/me', name: 'api_user_me', methods: ['GET'])]
+#[Route('/api/user/me', name: 'api_user_me', methods: ['GET'])]
 #[OA\Tag(name: 'User')]
 #[OA\Response(
     response: 200,

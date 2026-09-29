@@ -10,14 +10,6 @@ interface ApiCallResult<T> {
   response: Response
 }
 
-/**
- * Relays an openapi-fetch call to the browser: the payload on success,
- * `{ message, code }` with the backend's own status otherwise. `message` is
- * the backend's English wording, for the console only; `code` is set for the
- * few failures the UI must tell apart (see ApiErrorCode). It checks
- * `response.ok` rather than `error`, which openapi-fetch leaves undefined
- * when an error response has an empty body. An unreachable backend is a 502.
- */
 export async function relayApiResult<T>(
   call: Promise<ApiCallResult<T>>
 ): Promise<NextResponse> {
@@ -42,7 +34,6 @@ export async function relayApiResult<T>(
   return NextResponse.json(result.data ?? null)
 }
 
-/** Validates a JSON request body; a body that is not JSON is simply invalid. */
 export async function parseRequestBody<TSchema extends z.ZodType>(
   request: Request,
   schema: TSchema

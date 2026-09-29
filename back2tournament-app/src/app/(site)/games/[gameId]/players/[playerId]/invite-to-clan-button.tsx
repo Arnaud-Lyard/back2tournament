@@ -16,7 +16,6 @@ interface InviteToClanButtonProps {
   battletag: string
 }
 
-/** The caller leads a clan in this game: they invite this player into it. */
 export function InviteToClanButton({
   clanId,
   clanName,

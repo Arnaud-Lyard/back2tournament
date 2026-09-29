@@ -16,7 +16,6 @@ final class Version20260926120000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // Every game is played 1v1 until an admin opens other formats.
         $this->addSql('ALTER TABLE game ADD team_sizes JSON DEFAULT \'[1]\' NOT NULL');
         $this->addSql('ALTER TABLE game ALTER team_sizes DROP DEFAULT');
 
@@ -25,8 +24,6 @@ final class Version20260926120000 extends AbstractMigration
         $this->addSql('CREATE TABLE clan_member (clan UUID NOT NULL, player UUID NOT NULL, role VARCHAR(16) NOT NULL, status VARCHAR(16) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, id UUID NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE UNIQUE INDEX uniq_clan_member ON clan_member (clan, player)');
 
-        // A team now belongs to a clan and plays one game in one format. Teams
-        // made before had neither and never competed: nothing can be kept of them.
         $this->abortIf(
             (int) $this->connection->fetchOne('SELECT COUNT(*) FROM competitor WHERE type = \'team\'') > 0,
             'Some teams have already competed: they cannot be given a clan automatically.',
@@ -37,7 +34,6 @@ final class Version20260926120000 extends AbstractMigration
         $this->addSql('ALTER TABLE team ADD game UUID NOT NULL');
         $this->addSql('ALTER TABLE team ADD size INT NOT NULL');
 
-        // Existing fights are 1v1 between player profiles: their game is the one of those profiles.
         $this->addSql('ALTER TABLE fight ADD game UUID DEFAULT NULL');
         $this->addSql('ALTER TABLE fight ADD team_size INT DEFAULT 1 NOT NULL');
         $this->addSql('ALTER TABLE fight ADD tournament UUID DEFAULT NULL');

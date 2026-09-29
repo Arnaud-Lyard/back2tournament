@@ -43,7 +43,6 @@ describe("relayApiResult", () => {
   })
 
   it("still reports an error whose body was empty", async () => {
-    // openapi-fetch leaves `error` undefined when the error body is empty.
     const response = await relayApiResult(
       Promise.resolve({
         error: undefined,

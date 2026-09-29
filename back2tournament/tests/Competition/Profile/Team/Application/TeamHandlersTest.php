@@ -135,10 +135,7 @@ final class TeamHandlersTest extends TestCase
         return self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
     }
 
-    /**
-     * @param list<string> $players
-     * @param string       $caller  the user the User context verified
-     */
+    /** @param list<string> $players */
     private function command(int $size, array $players, string $caller): CreateTeamCommand
     {
         return new CreateTeamCommand(self::CLAN_ID, 'Falcons Duo', $size, $players, self::LEADER_PLAYER, $caller);

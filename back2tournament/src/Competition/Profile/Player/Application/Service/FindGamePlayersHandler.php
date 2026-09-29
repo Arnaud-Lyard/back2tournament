@@ -40,7 +40,6 @@ final class FindGamePlayersHandler
             $findGamePlayersQuery->getOffset(),
         );
 
-        // The tag of the clan each profile plays for, shown next to its battletag.
         $clans = $this->clanTagProvider->clansOfPlayers(array_map(
             static fn ($player): string => $player->getId()->getValue(),
             $players,

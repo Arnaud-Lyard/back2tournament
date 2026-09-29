@@ -10,9 +10,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Clan>
- */
+/** @extends ServiceEntityRepository<Clan> */
 final class ClanRepository extends ServiceEntityRepository implements ClanRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

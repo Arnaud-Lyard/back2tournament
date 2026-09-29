@@ -9,9 +9,7 @@ use App\Blog\Category\Domain\Repository\CategoryRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Category>
- */
+/** @extends ServiceEntityRepository<Category> */
 final class CategoryRepository extends ServiceEntityRepository implements CategoryRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

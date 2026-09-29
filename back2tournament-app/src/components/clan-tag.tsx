@@ -1,10 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/libs/utils"
 
-/**
- * The tag of the clan a player profile or a team plays for, shown before its
- * name in lists. Renders nothing for a profile in no clan.
- */
 export function ClanTag({
   tag,
   className,

@@ -13,7 +13,6 @@ interface ArticlesQuery {
   search?: string
   category?: string
   limit?: number
-  /** The public blog by default; the drafts are for the editors. */
   status?: ArticleStatusFilter
 }
 
@@ -30,34 +29,32 @@ export async function loadArticles({
   status = "published",
 }: ArticlesQuery = {}) {
   const client = await getServerApiClient()
+  const query = {
+    page,
+    limit,
+    ...(search ? { q: search } : {}),
+    ...(category ? { category } : {}),
+  }
+  if (status === "published") {
+    return loadApiResult(client.GET("/api/articles/", { params: { query } }))
+  }
   return loadApiResult(
-    client.GET("/api/articles/", {
-      params: {
-        query: {
-          page,
-          limit,
-          status,
-          ...(search ? { q: search } : {}),
-          ...(category ? { category } : {}),
-        },
-      },
+    client.GET("/api/editor/articles/", {
+      params: { query: { ...query, status } },
     })
   )
 }
 
-export async function loadArticle(articleId: string) {
+export async function loadArticle(
+  articleId: string,
+  { drafts = false }: { drafts?: boolean } = {}
+) {
   const client = await getServerApiClient()
+  const params = { params: { path: { id: articleId } } }
   return loadApiResult(
-    client.GET("/api/articles/{id}", { params: { path: { id: articleId } } })
-  )
-}
-
-export async function loadArticleComments(articleId: string) {
-  const client = await getServerApiClient()
-  return loadApiResult(
-    client.GET("/api/articles/{id}/comments", {
-      params: { path: { id: articleId } },
-    })
+    drafts
+      ? client.GET("/api/editor/articles/{id}", params)
+      : client.GET("/api/articles/{id}", params)
   )
 }
 

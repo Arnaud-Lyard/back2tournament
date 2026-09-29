@@ -52,7 +52,7 @@ describe("ImagePicker", () => {
 
     expect(fileInput()).toHaveAttribute(
       "accept",
-      "image/jpeg,image/png,image/webp,image/gif"
+      "image/jpeg,image/png,image/webp"
     )
     await userEvent.upload(fileInput(), png())
 
@@ -60,7 +60,6 @@ describe("ImagePicker", () => {
     const [url, init] = fetchMock.mock.calls[0]!
     expect(url).toBe(ENDPOINT)
     expect(init?.method).toBe("POST")
-    // A form, whose multipart boundary the browser sets itself.
     expect(init?.headers).toBeUndefined()
     const form = init?.body
     expect(form).toBeInstanceOf(FormData)
@@ -77,7 +76,6 @@ describe("ImagePicker", () => {
       <ImagePicker endpoint={ENDPOINT} name="Street Fighter 6" />
     )
 
-    // The file dialog may be switched to show every file.
     await userEvent
       .setup({ applyAccept: false })
       .upload(
@@ -88,7 +86,7 @@ describe("ImagePicker", () => {
     expect(add).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "error",
-        description: "Choose a JPEG, PNG, WebP or GIF image.",
+        description: "Choose a JPEG, PNG or WebP image.",
       })
     )
     expect(fetchMock).not.toHaveBeenCalled()
@@ -147,7 +145,6 @@ describe("ImagePicker", () => {
       screen.getByRole("button", { name: "Remove the image" })
     )
 
-    // Nothing is sent before the confirmation.
     expect(fetchMock).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }))
 

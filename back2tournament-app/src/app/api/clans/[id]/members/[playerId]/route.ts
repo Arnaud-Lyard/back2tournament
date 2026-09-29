@@ -13,7 +13,7 @@ export async function DELETE(_request: Request, { params }: MemberContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/clans/{id}/members/{playerid}", {
+    client.DELETE("/api/user/clans/{id}/members/{playerid}", {
       params: { path: { id, playerid: playerId } },
     })
   )

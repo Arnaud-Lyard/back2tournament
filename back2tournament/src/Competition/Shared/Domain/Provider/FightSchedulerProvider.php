@@ -54,8 +54,6 @@ final class FightSchedulerProvider implements FightSchedulerProviderInterface
 
         $this->fightRepository->save($fight);
 
-        // Each side's result keeps the clan it plays for today: the fight
-        // stays with that clan whatever its players do next.
         $lineups = $this->competitorRegistryProvider->lineups([$competitorOne, $competitorTwo]);
 
         foreach ([$competitorOne, $competitorTwo] as $competitor) {

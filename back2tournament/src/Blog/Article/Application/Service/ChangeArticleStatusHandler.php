@@ -56,7 +56,6 @@ final class ChangeArticleStatusHandler
             throw new NotFoundException('article not found');
         }
 
-        // Whoever publishes the article becomes its author.
         if (ArticleStatus::PUBLISHED === $status) {
             Article::publish($article, new AuthorId((string) $user->getId()));
         } else {

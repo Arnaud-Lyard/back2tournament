@@ -76,7 +76,6 @@ export default async function RankingsPage({
   const page = readPageParam(query.page)
   const view = readRankingView(query.view)
 
-  // One ranking per format the game is played in: 1v1, 2v2…
   const game = await loadGame(gameId)
   if (!game.ok && game.status === 404) notFound()
   const formats = game.ok ? (game.data.teamSizes ?? []) : []
@@ -92,7 +91,6 @@ export default async function RankingsPage({
   if (!ranking.ok && ranking.status === 404) notFound()
   const format = formatLabel(ranking.ok ? ranking.data.teamSize : size)
 
-  // The caller's own place stands out: their profile, or their clan.
   const mine =
     view === "clans"
       ? (myClans.ok ? activeClanIn(myClans.data, gameId) : undefined)?.clan.id
@@ -154,7 +152,6 @@ export default async function RankingsPage({
                 <TableHead className="text-right">
                   {t("columns.rating")}
                 </TableHead>
-                {/* On a phone, the record says as much. */}
                 <TableHead className="hidden text-right sm:table-cell">
                   {t("columns.fights")}
                 </TableHead>
@@ -193,7 +190,6 @@ export default async function RankingsPage({
                         entry.rank
                       )}
                     </TableCell>
-                    {/* Takes what the other columns leave: a long name is cut short. */}
                     <TableCell className="w-full max-w-0">
                       <span className="flex min-w-0 items-center gap-2">
                         <ClanTag tag={entry.subject.tag} />
@@ -240,7 +236,6 @@ export default async function RankingsPage({
   )
 }
 
-/** A row of links that reads as tabs: the current one stands out. */
 function TabNav({
   label,
   tabs,

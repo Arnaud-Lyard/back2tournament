@@ -16,7 +16,6 @@ interface RemoveMemberButtonProps {
   invited: boolean
 }
 
-/** The leader lets a member go, or withdraws an invitation. */
 export function RemoveMemberButton({
   clanId,
   playerId,

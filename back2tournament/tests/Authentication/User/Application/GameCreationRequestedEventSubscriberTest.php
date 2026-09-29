@@ -78,10 +78,6 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
         $this->assertSame([1, 2, 3], $dispatched->getTeamSizes());
     }
 
-    /**
-     * The created game goes back to the controller on the event it dispatched,
-     * not through the session.
-     */
     public function test_the_created_game_travels_back_on_the_requested_event(): void
     {
         $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
@@ -115,10 +111,6 @@ final class GameCreationRequestedEventSubscriberTest extends TestCase
         $subscriber->validateUser(new OnGameCreationRequestedEvent('Game', [1]));
     }
 
-    /**
-     * What the Game context does with the verified event: it creates the game
-     * and hands its JSON back on the event.
-     */
     private static function createsTheGame(object $event): object
     {
         if ($event instanceof OnGameCreationAdminVerifiedEvent) {

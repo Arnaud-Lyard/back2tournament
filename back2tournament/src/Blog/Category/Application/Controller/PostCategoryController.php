@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
- #[Route('/api/categories/', name: 'api_category_post', methods: ['POST'])]
+ #[Route('/api/admin/categories/', name: 'api_category_post', methods: ['POST'])]
 #[OA\Tag(name: 'Category')]
 #[OA\RequestBody(
     required: true,

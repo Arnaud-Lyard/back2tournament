@@ -19,7 +19,7 @@ final class CategoryIdProvider implements CategoryIdProviderInterface
 
     public function bySlug(string $slug): string
     {
-        /** @var Category|null $category */
+        /** @var (Category | null) $category */
         $category = $this->categoryRepository->findOneBy(['slug' => $slug]);
         if (!$category) {
             throw new NotFoundException(\sprintf('category with slug %s not found', $slug));

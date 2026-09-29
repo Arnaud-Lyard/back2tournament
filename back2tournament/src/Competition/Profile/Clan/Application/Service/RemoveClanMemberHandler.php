@@ -71,7 +71,6 @@ final class RemoveClanMemberHandler
             throw new NotFoundException('this player has no place in the clan');
         }
 
-        // The player leaves or declines on their own; the leader lets anyone else go.
         $caller = (string) $this->currentUserProvider->getUser()->getId();
         $player = $this->playerRepository->findOneBy(['id' => $playerId->getValue()]);
         $leader = $this->playerRepository->findOneBy(['id' => $clan->getLeader()->getValue()]);
@@ -114,11 +113,7 @@ final class RemoveClanMemberHandler
             && [] !== $this->teamRepository->findBy(['id' => $teamIds, 'clan' => $clanId->getValue()]);
     }
 
-    /**
-     * A place in a clan, the player named by battletag.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function normalizeMembership(ClanMember $membership, ?Player $player): array
     {
         return [

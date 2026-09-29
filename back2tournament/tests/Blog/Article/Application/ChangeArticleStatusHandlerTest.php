@@ -132,9 +132,7 @@ final class ChangeArticleStatusHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
@@ -148,9 +146,6 @@ final class ChangeArticleStatusHandlerTest extends TestCase
         return $articleRepository;
     }
 
-    /**
-     * To check what is saved.
-     */
     private function articleRepositoryMock(?Article $article): ArticleRepositoryInterface&MockObject
     {
         $articleRepository = $this->createMock(ArticleRepositoryInterface::class);

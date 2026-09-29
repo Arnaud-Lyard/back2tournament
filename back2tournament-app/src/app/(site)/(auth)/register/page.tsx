@@ -46,8 +46,6 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [passwordConfirmation, setPasswordConfirmation] = useState("")
-  // A value the backend refused as already taken, shown under its field
-  // until it is edited.
   const [taken, setTaken] = useState<{ email?: string; username?: string }>({})
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)

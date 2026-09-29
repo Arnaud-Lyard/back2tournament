@@ -6,9 +6,6 @@ namespace App\Competition\Ranking\Application\Model;
 
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 
-/**
- * The rating and the rank of one player profile, or of one clan.
- */
 final class FindRatingQuery
 {
     private RankingSubject $subjectType;

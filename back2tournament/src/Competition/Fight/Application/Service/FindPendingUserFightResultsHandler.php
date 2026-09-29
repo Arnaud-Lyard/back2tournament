@@ -43,7 +43,6 @@ final class FindPendingUserFightResultsHandler
         $page = $findPendingUserFightResultsQuery->getPage();
         $limit = $findPendingUserFightResultsQuery->getLimit();
 
-        // The caller's own player profiles, and the teams one of them leads.
         $represented = $this->competitorRegistryProvider->representedBy((string) $this->currentUserProvider->getUser()->getId());
 
         if ([] === $represented) {
@@ -69,7 +68,6 @@ final class FindPendingUserFightResultsHandler
             foreach ($this->fightRepository->findBy(['id' => $fightIds]) as $fight) {
                 $fights[$fight->getId()->getValue()] = $fight;
             }
-            // Both sides' results, so that each item can tell what the other side scored.
             foreach ($this->resultRepository->findBy(['fight' => $fightIds]) as $sideResult) {
                 $scores[$sideResult->getFight()->getValue()][$sideResult->getCompetitor()->getValue()] = $sideResult->getScore();
             }
@@ -108,9 +106,7 @@ final class FindPendingUserFightResultsHandler
         return $this->page($items, $this->resultRepository->count($criteria), $page, $limit);
     }
 
-    /**
-     * @param list<array<string, mixed>> $items
-     */
+    /** @param list<array<string, mixed>> $items */
     private function page(array $items, int $total, int $page, int $limit): string
     {
         return json_encode([
@@ -138,11 +134,9 @@ final class FindPendingUserFightResultsHandler
     }
 
     /**
-     * The player profile behind a 1v1 side; null for a team.
+     * @param (array{type: string, reference: string, name: ?string, tag: ?string} | null) $description
      *
-     * @param array{type: string, reference: string, name: ?string, tag: ?string}|null $description
-     *
-     * @return array<string, mixed>|null
+     * @return (array<string, mixed> | null)
      */
     private static function profile(?array $description): ?array
     {

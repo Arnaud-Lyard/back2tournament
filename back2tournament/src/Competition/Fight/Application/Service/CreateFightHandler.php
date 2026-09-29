@@ -25,10 +25,6 @@ use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-/**
- * Opens a challenge: 1v1 between two player profiles, or NvN between two teams
- * of the same format. The caller stands on one of the two sides.
- */
 #[AsMessageHandler]
 final class CreateFightHandler
 {
@@ -77,9 +73,7 @@ final class CreateFightHandler
         );
     }
 
-    /**
-     * @return array{string, string, string, int} both competitors, the game and the format
-     */
+    /** @return array{string, string, string, int} */
     private function betweenPlayers(PlayerId $one, PlayerId $two): array
     {
         if ($one->getValue() === $two->getValue()) {
@@ -96,7 +90,6 @@ final class CreateFightHandler
             throw new ValidationException('both players must play the same game');
         }
 
-        // A fight is opened by one of its two sides, never by a bystander.
         $caller = $this->caller();
         if ($caller !== $playerOne->getUser()->getValue() && $caller !== $playerTwo->getUser()->getValue()) {
             throw new PermissionDeniedException('you do not take part in this fight');
@@ -113,9 +106,7 @@ final class CreateFightHandler
         ];
     }
 
-    /**
-     * @return array{string, string, string, int} both competitors, the game and the format
-     */
+    /** @return array{string, string, string, int} */
     private function betweenTeams(TeamId $one, TeamId $two): array
     {
         if ($one->getValue() === $two->getValue()) {
@@ -132,7 +123,6 @@ final class CreateFightHandler
             throw new ValidationException('both teams must play the same game, in the same format');
         }
 
-        // A team is spoken for by its leader.
         $caller = $this->caller();
         $leaders = $this->playerRepository->findBy(['id' => [$teamOne->getLeader()->getValue(), $teamTwo->getLeader()->getValue()]]);
         if ([] === array_filter($leaders, static fn (Player $leader): bool => $leader->getUser()->getValue() === $caller)) {
@@ -176,12 +166,9 @@ final class CreateFightHandler
     }
 
     /**
-     * The fight, where it stands as a whole, and its two sides, each named and
-     * carrying its own result.
-     *
-     * @param list<Result>                                                         $results     a side with no result reads as pending, 0 points
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described   the sides, keyed by competitor id
-     * @param list<string>                                                         $represented the competitors the caller speaks for
+     * @param list<Result> $results
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
+     * @param list<string> $represented
      *
      * @return array<string, mixed>
      */

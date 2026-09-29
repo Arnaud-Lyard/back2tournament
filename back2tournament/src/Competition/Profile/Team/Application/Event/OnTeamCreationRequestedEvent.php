@@ -14,18 +14,14 @@ final class OnTeamCreationRequestedEvent extends Event
 
     private int $size;
 
-    /**
-     * @var list<string>
-     */
+    /** @var list<string> */
     private array $players;
 
     private string $leader;
 
     private string $createdTeam;
 
-    /**
-     * @param list<string> $players
-     */
+    /** @param list<string> $players */
     public function __construct(string $name, string $clan, int $size, array $players, string $leader)
     {
         $this->name = $name;
@@ -50,9 +46,7 @@ final class OnTeamCreationRequestedEvent extends Event
         return $this->size;
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public function getPlayers(): array
     {
         return $this->players;
@@ -63,9 +57,6 @@ final class OnTeamCreationRequestedEvent extends Event
         return $this->leader;
     }
 
-    /**
-     * The created team, as the handler serialized it, handed back to the controller.
-     */
     public function getCreatedTeam(): string
     {
         return $this->createdTeam;

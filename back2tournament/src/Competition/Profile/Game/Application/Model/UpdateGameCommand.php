@@ -10,14 +10,10 @@ final class UpdateGameCommand
 
     private ?string $title;
 
-    /**
-     * @var list<int>|null
-     */
+    /** @var (list<int> | null) */
     private ?array $teamSizes;
 
-    /**
-     * @param list<int>|null $teamSizes
-     */
+    /** @param (list<int> | null) $teamSizes */
     public function __construct(string $gameId, ?string $title, ?array $teamSizes)
     {
         $this->gameId = $gameId;
@@ -35,9 +31,7 @@ final class UpdateGameCommand
         return $this->title;
     }
 
-    /**
-     * @return list<int>|null
-     */
+    /** @return (list<int> | null) */
     public function getTeamSizes(): ?array
     {
         return $this->teamSizes;

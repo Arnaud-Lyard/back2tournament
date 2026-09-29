@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
-  // The Playwright e2e suite drives the dev server via 127.0.0.1.
   allowedDevOrigins: ["127.0.0.1"],
 }
 

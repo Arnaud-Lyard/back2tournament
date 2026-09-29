@@ -31,10 +31,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
- * Registers a player profile in a 1v1 tournament, or a team in an NvN one. The
- * caller owns the profile, or leads the team.
- */
 #[AsMessageHandler]
 final class RegisterParticipantHandler
 {
@@ -133,9 +129,7 @@ final class RegisterParticipantHandler
         return $this->competitorRegistryProvider->enlistPlayer($playerId->getValue());
     }
 
-    /**
-     * @param list<Participant> $registered
-     */
+    /** @param list<Participant> $registered */
     private function enlistTeam(Tournament $tournament, ?string $team, array $registered): string
     {
         if (null === $team) {
@@ -158,7 +152,6 @@ final class RegisterParticipantHandler
             throw new PermissionDeniedException('only the team leader registers the team');
         }
 
-        // A player plays for one team per tournament.
         $registeredTeams = [];
         $described = $this->competitorRegistryProvider->describe(array_map(
             static fn (Participant $participant): string => $participant->getCompetitor()->getValue(),
@@ -186,8 +179,6 @@ final class RegisterParticipantHandler
     }
 
     /**
-     * A place in the tournament; the competitor is named by battletag or team name.
-     *
      * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>

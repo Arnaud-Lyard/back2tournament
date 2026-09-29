@@ -29,9 +29,6 @@ use App\Shared\ValueObject\TeamNameValueObject;
 use App\Shared\ValueObject\TeamSizeValueObject;
 use Symfony\Component\Uid\Uuid;
 
-/**
- * Builders for the competition entities handler tests read from their repositories.
- */
 trait CompetitionFixtures
 {
     private function signedIn(string $userId): CurrentUserProviderInterface
@@ -42,9 +39,7 @@ trait CompetitionFixtures
         return $currentUserProvider;
     }
 
-    /**
-     * @param list<int> $teamSizes
-     */
+    /** @param list<int> $teamSizes */
     private static function aGame(string $gameId, array $teamSizes = [1]): Game
     {
         return Game::create(
@@ -80,7 +75,7 @@ trait CompetitionFixtures
     }
 
     /**
-     * @param list<string> $playerIds the lineup, the first one leading
+     * @param list<string> $playerIds
      *
      * @return array{Team, list<TeamPlayer>}
      */

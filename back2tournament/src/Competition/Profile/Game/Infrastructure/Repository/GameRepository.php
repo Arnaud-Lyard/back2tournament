@@ -9,9 +9,7 @@ use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Game>
- */
+/** @extends ServiceEntityRepository<Game> */
 final class GameRepository extends ServiceEntityRepository implements GameRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

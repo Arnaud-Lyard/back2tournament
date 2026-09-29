@@ -26,7 +26,6 @@ const user: AuthUser = {
   playersByGame: { [GAME_ID]: { id: PLAYER_ID, battletag: "PlayerOne#1234" } },
 }
 
-/** What the Route Handler relays: the backend's status, its message. */
 function backendAnswers(status: number, body: unknown) {
   vi.stubGlobal(
     "fetch",

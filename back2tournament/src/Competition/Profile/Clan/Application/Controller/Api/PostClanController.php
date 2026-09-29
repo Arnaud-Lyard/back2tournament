@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/clans/', name: 'api_clan_post', methods: ['POST'])]
+#[Route('/api/user/clans/', name: 'api_clan_post', methods: ['POST'])]
 #[OA\Tag(name: 'Clan')]
 #[OA\RequestBody(
     required: true,

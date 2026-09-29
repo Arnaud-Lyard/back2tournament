@@ -6,9 +6,6 @@ namespace App\Shared\ValueObject;
 
 use App\Shared\Exception\ValidationException;
 
-/**
- * The short label a clan shows next to its members' names, stored upper-cased.
- */
 final class ClanTagValueObject
 {
     private string $value;

@@ -95,7 +95,6 @@ final class UpdateArticleHandlerTest extends TestCase
         $this->handler($this->articleRepository($article))(new UpdateArticleCommand(self::ARTICLE_ID, null, null, null, ' The title ', 'The body'));
 
         $this->assertSame(['The title', 'The body'], [$article->getTitleEn(), $article->getBodyEn()]);
-        // The French version stays as it is.
         $this->assertSame(['Title', 'Body'], [$article->getTitle(), $article->getBody()]);
     }
 
@@ -192,9 +191,6 @@ final class UpdateArticleHandlerTest extends TestCase
         return $articleRepository;
     }
 
-    /**
-     * To check what is saved.
-     */
     private function articleRepositoryMock(?Article $article): ArticleRepositoryInterface&MockObject
     {
         $articleRepository = $this->createMock(ArticleRepositoryInterface::class);

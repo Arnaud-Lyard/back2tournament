@@ -6,7 +6,6 @@ export type RoundName =
   | { key: "quarterFinals" }
   | { key: "roundOf"; count: number }
 
-/** A round named by what is left to play: the final, semi-finals, round of 16… */
 export function roundName(round: number, rounds: number): RoundName {
   const left = rounds - round
   if (left === 0) return { key: "final" }
@@ -15,7 +14,6 @@ export function roundName(round: number, rounds: number): RoundName {
   return { key: "roundOf", count: 2 ** (left + 1) }
 }
 
-/** The matchups of the bracket, round by round, top to bottom. */
 export function bracketRounds(
   matchups: readonly TournamentMatchup[]
 ): TournamentMatchup[][] {

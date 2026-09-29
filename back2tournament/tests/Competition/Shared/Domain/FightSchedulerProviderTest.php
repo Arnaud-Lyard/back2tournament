@@ -38,7 +38,6 @@ final class FightSchedulerProviderTest extends TestCase
             }
         );
 
-        // ONE plays for a clan, TWO for none.
         $competitorRegistryProvider = $this->createStub(CompetitorRegistryProviderInterface::class);
         $competitorRegistryProvider->method('lineups')->willReturn([
             self::ONE => ['players' => [self::PLAYER_ID], 'clan' => self::CLAN_ID],

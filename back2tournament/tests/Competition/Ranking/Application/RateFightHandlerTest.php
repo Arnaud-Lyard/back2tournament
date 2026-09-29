@@ -115,7 +115,6 @@ final class RateFightHandlerTest extends TestCase
 
     public function test_a_side_counts_for_the_clan_it_played_for_when_the_fight_opened(): void
     {
-        // Alice has left CLAN_A for CLAN_B since: the duel stays CLAN_A's.
         $this->handler($this->settled(ResultStatus::WIN, clanOne: self::CLAN_A, clanTwo: self::CLAN_B), lineups: [
             self::ONE => ['players' => [self::ALICE], 'clan' => self::CLAN_B],
             self::TWO => ['players' => [self::BOB], 'clan' => self::CLAN_B],
@@ -138,12 +137,10 @@ final class RateFightHandlerTest extends TestCase
         $alice = $this->ratingOf(self::ALICE, 1);
         $bob = $this->ratingOf(self::BOB, 1);
         Rating::settle([$alice], [$bob], FightOutcome::SIDE_ONE_WON, new FightId(Uuid::v4()->toString()), $this->changeIds(2));
-        // Alice's 2v2 rating has nothing to do with her duels.
         $aliceIn2v2 = $this->ratingOf(self::ALICE, 2);
 
         $this->handler($this->settled(ResultStatus::WIN), ratings: [$aliceIn2v2, $alice, $bob])(new RateFightCommand(self::FIGHT_ID));
 
-        // 1016 against 984: the favourite wins 15.
         $this->assertSame([$alice, $bob], $this->savedRatings());
         $this->assertSame([1031, 2, 2], [$alice->getValue(), $alice->getFights(), $alice->getWins()]);
         $this->assertSame([969, 2, 2], [$bob->getValue(), $bob->getFights(), $bob->getLosses()]);
@@ -192,7 +189,6 @@ final class RateFightHandlerTest extends TestCase
 
     public function test_a_player_on_both_sides_leaves_the_players_as_they_are(): void
     {
-        // Fights refuse it; were one let through, only the clans would move.
         $this->handler($this->settled(ResultStatus::WIN, teamSize: 2, clanOne: self::CLAN_A, clanTwo: self::CLAN_B), lineups: [
             self::ONE => ['players' => [self::ALICE, self::CAROL], 'clan' => self::CLAN_A],
             self::TWO => ['players' => [self::ALICE, self::DAVE], 'clan' => self::CLAN_B],
@@ -208,12 +204,7 @@ final class RateFightHandlerTest extends TestCase
         $this->handler([null, []])(new RateFightCommand(self::FIGHT_ID));
     }
 
-    /**
-     * The fight between ONE and TWO in a format, and its two results, ONE's
-     * being $outcomeOfOne; each result keeps the clan its side played for.
-     *
-     * @return array{?Fight, list<Result>}
-     */
+    /** @return array{?Fight, list<Result>} */
     private function settled(ResultStatus $outcomeOfOne, int $teamSize = 1, ?string $clanOne = null, ?string $clanTwo = null): array
     {
         $fight = Fight::create(new FightId(self::FIGHT_ID), new CompetitorId(self::ONE), new CompetitorId(self::TWO), new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
@@ -232,10 +223,10 @@ final class RateFightHandlerTest extends TestCase
     }
 
     /**
-     * @param array{?Fight, list<Result>}                                    $fight
-     * @param array<string, array{players: list<string>, clan: ?string}>|null $lineups two player profiles in no clan by default
-     * @param list<Rating>                                                   $ratings
-     * @param list<RatingChange>                                             $changes
+     * @param array{?Fight, list<Result>} $fight
+     * @param (array<string, array{players: list<string>, clan: ?string}> | null) $lineups
+     * @param list<Rating> $ratings
+     * @param list<RatingChange> $changes
      */
     private function handler(
         array $fight,
@@ -276,35 +267,25 @@ final class RateFightHandlerTest extends TestCase
         return Rating::start(new RatingId(Uuid::v4()->toString()), RankingSubject::PLAYER, $player, new GameId(self::GAME_ID), new TeamSizeValueObject($teamSize));
     }
 
-    /**
-     * @return list<RatingChangeId>
-     */
+    /** @return list<RatingChangeId> */
     private function changeIds(int $count): array
     {
         return array_map(static fn (): RatingChangeId => new RatingChangeId(Uuid::v4()->toString()), range(1, $count));
     }
 
-    /**
-     * @return list<Rating>
-     */
+    /** @return list<Rating> */
     private function savedRatings(): array
     {
         return array_values(array_filter($this->saved, static fn (object $saved): bool => $saved instanceof Rating));
     }
 
-    /**
-     * @return list<RatingChange>
-     */
+    /** @return list<RatingChange> */
     private function savedChanges(): array
     {
         return array_values(array_filter($this->saved, static fn (object $saved): bool => $saved instanceof RatingChange));
     }
 
-    /**
-     * Each saved rating as [subject type, subject, format, value], in the order it was saved.
-     *
-     * @return list<array{string, string, int, int}>
-     */
+    /** @return list<array{string, string, int, int}> */
     private function standings(): array
     {
         return array_map(

@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: GameContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/games/{id}/image", {
+    client.POST("/api/admin/games/{id}/image", {
       params: { path: { id } },
       body: { image: upload.image },
       bodySerializer: toImageForm,
@@ -31,6 +31,6 @@ export async function DELETE(_request: Request, { params }: GameContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/games/{id}/image", { params: { path: { id } } })
+    client.DELETE("/api/admin/games/{id}/image", { params: { path: { id } } })
   )
 }

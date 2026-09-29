@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/{id}', name: 'api_article_patch', methods: ['PATCH'])]
+#[Route('/api/editor/articles/{id}', name: 'api_article_patch', methods: ['PATCH'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(
@@ -61,12 +61,7 @@ final class PatchArticleController extends AbstractController
         )));
     }
 
-    /**
-     * Null when the key is left out, to keep what the article has; an empty
-     * string when it is sent empty or null, to remove the English version.
-     *
-     * @param array<string, mixed> $parameters
-     */
+    /** @param array<string, mixed> $parameters */
     private static function englishField(array $parameters, string $key): ?string
     {
         return \array_key_exists($key, $parameters) ? ($parameters[$key] ?? '') : null;

@@ -6,7 +6,6 @@ namespace App\Blog\Article\Application\Controller\Api;
 
 use App\Blog\Article\Application\Model\FindArticleQuery;
 use App\Blog\Article\Domain\Entity\ArticleId;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,12 +13,12 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/{id}', name: 'api_article', methods: ['GET'])]
+#[Route('/api/editor/articles/{id}', name: 'api_editor_article', methods: ['GET'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(
     response: 200,
-    description: 'A published article with its comments, oldest first. A draft is read on `GET /api/editor/articles/{id}`.',
+    description: 'Requires an editor or an administrator. The article with its comments, oldest first, whether it is a draft or published.',
     content: new OA\JsonContent(
         allOf: [
             new OA\Schema(ref: '#/components/schemas/Article'),
@@ -32,9 +31,10 @@ use Symfony\Component\Routing\Attribute\Route;
         ],
     ),
 )]
-#[OA\Response(response: 404, description: 'No published article has this id', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
-#[Security(name: null)]
-final class GetArticleController extends AbstractController
+#[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
+#[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
+#[OA\Response(response: 404, description: 'No article has this id', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+final class GetEditorArticleController extends AbstractController
 {
     use HandleTrait;
 
@@ -45,7 +45,7 @@ final class GetArticleController extends AbstractController
 
     public function __invoke(string $id): JsonResponse
     {
-        $article = $this->handle(new FindArticleQuery(new ArticleId($id)->getValue()));
+        $article = $this->handle(new FindArticleQuery(new ArticleId($id)->getValue(), true));
 
         return JsonResponse::fromJsonString($article);
     }

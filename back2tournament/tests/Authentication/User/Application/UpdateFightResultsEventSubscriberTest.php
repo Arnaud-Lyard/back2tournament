@@ -19,10 +19,6 @@ final class UpdateFightResultsEventSubscriberTest extends TestCase
     private const FIGHT_ID = '55555555-5555-4555-8555-555555555555';
     private const UPDATED_FIGHT = '{"status":"reporting"}';
 
-    /**
-     * The side that declares is resolved from the JWT identity downstream, so
-     * the verified event carries that user along with the scores as sent.
-     */
     public function test_the_authenticated_caller_is_the_one_carried_downstream(): void
     {
         $dispatched = null;

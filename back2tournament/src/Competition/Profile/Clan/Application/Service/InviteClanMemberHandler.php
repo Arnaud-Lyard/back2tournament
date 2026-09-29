@@ -89,11 +89,7 @@ final class InviteClanMemberHandler
         return json_encode($this->normalizeMembership($membership, $player), JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * A place in a clan, the player named by battletag.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function normalizeMembership(ClanMember $membership, ?Player $player): array
     {
         return [

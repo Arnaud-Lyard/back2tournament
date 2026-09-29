@@ -11,16 +11,12 @@ final class OnGameCreationAdminVerifiedEvent extends Event
     private string $title;
     private string $user;
 
-    /**
-     * @var list<int>
-     */
+    /** @var list<int> */
     private array $teamSizes;
 
     private string $createdGame;
 
-    /**
-     * @param list<int> $teamSizes
-     */
+    /** @param list<int> $teamSizes */
     public function __construct(string $title, string $user, array $teamSizes)
     {
         $this->title = $title;
@@ -38,9 +34,7 @@ final class OnGameCreationAdminVerifiedEvent extends Event
         return $this->user;
     }
 
-    /**
-     * @return list<int>
-     */
+    /** @return list<int> */
     public function getTeamSizes(): array
     {
         return $this->teamSizes;

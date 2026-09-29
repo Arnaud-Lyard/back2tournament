@@ -62,7 +62,6 @@ final class RateFightHandler
             throw new NotFoundException('fight not found');
         }
 
-        // A fight counts once.
         if ($this->ratingChangeRepository->count(['fight' => $fightId->getValue()]) > 0) {
             return;
         }
@@ -91,14 +90,11 @@ final class RateFightHandler
             default => FightOutcome::DRAW,
         };
 
-        // Every format is a ranking of its own: a 2v2 counts in the 2v2 rankings.
         $gameId = $fight->getGame();
         $teamSize = new TeamSizeValueObject($fight->getTeamSize());
 
         $sides = [];
 
-        // Every player profile of a side moves, by what the fight was worth
-        // to its side. Nobody stands on both sides: fights refuse it.
         $playersOne = $lineups[$one]['players'];
         $playersTwo = $lineups[$two]['players'];
         if ([] !== $playersOne && [] !== $playersTwo && [] === array_intersect($playersOne, $playersTwo)) {
@@ -108,10 +104,6 @@ final class RateFightHandler
             ];
         }
 
-        // A clan rates on the fights of its teams, and on the duels of its
-        // members, against another clan: two sides of one clan leave it as it
-        // is. Each side counts for the clan its result recorded when the fight
-        // opened, so that counting the fight again gives the same ranking.
         $clanOne = $clans[$one] ?? null;
         $clanTwo = $clans[$two] ?? null;
         if (null !== $clanOne && null !== $clanTwo && $clanOne !== $clanTwo) {
@@ -146,10 +138,6 @@ final class RateFightHandler
         }
     }
 
-    /**
-     * The rating of a player profile or a clan in one format, started on its
-     * first fight in that format.
-     */
     private function ratingOf(RankingSubject $subjectType, string $subject, GameId $gameId, TeamSizeValueObject $teamSize): Rating
     {
         $rating = $this->ratingRepository->findOneBy([

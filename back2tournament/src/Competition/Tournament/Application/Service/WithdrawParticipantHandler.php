@@ -59,7 +59,6 @@ final class WithdrawParticipantHandler
             throw new NotFoundException('this participant is not registered in the tournament');
         }
 
-        // The participant withdraws itself, or the organizer withdraws it.
         $caller = (string) $this->currentUserProvider->getUser()->getId();
         if ($caller !== $tournament->getOrganizer()->getValue()
             && !\in_array($leaving->getCompetitor()->getValue(), $this->competitorRegistryProvider->representedBy($caller), true)) {
@@ -91,8 +90,6 @@ final class WithdrawParticipantHandler
     }
 
     /**
-     * A place in the tournament; the competitor is named by battletag or team name.
-     *
      * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>

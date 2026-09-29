@@ -18,7 +18,6 @@ import { useFieldErrors } from "@/hooks/use-field-errors"
 interface Side {
   competitor: string
   name: string
-  /** What was declared for this side, to start from. */
   score: number
 }
 
@@ -26,13 +25,10 @@ interface ArbitrationFormProps {
   fightId: string
   one: Side
   two: Side
-  /** A declaration waits for its confirmation: it may be set aside. */
   declared: boolean
-  /** A tournament fight cannot end in a draw. */
   tournament: boolean
 }
 
-/** Admin only: imposes the scores of a fight in dispute, or sets its declaration aside. */
 export function ArbitrationForm({
   fightId,
   one,
@@ -228,7 +224,6 @@ export function ArbitrationForm({
   )
 }
 
-/** A number input's text as a number, or undefined while it holds none. */
 function toNumber(value: string): number | undefined {
   return value.trim() === "" ? undefined : Number(value)
 }

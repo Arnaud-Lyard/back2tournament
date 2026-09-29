@@ -20,7 +20,7 @@ export async function PATCH(request: Request, { params }: GameContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.PATCH("/api/games/{id}", {
+    client.PATCH("/api/admin/games/{id}", {
       params: { path: { id } },
       body: parsed.data,
     })

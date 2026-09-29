@@ -16,7 +16,6 @@ final class Version20260927150000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // The fights settled so far were settled by their sides.
         $this->addSql('ALTER TABLE fight ADD arbitrated BOOLEAN DEFAULT false NOT NULL');
     }
 

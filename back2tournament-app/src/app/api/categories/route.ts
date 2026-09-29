@@ -11,5 +11,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return invalidInput(parsed.error)
 
   const client = await getServerApiClient()
-  return relayApiResult(client.POST("/api/categories/", { body: parsed.data }))
+  return relayApiResult(
+    client.POST("/api/admin/categories/", { body: parsed.data })
+  )
 }

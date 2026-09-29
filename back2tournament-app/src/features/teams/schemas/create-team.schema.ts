@@ -1,7 +1,6 @@
 import { z } from "zod"
 import { message, requiredName, uuid } from "@/libs/validation"
 
-/** A lineup of exactly `size` clan members, its leader among them. */
 export const createTeamSchema = z
   .object({
     clan: uuid(),

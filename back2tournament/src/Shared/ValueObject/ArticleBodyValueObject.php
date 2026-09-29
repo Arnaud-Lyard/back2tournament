@@ -6,9 +6,6 @@ namespace App\Shared\ValueObject;
 
 use App\Shared\Exception\ValidationException;
 
-/**
- * The text of an article. Kept as written: only a blank body is refused.
- */
 final class ArticleBodyValueObject
 {
     private string $value;

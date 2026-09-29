@@ -68,7 +68,6 @@ final class ChangeArticleImageHandler
                 $this->eventDispatcher->dispatch($domainEvent);
             }
 
-            // The former cover goes once the article no longer points to it.
             $this->imageProvider->remove($previous);
         }
 

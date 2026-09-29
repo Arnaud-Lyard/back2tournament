@@ -148,7 +148,7 @@ nelmio_api_doc:
                         image:
                             type: string
                             format: binary
-                            description: 'A JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most, 16 pixels a side at least. An animation keeps its first frame.'
+                            description: 'A JPEG, PNG or WebP image of 8 MB and 40 megapixels at most, 16 pixels a side at least. An animated WebP keeps its first frame.'
                 Player:
                     type: object
                     description: 'One user in one game. `user` names the account, `game` the game.'

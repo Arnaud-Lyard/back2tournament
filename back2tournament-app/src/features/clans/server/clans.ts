@@ -34,10 +34,9 @@ export const loadClan = cache(async (clanId: string) => {
   )
 })
 
-/** The caller's places in clans; nobody signed in holds none. */
 export const loadMyClans = cache(async (): Promise<Loaded<MyClan[]>> => {
   if (!(await getCurrentUser())) return { ok: true, data: [] }
 
   const client = await getServerApiClient()
-  return loadApiResult(client.GET("/api/users/me/clans"))
+  return loadApiResult(client.GET("/api/user/me/clans"))
 })

@@ -14,13 +14,12 @@ export async function loadChallenges({
 }: { page?: number; limit?: number } = {}) {
   const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/results/users/fights", {
+    client.GET("/api/user/results/fights", {
       params: { query: { page, limit } },
     })
   )
 }
 
-/** Admin only: one page of every fight, by status and by the name of a side. */
 export async function loadFights({
   status,
   search = "",
@@ -32,7 +31,7 @@ export async function loadFights({
 }) {
   const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/fights/", {
+    client.GET("/api/admin/fights/", {
       params: {
         query: {
           status,
@@ -45,10 +44,9 @@ export async function loadFights({
   )
 }
 
-/** One fight and both its sides. */
 export async function loadFight(fightId: string) {
   const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/fights/{id}", { params: { path: { id: fightId } } })
+    client.GET("/api/user/fights/{id}", { params: { path: { id: fightId } } })
   )
 }

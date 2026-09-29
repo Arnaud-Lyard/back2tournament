@@ -8,13 +8,21 @@ final class FindArticleQuery
 {
     private string $articleId;
 
-    public function __construct(string $articleId)
+    private bool $includesDrafts;
+
+    public function __construct(string $articleId, bool $includesDrafts = false)
     {
         $this->articleId = $articleId;
+        $this->includesDrafts = $includesDrafts;
     }
 
     public function getArticleId(): string
     {
         return $this->articleId;
+    }
+
+    public function includesDrafts(): bool
+    {
+        return $this->includesDrafts;
     }
 }

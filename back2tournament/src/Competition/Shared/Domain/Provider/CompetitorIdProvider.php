@@ -30,13 +30,13 @@ final class CompetitorIdProvider implements CompetitorIdProviderInterface
 
     public function byUserAndGame(string $userId, string $gameId): string
     {
-        /** @var Player|null $player */
+        /** @var (Player | null) $player */
         $player = $this->playerRepository->findOneBy(['user' => $userId, 'game' => $gameId]);
         if (!$player) {
             throw new NotFoundException(\sprintf('user %s has no player profile in game %s', $userId, $gameId));
         }
 
-        /** @var Competitor|null $competitor */
+        /** @var (Competitor | null) $competitor */
         $competitor = $this->competitorRepository->findOneBy([
             'type' => CompetitorType::PLAYER,
             'reference' => $player->getId()->getValue(),
@@ -50,7 +50,7 @@ final class CompetitorIdProvider implements CompetitorIdProviderInterface
 
     public function takesPartInFights(string $playerId): bool
     {
-        /** @var Competitor|null $competitor */
+        /** @var (Competitor | null) $competitor */
         $competitor = $this->competitorRepository->findOneBy([
             'type' => CompetitorType::PLAYER,
             'reference' => $playerId,

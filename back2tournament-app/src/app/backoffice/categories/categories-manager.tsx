@@ -41,7 +41,6 @@ import { useFieldErrors } from "@/hooks/use-field-errors"
 import { ListCard } from "../list-card"
 import { LoadError } from "../load-error"
 
-/** `categories` is null when the list could not be loaded. */
 export function CategoriesManager({
   categories,
 }: {
@@ -52,7 +51,6 @@ export function CategoriesManager({
   const describeError = useApiErrorMessage()
   const createCategory = useCreateCategory()
   const [name, setName] = useState("")
-  // The slug follows the name until it is edited by hand.
   const [customSlug, setCustomSlug] = useState<string | null>(null)
 
   const slug = customSlug ?? slugify(name)

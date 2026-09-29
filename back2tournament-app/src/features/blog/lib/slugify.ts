@@ -1,4 +1,3 @@
-/** "Actualités & Esport" → "actualites-esport": the shape category slugs take. */
 export function slugify(value: string): string {
   return value
     .normalize("NFD")

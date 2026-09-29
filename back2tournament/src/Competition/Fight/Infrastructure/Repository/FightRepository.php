@@ -12,9 +12,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Fight>
- */
+/** @extends ServiceEntityRepository<Fight> */
 final class FightRepository extends ServiceEntityRepository implements FightRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -48,15 +46,14 @@ final class FightRepository extends ServiceEntityRepository implements FightRepo
     }
 
     /**
-     * @param list<ResultStatus>|null $statuses
-     * @param list<string>|null       $competitors
+     * @param (list<ResultStatus> | null) $statuses
+     * @param (list<string> | null) $competitors
      */
     private function filtered(?array $statuses, ?string $gameId, ?array $competitors, ?string $fightId): QueryBuilder
     {
         $queryBuilder = $this->createQueryBuilder('fight');
 
         if (null !== $statuses) {
-            // Both results of a fight move together: one in the status is enough.
             $queryBuilder
                 ->andWhere(\sprintf('EXISTS (SELECT result.id FROM %s result WHERE result.fight = fight.id AND result.status IN (:statuses))', Result::class))
                 ->setParameter('statuses', array_map(static fn (ResultStatus $status): string => $status->value, $statuses));

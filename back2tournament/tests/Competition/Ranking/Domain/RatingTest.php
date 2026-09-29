@@ -59,7 +59,6 @@ final class RatingTest extends TestCase
 
     public function test_an_unexpected_win_is_worth_more_than_an_expected_one(): void
     {
-        // 1200 against 1000: the favourite was expected to score 0.76.
         $this->assertSame(8, Rating::points(1200, 1000, 1.0));
         $this->assertSame(24, Rating::points(1000, 1200, 1.0));
         $this->assertSame(-24, Rating::points(1200, 1000, 0.0));
@@ -97,8 +96,6 @@ final class RatingTest extends TestCase
 
     public function test_every_player_of_a_side_moves_by_what_the_fight_was_worth_to_the_side(): void
     {
-        // 1031 and 1016 average 1023.5, 984 and 969 average 976.5: the
-        // favourites were expected to score 0.57, and win 14 each.
         $alice = $this->record(self::ALICE, wins: 2);
         $bob = $this->record(self::BOB, wins: 1);
         $carol = $this->record(self::CAROL, losses: 1);
@@ -191,10 +188,6 @@ final class RatingTest extends TestCase
         );
     }
 
-    /**
-     * A 2v2 rating made by $wins wins, then $losses losses, each against a
-     * newcomer at 1000: one win makes 1016, two 1031; one loss 984, two 969.
-     */
     private function record(string $subject, int $wins = 0, int $losses = 0): Rating
     {
         $rating = $this->rating($subject, teamSize: 2);
@@ -218,9 +211,7 @@ final class RatingTest extends TestCase
         return Rating::settle($sideOne, $sideTwo, $outcome, new FightId(self::FIGHT_ID), $this->changeIds(\count($sideOne) + \count($sideTwo)));
     }
 
-    /**
-     * @return list<RatingChangeId>
-     */
+    /** @return list<RatingChangeId> */
     private function changeIds(int $count): array
     {
         return array_map(static fn (): RatingChangeId => new RatingChangeId(Uuid::v4()->toString()), range(1, $count));

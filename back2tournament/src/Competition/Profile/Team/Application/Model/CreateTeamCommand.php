@@ -12,18 +12,14 @@ final class CreateTeamCommand
 
     private int $size;
 
-    /**
-     * @var list<string>
-     */
+    /** @var list<string> */
     private array $players;
 
     private string $leader;
 
     private string $user;
 
-    /**
-     * @param list<string> $players
-     */
+    /** @param list<string> $players */
     public function __construct(string $clan, string $name, int $size, array $players, string $leader, string $user)
     {
         $this->clan = $clan;
@@ -49,9 +45,7 @@ final class CreateTeamCommand
         return $this->size;
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public function getPlayers(): array
     {
         return $this->players;
@@ -62,9 +56,6 @@ final class CreateTeamCommand
         return $this->leader;
     }
 
-    /**
-     * The caller, as the User context verified it.
-     */
     public function getUser(): string
     {
         return $this->user;

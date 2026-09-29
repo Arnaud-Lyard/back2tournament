@@ -41,9 +41,6 @@ class OnUpdateFightResultsEvent extends Event
         return $this->opponentScore;
     }
 
-    /**
-     * The fight once declared, as the handler serialized it, handed back to the controller.
-     */
     public function getUpdatedFight(): string
     {
         return $this->updatedFight;

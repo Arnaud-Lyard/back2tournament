@@ -8,9 +8,6 @@ use App\Media\Image\Domain\Enum\ImageKind;
 use App\Media\Image\Domain\ValueObject\CompressedImage;
 use App\Shared\ValueObject\UploadedImageValueObject;
 
-/**
- * Turns an uploaded image into the one a kind of image is stored as.
- */
 interface ImageCompressorInterface
 {
     public function compress(UploadedImageValueObject $image, ImageKind $kind): CompressedImage;

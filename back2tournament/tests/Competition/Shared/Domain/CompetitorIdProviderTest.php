@@ -120,10 +120,7 @@ final class CompetitorIdProviderTest extends TestCase
         $this->assertTrue($provider->takesPartInFights(self::PLAYER_ID));
     }
 
-    /**
-     *
-     * @param list<array<string, string>> $matching
-     */
+    /** @param list<array<string, string>> $matching */
     private function fightingProvider(array $matching): CompetitorIdProvider
     {
         $fightRepository = $this->createStub(FightRepositoryInterface::class);

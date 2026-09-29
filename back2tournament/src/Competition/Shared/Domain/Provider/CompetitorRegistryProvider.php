@@ -16,9 +16,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class CompetitorRegistryProvider implements CompetitorRegistryProviderInterface
 {
-    /**
-     * How many player profiles, and how many teams, a name search keeps.
-     */
     private const NAMED_AT_MOST = 100;
 
     private CompetitorRepositoryInterface $competitorRepository;
@@ -162,12 +159,10 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
             $references[$competitor->getType()->value][] = $competitor->getReference();
         }
 
-        // A player profile plays for the clan it is an active member of.
         $clansOfPlayers = [] === $references[CompetitorType::PLAYER->value]
             ? []
             : $this->clanTagProvider->clansOfPlayers($references[CompetitorType::PLAYER->value]);
 
-        // A team plays for its clan, with its lineup.
         $teams = [];
         if ([] !== $references[CompetitorType::TEAM->value]) {
             foreach ($this->teamRepository->findBy(['id' => $references[CompetitorType::TEAM->value]]) as $team) {

@@ -20,7 +20,7 @@ export async function POST(request: Request, { params }: ClanContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/clans/{id}/invitations", {
+    client.POST("/api/user/clans/{id}/invitations", {
       params: { path: { id } },
       body: parsed.data,
     })

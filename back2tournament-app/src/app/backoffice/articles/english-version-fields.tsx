@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea"
 type EnglishField = "titleEn" | "bodyEn"
 
 interface EnglishVersionFieldsProps {
-  /** Keeps the ids of the create form and the edit form apart. */
   idPrefix: string
   titleEn: string
   bodyEn: string
@@ -28,7 +27,6 @@ interface EnglishVersionFieldsProps {
   }
 }
 
-/** The optional English version of an article: its title and its body. */
 export function EnglishVersionFields({
   idPrefix,
   titleEn,

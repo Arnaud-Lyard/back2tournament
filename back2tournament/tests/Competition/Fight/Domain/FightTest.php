@@ -336,7 +336,6 @@ final class FightTest extends TestCase
         $this->assertNull($fight->getDeclaredBy());
         $this->assertFalse($fight->isArbitrated());
 
-        // The other side may now declare.
         Fight::declareOutcome($fight, new CompetitorId(self::COMPETITOR_TWO), $two, new Score(2), $one, new Score(1));
         $this->assertSame(self::COMPETITOR_TWO, $fight->getDeclaredBy()?->getValue());
     }
@@ -351,10 +350,6 @@ final class FightTest extends TestCase
         Fight::reopen($fight, $one, $two);
     }
 
-    /**
-     * Declared by an administrator, a result is as final as one confirmed by
-     * both sides: nobody goes back on it.
-     */
     public function test_an_arbitrated_fight_is_final_for_everyone(): void
     {
         [$fight, $one, $two] = $this->openFight();
@@ -404,9 +399,7 @@ final class FightTest extends TestCase
         );
     }
 
-    /**
-     * @return array{Fight, Result, Result}
-     */
+    /** @return array{Fight, Result, Result} */
     private function openFight(?TournamentId $tournamentId = null): array
     {
         $fight = $this->fight($tournamentId);

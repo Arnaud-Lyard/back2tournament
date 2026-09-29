@@ -6,10 +6,6 @@ namespace App\Competition\Tournament\Domain\Entity;
 
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 
-/**
- * A competitor registered in a tournament. The seed is its registration rank:
- * 1 registered first, and the bracket pairs seeds from both ends.
- */
 class Participant
 {
     private string $id;

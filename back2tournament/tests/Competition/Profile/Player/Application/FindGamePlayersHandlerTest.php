@@ -108,17 +108,13 @@ final class FindGamePlayersHandlerTest extends TestCase
         $this->assertSame(0, $page['pages']);
     }
 
-    /**
-     * @return array{items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int}
-     */
+    /** @return array{items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int} */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * @param list<Player> $players
-     */
+    /** @param list<Player> $players */
     private function playerRepository(array $players, int $total): PlayerRepositoryInterface
     {
         $playerRepository = $this->createStub(PlayerRepositoryInterface::class);
@@ -128,9 +124,7 @@ final class FindGamePlayersHandlerTest extends TestCase
         return $playerRepository;
     }
 
-    /**
-     * @param array<string, array{id: string, tag: string}> $clans
-     */
+    /** @param array<string, array{id: string, tag: string}> $clans */
     private function clans(array $clans): ClanTagProviderInterface
     {
         $clanTagProvider = $this->createStub(ClanTagProviderInterface::class);

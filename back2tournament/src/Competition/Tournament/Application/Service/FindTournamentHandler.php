@@ -61,12 +61,9 @@ final class FindTournamentHandler
     }
 
     /**
-     * The tournament, its participants by seed and its bracket round by round.
-     * Competitors are named by battletag or team name.
-     *
-     * @param list<Participant>                                                     $participants
-     * @param list<Matchup>                                                         $bracket
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described    the competitors, keyed by id
+     * @param list<Participant> $participants
+     * @param list<Matchup> $bracket
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */

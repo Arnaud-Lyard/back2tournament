@@ -7,9 +7,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20260905120411 extends AbstractMigration
 {
     public function getDescription(): string
@@ -19,7 +16,6 @@ final class Version20260905120411 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE article (title VARCHAR(255) NOT NULL, body TEXT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, author UUID NOT NULL, category UUID NOT NULL, id UUID NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE TABLE category (name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL, id UUID NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE TABLE comment (message TEXT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, article_id VARCHAR(255) NOT NULL, id UUID NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY (id))');
@@ -41,7 +37,6 @@ final class Version20260905120411 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('DROP TABLE article');
         $this->addSql('DROP TABLE category');
         $this->addSql('DROP TABLE comment');

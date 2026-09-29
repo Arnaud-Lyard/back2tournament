@@ -1,14 +1,13 @@
 import type { components, paths } from "@/libs/api/schema"
 
 export type PendingResult =
-  paths["/api/results/users/fights"]["get"]["responses"][200]["content"]["application/json"]["items"][number]
+  paths["/api/user/results/fights"]["get"]["responses"][200]["content"]["application/json"]["items"][number]
 
 export type CreatedFight =
-  paths["/api/fights/"]["post"]["responses"][200]["content"]["application/json"]
+  paths["/api/user/fights/"]["post"]["responses"][200]["content"]["application/json"]
 
 export type FightSummary = components["schemas"]["FightSummary"]
 
-/** Which fights the backoffice lists: the disputes are among the `reporting` ones. */
 export type FightStatusFilter = "reporting" | "pending" | "finished" | "all"
 
 export const ADMIN_FIGHTS_PER_PAGE = 20
@@ -21,5 +20,4 @@ export type SettledResult = components["schemas"]["SettledResult"]
 
 export type Outcome = SettledResult["outcome"]
 
-/** How many settled fights a profile or a clan page shows. */
 export const HISTORY_SIZE = 10

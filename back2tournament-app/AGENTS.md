@@ -7,3 +7,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# Comments
+
+No comments: names, types and tests say what the code does. Only what a tool reads
+stays: `// @vitest-environment` directives, the comment oxlint's `no-empty` wants in an
+otherwise empty `catch`, and the generated `src/libs/api/schema.d.ts`, whose doc
+comments are the API's OpenAPI descriptions.

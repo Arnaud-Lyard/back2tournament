@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/fights/', name: 'api_fight_list', methods: ['GET'])]
+#[Route('/api/admin/fights/', name: 'api_fight_list', methods: ['GET'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\Parameter(name: 'status', in: 'query', required: false, description: '`reporting` keeps the fights whose declaration waits for its confirmation, where disputes are; `pending` those nobody declared yet; `finished` the settled ones; `all` by default.', schema: new OA\Schema(type: 'string', enum: ['all', 'pending', 'reporting', 'finished'], default: 'all'))]
 #[OA\Parameter(name: 'game', in: 'query', required: false, description: 'Keeps the fights of this game.', schema: new OA\Schema(type: 'string', format: 'uuid'))]

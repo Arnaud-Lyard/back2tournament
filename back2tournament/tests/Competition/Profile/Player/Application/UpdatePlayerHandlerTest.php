@@ -132,10 +132,6 @@ final class UpdatePlayerHandlerTest extends TestCase
         return $currentUserProvider;
     }
 
-    /**
-     * A profile as the handler meets it: read back from the repository, so the
-     * creation it was born with is long dispatched.
-     */
     private function player(): Player
     {
         $player = Player::create(

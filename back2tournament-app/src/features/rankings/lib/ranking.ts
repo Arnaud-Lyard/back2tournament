@@ -1,7 +1,6 @@
 import { listHref } from "@/libs/list-params"
 import type { RankedSubject, RankingView } from "../types"
 
-/** The ranking a page shows: the players', unless the clans' is asked for. */
 export function readRankingView(
   value: string | string[] | undefined
 ): RankingView {
@@ -9,11 +8,6 @@ export function readRankingView(
   return raw === "clans" ? "clans" : "players"
 }
 
-/**
- * The format a page ranks, as the number of players per side: the one asked
- * for when the game is played in it, its smallest format otherwise.
- * Undefined when the game's formats are unknown: the API then picks.
- */
 export function readRankingSize(
   value: string | string[] | undefined,
   formats: readonly number[]
@@ -25,7 +19,6 @@ export function readRankingSize(
   return formats.length > 0 ? Math.min(...formats) : undefined
 }
 
-/** The page of a ranked player profile or clan, in its game. */
 export function rankedSubjectHref(
   gameId: string,
   subject: RankedSubject | undefined
@@ -37,10 +30,6 @@ export function rankedSubjectHref(
   return `/games/${encodeURIComponent(gameId)}/${section}/${encodeURIComponent(id)}`
 }
 
-/**
- * Where a game's ranking is, on the view that ranks this kind of subject and
- * in a format; without one, the smallest format of the game.
- */
 export function rankingHref(
   gameId: string,
   view: RankingView,

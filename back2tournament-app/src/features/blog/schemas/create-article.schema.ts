@@ -1,10 +1,6 @@
 import { z } from "zod"
 import { message, requiredText, slug } from "@/libs/validation"
 
-/**
- * The fields of an article. Its English version is optional, but whole: a
- * title and a body, or neither; a blank field counts as left empty.
- */
 export const articleFields = z.object({
   title: requiredText(),
   categorySlug: slug(),
@@ -13,10 +9,6 @@ export const articleFields = z.object({
   bodyEn: z.string().trim().optional(),
 })
 
-/**
- * Flags the empty half of an English version whose other half is filled.
- * A field left out is not judged: an edit may change one of the two.
- */
 export function refineEnglishVersion(
   data: { titleEn?: string; bodyEn?: string },
   context: z.RefinementCtx

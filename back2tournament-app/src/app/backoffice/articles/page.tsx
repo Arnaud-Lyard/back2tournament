@@ -31,7 +31,6 @@ interface BackofficeArticlesPageProps {
   searchParams: Promise<{
     articleId?: string | string[]
     page?: string | string[]
-    /** `1` turns the preview of `articleId` into its edit form. */
     edit?: string | string[]
   }>
 }
@@ -57,10 +56,9 @@ export default async function BackofficeArticlesPage({
   const editing = !!selectedId && canEdit && [query.edit].flat().includes("1")
 
   const [articles, categories, edited] = await Promise.all([
-    // The backoffice lists the drafts along with the published articles.
     loadArticles({ page, status: "all" }),
     loadCategories(),
-    editing ? loadArticle(selectedId) : undefined,
+    editing ? loadArticle(selectedId, { drafts: true }) : undefined,
   ])
   const categoryList = categories.ok ? categories.data : []
   const previewHref = listHref(PATHNAME, { page, articleId: selectedId })
@@ -78,8 +76,6 @@ export default async function BackofficeArticlesPage({
           {selectedId &&
             (edited?.ok ? (
               <>
-                {/* The cover is saved on its own, as soon as it is chosen:
-                    the form below keeps what is being typed meanwhile. */}
                 <Card>
                   <CardHeader>
                     <CardTitle>{t("cover.title")}</CardTitle>

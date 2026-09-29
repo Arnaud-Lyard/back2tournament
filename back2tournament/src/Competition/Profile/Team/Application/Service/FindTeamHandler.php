@@ -51,9 +51,7 @@ final class FindTeamHandler
     }
 
     /**
-     * The team, its lineup named by battletag, leader first.
-     *
-     * @param list<Player> $players the lineup
+     * @param list<Player> $players
      *
      * @return array<string, mixed>
      */

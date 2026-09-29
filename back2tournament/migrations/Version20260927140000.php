@@ -16,7 +16,6 @@ final class Version20260927140000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // The articles written so far are in French only.
         $this->addSql('ALTER TABLE article ADD title_en VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE article ADD body_en TEXT DEFAULT NULL');
     }

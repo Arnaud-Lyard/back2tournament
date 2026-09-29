@@ -99,11 +99,7 @@ final class FindClanHandler
         return json_encode($view, JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * A place in a clan, the player named by battletag.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function normalizeMembership(ClanMember $membership, ?Player $player): array
     {
         return [
@@ -121,9 +117,7 @@ final class FindClanHandler
     }
 
     /**
-     * The team, its lineup named by battletag, leader first.
-     *
-     * @param list<Player> $players the lineup
+     * @param list<Player> $players
      *
      * @return array<string, mixed>
      */

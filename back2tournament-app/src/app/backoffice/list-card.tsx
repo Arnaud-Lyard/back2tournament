@@ -21,14 +21,12 @@ interface ListCardProps {
   title: string
   description: string
   count: number
-  /** False when the rows speak for themselves, e.g. one page of a longer list. */
   showCount?: boolean
   emptyTitle: string
   emptyDescription: string
   children: ReactNode
 }
 
-/** A backoffice listing: its rows, or an empty state when there are none. */
 export function ListCard({
   title,
   description,

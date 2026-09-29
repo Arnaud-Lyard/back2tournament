@@ -5,14 +5,11 @@ deptrac:
         - '#/Tests/#'
 
     layers:
-        # ---- Infrastructure layer
 
         -   name: Infrastructure
             collectors:
                 -   type: classNameRegex
                     value: '#^App\\.*\\Infrastructure\\.*#'
-
-        # ---- Domain layer
 
         -   name: Domain
             collectors:

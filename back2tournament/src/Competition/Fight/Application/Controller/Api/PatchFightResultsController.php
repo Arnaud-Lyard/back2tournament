@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-#[Route('/api/fights/{id}/results', name: 'api_fight_results_patch', methods: ['PATCH'])]
+#[Route('/api/user/fights/{id}/results', name: 'api_fight_results_patch', methods: ['PATCH'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Fight ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(

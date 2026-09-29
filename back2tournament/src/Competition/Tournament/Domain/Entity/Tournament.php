@@ -20,12 +20,6 @@ use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\TeamSizeValueObject;
 use App\Shared\ValueObject\TournamentNameValueObject;
 
-/**
- * A single-elimination tournament of one game, in one format.
- *
- * upcoming (registrations open) → ongoing (bracket drawn) → finished,
- * or cancelled at any point before it is finished.
- */
 class Tournament extends AggregateRoot
 {
     public const MIN_CAPACITY = 2;
@@ -165,9 +159,6 @@ class Tournament extends AggregateRoot
         return $tournament;
     }
 
-    /**
-     * @param int $registered how many participants the tournament already counts
-     */
     public static function ensureOpenForRegistration(Tournament $tournament, int $registered): void
     {
         if (TournamentStatus::UPCOMING !== $tournament->status) {
@@ -179,9 +170,6 @@ class Tournament extends AggregateRoot
         }
     }
 
-    /**
-     * @param int $registered how many participants the tournament already counts
-     */
     public static function register(
         Tournament $tournament,
         ParticipantId $participantId,
@@ -205,12 +193,9 @@ class Tournament extends AggregateRoot
     }
 
     /**
-     * The participant leaves before the bracket is drawn; those registered
-     * after it move up one seed.
+     * @param list<Participant> $registered
      *
-     * @param list<Participant> $registered every participant, the leaving one included
-     *
-     * @return list<Participant> the participants whose seed changed
+     * @return list<Participant>
      */
     public static function withdraw(Tournament $tournament, Participant $leaving, array $registered): array
     {
@@ -239,14 +224,10 @@ class Tournament extends AggregateRoot
     }
 
     /**
-     * Closes registrations and draws the bracket: seed 1 meets the last seed,
-     * seed 2 the one before, and so on. When the participants do not fill a
-     * power of two, the top seeds get a bye and go straight to round 2.
-     *
      * @param list<Participant> $participants
-     * @param list<MatchupId>   $matchupIds   one per matchup of the bracket: bracketSize() - 1
+     * @param list<MatchupId> $matchupIds
      *
-     * @return list<Matchup> the whole bracket, round by round, top to bottom
+     * @return list<Matchup>
      */
     public static function start(Tournament $tournament, array $participants, array $matchupIds): array
     {
@@ -297,7 +278,6 @@ class Tournament extends AggregateRoot
 
         $tournament->recordDomainEvent(new TournamentStartedEvent($tournament->getId()));
 
-        // A seed facing nobody moves on at once.
         foreach ($bracket as $matchup) {
             if (1 === $matchup->getRound() && (null === $matchup->getCompetitorOne()) !== (null === $matchup->getCompetitorTwo())) {
                 self::advance($tournament, $bracket, $matchup, $matchup->getCompetitorOne() ?? $matchup->getCompetitorTwo());
@@ -307,14 +287,7 @@ class Tournament extends AggregateRoot
         return $bracket;
     }
 
-    /**
-     * The fight of a matchup is settled: its winner moves on to the next round,
-     * or wins the tournament when the matchup was the final.
-     *
-     * @param list<Matchup> $bracket
-     *
-     * @return Matchup|null the matchup the winner moves on to, null after the final
-     */
+    /** @param list<Matchup> $bracket */
     public static function recordWinner(Tournament $tournament, array $bracket, Matchup $decided, CompetitorId $winner): ?Matchup
     {
         if (TournamentStatus::ONGOING !== $tournament->status) {
@@ -358,9 +331,6 @@ class Tournament extends AggregateRoot
         return $tournament;
     }
 
-    /**
-     * The smallest power of two that seats every participant.
-     */
     public static function bracketSize(int $participants): int
     {
         $size = 2;
@@ -372,8 +342,6 @@ class Tournament extends AggregateRoot
     }
 
     /**
-     * The matchups whose two sides are known and whose fight is still to open.
-     *
      * @param list<Matchup> $bracket
      *
      * @return list<Matchup>
@@ -389,12 +357,7 @@ class Tournament extends AggregateRoot
         ));
     }
 
-    /**
-     * Seeds in bracket order, top to bottom: for 8, [1, 8, 4, 5, 2, 7, 3, 6],
-     * so that the two best seeds can only meet in the final.
-     *
-     * @return list<int>
-     */
+    /** @return list<int> */
     private static function seedingOrder(int $size): array
     {
         $order = [1];
@@ -411,9 +374,7 @@ class Tournament extends AggregateRoot
         return $order;
     }
 
-    /**
-     * @param list<Matchup> $bracket
-     */
+    /** @param list<Matchup> $bracket */
     private static function advance(Tournament $tournament, array $bracket, Matchup $decided, CompetitorId $winner): ?Matchup
     {
         $decided->setWinner($winner);
@@ -432,7 +393,6 @@ class Tournament extends AggregateRoot
             }
         }
 
-        // No next round: that was the final.
         $tournament->winner = $winner->getValue();
         $tournament->status = TournamentStatus::FINISHED;
         $tournament->setUpdatedAt(new \DateTimeImmutable('now'));

@@ -64,7 +64,6 @@ final class ConfirmFightResultsHandler
         $this->resultRepository->save($resultTwo);
         $this->fightRepository->save($fight);
 
-        // FightSettledEvent: a tournament bracket moves its winner on from here.
         foreach ($fight->pullDomainEvents() as $domainEvent) {
             $this->eventDispatcher->dispatch($domainEvent);
         }
@@ -81,12 +80,9 @@ final class ConfirmFightResultsHandler
     }
 
     /**
-     * The fight, where it stands as a whole, and its two sides, each named and
-     * carrying its own result.
-     *
-     * @param list<Result>                                                         $results     a side with no result reads as pending, 0 points
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described   the sides, keyed by competitor id
-     * @param list<string>                                                         $represented the competitors the caller speaks for
+     * @param list<Result> $results
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
+     * @param list<string> $represented
      *
      * @return array<string, mixed>
      */

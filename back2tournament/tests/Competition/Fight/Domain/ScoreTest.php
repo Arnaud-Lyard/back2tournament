@@ -11,9 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 final class ScoreTest extends TestCase
 {
-    /**
-     * @return iterable<string, array{int}>
-     */
+    /** @return iterable<string, array{int}> */
     public static function acceptedScores(): iterable
     {
         yield 'a side that scored nothing' => [0];
@@ -27,9 +25,7 @@ final class ScoreTest extends TestCase
         self::assertSame($score, new Score($score)->getValue());
     }
 
-    /**
-     * @return iterable<string, array{int}>
-     */
+    /** @return iterable<string, array{int}> */
     public static function refusedScores(): iterable
     {
         yield 'just below zero' => [-1];

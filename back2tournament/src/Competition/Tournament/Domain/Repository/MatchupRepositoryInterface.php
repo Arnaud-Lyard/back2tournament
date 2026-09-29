@@ -10,9 +10,7 @@ interface MatchupRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Matchup>
-     */
+    /** @return list<Matchup> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
     public function save(Matchup $matchup): void;

@@ -27,7 +27,6 @@ export const ROLE_PERMISSIONS = {
   ],
 } as const satisfies Record<UserRole, readonly AuthPermission[]>
 
-/** Highest-privilege role wins when a user holds multiple Symfony ROLE_* strings. */
 export const ROLE_PRECEDENCE: readonly UserRole[] = ["admin", "editor", "user"]
 
 export function getPermissionsForRole(role: UserRole): AuthPermission[] {

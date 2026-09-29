@@ -175,10 +175,6 @@ final class DeletePlayerHandlerTest extends TestCase
         return $competitorIdProvider;
     }
 
-    /**
-     * A profile as the handler meets it: read back from the repository, so the
-     * creation it was born with is long dispatched.
-     */
     private function player(): Player
     {
         $player = Player::create(

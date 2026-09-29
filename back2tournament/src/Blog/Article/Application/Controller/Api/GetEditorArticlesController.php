@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Blog\Article\Application\Controller\Api;
 
 use App\Blog\Article\Application\Model\FindArticlesQuery;
-use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/', name: 'api_article_list', methods: ['GET'])]
+#[Route('/api/editor/articles/', name: 'api_editor_article_list', methods: ['GET'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(
     name: 'page',
@@ -44,9 +43,16 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'Keeps the articles filed under this category, named by its slug.',
     schema: new OA\Schema(type: 'string', example: 'actualites'),
 )]
+#[OA\Parameter(
+    name: 'status',
+    in: 'query',
+    required: false,
+    description: '`all` by default: drafts and published articles. `draft` or `published` keeps those only.',
+    schema: new OA\Schema(type: 'string', enum: ['all', 'draft', 'published'], default: 'all'),
+)]
 #[OA\Response(
     response: 200,
-    description: 'One page of published articles, newest first by their publication date. Comments are not included: `GET /api/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one.',
+    description: 'Requires an editor or an administrator. One page of articles, newest first: a published article by its publication date, a draft by the day it was written. Comments are not included: `GET /api/editor/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one.',
     content: new OA\JsonContent(
         required: ['items', 'total', 'page', 'limit', 'pages'],
         properties: [
@@ -60,9 +66,10 @@ use Symfony\Component\Routing\Attribute\Route;
     ),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
+#[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
+#[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
 #[OA\Response(response: 404, description: 'No category has the requested slug')]
-#[Security(name: null)]
-final class GetArticlesController extends AbstractController
+final class GetEditorArticlesController extends AbstractController
 {
     use HandleTrait;
 
@@ -78,6 +85,7 @@ final class GetArticlesController extends AbstractController
             $request->query->getInt('limit', 10),
             $request->query->getString('q'),
             $request->query->getString('category'),
+            $request->query->getString('status', 'all'),
         )));
     }
 }

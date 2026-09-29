@@ -8,20 +8,15 @@ use App\Shared\ValueObject\AggregateRootId;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 
-/**
- * Repository doubles that answer findOneBy / findBy / count from a fixed set of
- * entities, the way Doctrine would: each criterion is read through the entity's
- * getter, and a list criterion means "one of these".
- */
 trait RepositoryStubs
 {
     /**
      * @template T of object
      *
      * @param class-string<T> $interface
-     * @param list<object>    $entities
+     * @param list<object> $entities
      *
-     * @return T&Stub
+     * @return (T & Stub)
      */
     private function repositoryStub(string $interface, array $entities): object
     {
@@ -32,14 +27,12 @@ trait RepositoryStubs
     }
 
     /**
-     * The same, as a mock, for a test that also sets expectations on writes.
-     *
      * @template T of object
      *
      * @param class-string<T> $interface
-     * @param list<object>    $entities
+     * @param list<object> $entities
      *
-     * @return T&MockObject
+     * @return (T & MockObject)
      */
     private function repositoryMock(string $interface, array $entities): object
     {
@@ -49,9 +42,7 @@ trait RepositoryStubs
         return $repository;
     }
 
-    /**
-     * @param list<object> $entities
-     */
+    /** @param list<object> $entities */
     private function answerFrom(object $repository, string $interface, array $entities): void
     {
         $matching = static fn (array $criteria): array => array_values(array_filter(
@@ -59,7 +50,6 @@ trait RepositoryStubs
             static fn (object $entity): bool => self::matchesCriteria($entity, $criteria),
         ));
 
-        // Only what the interface declares: PHPUnit refuses to configure anything else.
         if (method_exists($interface, 'findOneBy')) {
             $repository->method('findOneBy')->willReturnCallback(
                 static fn (array $criteria, ?array $orderBy = null): ?object => $matching($criteria)[0] ?? null

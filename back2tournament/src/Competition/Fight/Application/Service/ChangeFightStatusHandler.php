@@ -82,7 +82,6 @@ final class ChangeFightStatusHandler
         $this->resultRepository->save($resultTwo);
         $this->fightRepository->save($fight);
 
-        // FightSettledEvent: the bracket and the rankings move on from here.
         foreach ($fight->pullDomainEvents() as $domainEvent) {
             $this->eventDispatcher->dispatch($domainEvent);
         }
@@ -94,11 +93,9 @@ final class ChangeFightStatusHandler
     }
 
     /**
-     * The score of each side, checked before anything is read.
+     * @param (array<string, mixed> | null) $given
      *
-     * @param array<string, mixed>|null $given
-     *
-     * @return array<string, Score> keyed by competitor id
+     * @return array<string, Score>
      */
     private static function scores(?array $given): array
     {
@@ -118,11 +115,8 @@ final class ChangeFightStatusHandler
     }
 
     /**
-     * The fight as a whole, and its two sides, each named and carrying its
-     * own result.
-     *
-     * @param list<Result>                                                         $results
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the sides, keyed by competitor id
+     * @param list<Result> $results
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */

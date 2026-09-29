@@ -12,9 +12,6 @@ final class CreateFightCommand
 
     private string $sideTwo;
 
-    /**
-     * @param bool $betweenTeams true when both sides name teams, false when they name player profiles
-     */
     public function __construct(bool $betweenTeams, string $sideOne, string $sideTwo)
     {
         $this->betweenTeams = $betweenTeams;

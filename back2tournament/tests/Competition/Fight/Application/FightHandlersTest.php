@@ -130,7 +130,6 @@ final class FightHandlersTest extends TestCase
 
         $this->expectException(PermissionDeniedException::class);
 
-        // STRANGER_USER owns MATE_PLAYER, who plays in MY_TEAM without leading it.
         $this->createHandler($scheduler, self::STRANGER_USER)(new CreateFightCommand(true, self::MY_TEAM, self::THEIR_TEAM));
     }
 
@@ -323,9 +322,9 @@ final class FightHandlersTest extends TestCase
     }
 
     /**
-     * @param list<int>             $teamSizes
-     * @param list<Player>          $extraPlayers
-     * @param list<TeamPlayer>|null $theirLineup
+     * @param list<int> $teamSizes
+     * @param list<Player> $extraPlayers
+     * @param (list<TeamPlayer> | null) $theirLineup
      */
     private function createHandler(
         FightSchedulerProviderInterface $scheduler,
@@ -361,9 +360,7 @@ final class FightHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<string> $represented
-     */
+    /** @param list<string> $represented */
     private function updateHandler(
         ?Fight $fight,
         ResultRepositoryInterface $resultRepository,
@@ -378,9 +375,7 @@ final class FightHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<string> $represented
-     */
+    /** @param list<string> $represented */
     private function confirmHandler(
         Fight $fight,
         ResultRepositoryInterface $resultRepository,
@@ -395,9 +390,7 @@ final class FightHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<string> $represented
-     */
+    /** @param list<string> $represented */
     private function pendingHandler(
         array $represented,
         ResultRepositoryInterface $resultRepository,
@@ -413,9 +406,7 @@ final class FightHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<string> $represented
-     */
+    /** @param list<string> $represented */
     private function registry(array $represented): CompetitorRegistryProviderInterface
     {
         $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
@@ -439,9 +430,7 @@ final class FightHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @return array{Fight, Result, Result}
-     */
+    /** @return array{Fight, Result, Result} */
     private function openFight(int $teamSize = 1): array
     {
         $fight = $this->fight($teamSize);
@@ -453,9 +442,7 @@ final class FightHandlersTest extends TestCase
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);

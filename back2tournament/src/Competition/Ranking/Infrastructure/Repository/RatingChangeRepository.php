@@ -9,9 +9,7 @@ use App\Competition\Ranking\Domain\Repository\RatingChangeRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<RatingChange>
- */
+/** @extends ServiceEntityRepository<RatingChange> */
 final class RatingChangeRepository extends ServiceEntityRepository implements RatingChangeRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

@@ -23,7 +23,6 @@ const SECTIONS: readonly { key: SectionKey; icon: LucideIcon }[] = [
 interface GameNavProps {
   gameId: string
   title: string
-  /** Where the game's picture is read from; null while it has none. */
   image?: string | null
 }
 

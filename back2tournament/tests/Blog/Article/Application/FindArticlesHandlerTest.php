@@ -159,17 +159,13 @@ final class FindArticlesHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @return array{items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int}
-     */
+    /** @return array{items: list<array<string, mixed>>, total: int, page: int, limit: int, pages: int} */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * @param list<Article> $articles
-     */
+    /** @param list<Article> $articles */
     private function articleRepository(array $articles, int $total): ArticleRepositoryInterface
     {
         $articleRepository = $this->createStub(ArticleRepositoryInterface::class);
@@ -192,9 +188,6 @@ final class FindArticlesHandlerTest extends TestCase
         return $normalizer;
     }
 
-    /**
-     * Published by the user of AUTHOR_ID.
-     */
     private function article(string $id, string $title): Article
     {
         $article = Article::create(

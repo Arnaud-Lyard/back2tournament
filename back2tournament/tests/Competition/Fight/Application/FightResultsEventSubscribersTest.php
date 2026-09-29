@@ -17,10 +17,6 @@ use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 
-/**
- * The Fight end of the two result chains: once the User context has verified
- * the caller, the command runs for that user and its JSON goes back on the event.
- */
 final class FightResultsEventSubscribersTest extends TestCase
 {
     private const USER_ID = '22222222-2222-2222-2222-222222222222';
@@ -55,10 +51,6 @@ final class FightResultsEventSubscribersTest extends TestCase
         $this->assertSame(self::FIGHT_JSON, $event->getConfirmedFight());
     }
 
-    /**
-     * A refusal from the handler reaches the controller, and so
-     * DomainExceptionListener, which unwraps it into its status code.
-     */
     public function test_a_refusal_from_the_handler_is_not_swallowed(): void
     {
         $messageBus = $this->createStub(MessageBusInterface::class);

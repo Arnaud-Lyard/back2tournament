@@ -13,18 +13,14 @@ final class OnTeamCreationUserVerifiedEvent extends Event
     private string $clan;
     private int $size;
 
-    /**
-     * @var list<string>
-     */
+    /** @var list<string> */
     private array $players;
 
     private string $leader;
 
     private string $createdTeam;
 
-    /**
-     * @param list<string> $players
-     */
+    /** @param list<string> $players */
     public function __construct(string $name, string $user, string $clan, int $size, array $players, string $leader)
     {
         $this->name = $name;
@@ -55,9 +51,7 @@ final class OnTeamCreationUserVerifiedEvent extends Event
         return $this->size;
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public function getPlayers(): array
     {
         return $this->players;

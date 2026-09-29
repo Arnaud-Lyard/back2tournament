@@ -24,11 +24,9 @@ import type { Loaded } from "@/libs/api/load"
 
 interface ResultHistoryProps {
   history: Loaded<SettledResultPage>
-  /** Whose results these are: a player profile, or a clan through its teams and members. */
   subject: "player" | "clan"
 }
 
-/** The latest settled fights of a player profile or a clan, newest first. */
 export async function ResultHistory({ history, subject }: ResultHistoryProps) {
   const [t, format] = await Promise.all([
     getTranslations("history"),
@@ -64,8 +62,6 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
             {items.map((result) => {
               const href = opponentHref(result)
               const opponent = result.opponent?.name ?? t("unknown")
-              // A clan names who played for it: one of its teams, or the member
-              // who fought the duel. A profile names its team when it had one.
               const named = subject === "clan" || result.side.type === "team"
 
               return (
@@ -80,7 +76,6 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
                     <span className="flex min-w-0 items-center gap-1.5 text-sm">
                       {named && (
                         <>
-                          {/* On a clan's page, its own tag goes without saying. */}
                           {subject === "player" && (
                             <ClanTag tag={result.side.tag} />
                           )}

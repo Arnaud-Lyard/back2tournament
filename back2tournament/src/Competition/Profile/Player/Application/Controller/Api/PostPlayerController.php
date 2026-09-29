@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/players/', name: 'api_player_post', methods: ['POST'])]
+#[Route('/api/user/players/', name: 'api_player_post', methods: ['POST'])]
 #[OA\Tag(name: 'Player')]
 #[OA\RequestBody(
     required: true,

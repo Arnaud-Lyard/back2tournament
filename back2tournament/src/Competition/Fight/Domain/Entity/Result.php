@@ -16,13 +16,6 @@ class Result
 
     private string $competitor;
 
-    /**
-     * The clan this side played for, as it stood when the fight was opened:
-     * the clan of the team, or the clan the player profile was an active
-     * member of. Null for a profile in no clan. The clans' rankings and
-     * results read it, so a player who changes clans leaves their past
-     * fights with the clan they played them for.
-     */
     private ?string $clan = null;
 
     private int $score;

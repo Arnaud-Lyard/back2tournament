@@ -14,7 +14,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/fights/', name: 'api_fight_post', methods: ['POST'])]
+#[Route('/api/user/fights/', name: 'api_fight_post', methods: ['POST'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\RequestBody(
     required: true,

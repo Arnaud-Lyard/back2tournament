@@ -49,7 +49,6 @@ final class FindRankingHandler
             throw new NotFoundException('game not found');
         }
 
-        // One ranking per format the game is played in, the smallest by default.
         $teamSize = $findRankingQuery->getTeamSize() ?? min($game->getTeamSizes());
         if (!$game->supportsTeamSize($teamSize)) {
             throw new ValidationException(\sprintf('%s is not played %2$dv%2$d', $game->getTitle(), $teamSize));
@@ -61,7 +60,6 @@ final class FindRankingHandler
         $ratings = $this->ratingRepository->findRanking($subjectType, $gameId->getValue(), $teamSize, $findRankingQuery->getLimit(), $offset);
         $subjects = $this->subjects($subjectType, array_map(static fn (Rating $rating): string => $rating->getSubject(), $ratings));
 
-        // Equal ratings share a rank; the next one down takes its place in the list.
         $items = [];
         $rank = 0;
         $previous = null;
@@ -90,9 +88,6 @@ final class FindRankingHandler
     }
 
     /**
-     * The names of the ranked player profiles or clans, keyed by id, with the
-     * tag of the clan: the profile's own clan, when it is in one.
-     *
      * @param list<string> $subjectIds
      *
      * @return array<string, array{name: string, tag: ?string}>
@@ -122,7 +117,7 @@ final class FindRankingHandler
     }
 
     /**
-     * @param array{name: string, tag: ?string}|null $subject
+     * @param (array{name: string, tag: ?string} | null) $subject
      *
      * @return array<string, mixed>
      */

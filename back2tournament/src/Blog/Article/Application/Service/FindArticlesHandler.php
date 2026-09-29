@@ -48,7 +48,6 @@ final class FindArticlesHandler
             default => throw new ValidationException('status must be published, draft or all'),
         };
 
-        // Drafts stay in the backoffice.
         if (ArticleStatus::PUBLISHED !== $status && !$this->currentUserProvider->isGranted('ROLE_EDITOR')) {
             throw new PermissionDeniedException('only an editor reads the drafts');
         }
@@ -91,9 +90,7 @@ final class FindArticlesHandler
     }
 
     /**
-     * The article, and the name of the user who published it.
-     *
-     * @param array<string, string> $usernames keyed by user id
+     * @param array<string, string> $usernames
      *
      * @return array<string, mixed>
      */

@@ -1,7 +1,3 @@
-/**
- * A `datetime-local` value is the visitor's wall-clock time with no offset:
- * it is sent with theirs, so the backend reads the moment they meant.
- */
 export function toIsoWithOffset(local: string): string {
   if (!local) return ""
   const date = new Date(local)

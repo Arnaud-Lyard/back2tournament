@@ -130,7 +130,7 @@ Each context (except `Shared`) has three layers:
 ## Images
 
 An uploaded file goes through `UploadedImageValueObject` (`src/Shared/ValueObject/`)
-first: a JPEG, PNG, WebP or GIF by its content, whatever its name or declared type, of
+first: a JPEG, PNG or WebP by its content, whatever its name or declared type, of
 8 MB and 40 megapixels at most, 16 pixels a side at least. `ImageProviderInterface`
 (`Media/Shared/Domain/Provider/`) then stores it for an `ImageKind`:
 
@@ -146,8 +146,8 @@ An entity keeps the key only. A property marked `#[StoredImage]` is normalized a
 URL browsers read it from (`S3_PUBLIC_URL` + key) by `StoredImageNormalizer`, so every
 response carrying the entity carries the URL, and null when there is no image. The
 handler that changes an image removes the former one once the entity no longer points
-to it. The endpoints are `POST`/`DELETE` `/api/articles/{id}/image` (an editor),
-`/api/games/{id}/image` (an administrator) and `/api/users/me/avatar` (the signed-in
+to it. The endpoints are `POST`/`DELETE` `/api/editor/articles/{id}/image` (an editor),
+`/api/admin/games/{id}/image` (an administrator) and `/api/user/me/avatar` (the signed-in
 user): `multipart/form-data` with one `image` field.
 
 **Configuration**: `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`,
@@ -167,7 +167,12 @@ of `S3_BUCKET`, and that bucket served on the web endpoint under the host of
 it again changes nothing. `php` starts once it has exited successfully, which is also
 what lets `docker compose up --wait` treat its exit as a success. In development,
 `compose.override.yaml` publishes 3900 (for an API run outside Docker) and 3902
-(`S3_PUBLIC_URL=http://localhost:3902`).
+(`S3_PUBLIC_URL=http://localhost:3902`), and runs
+[Garage Web UI](https://github.com/khairul169/garage-webui) on
+`http://localhost:3909` to browse the bucket. The web endpoint serves an image by its
+key only (`http://localhost:3902/avatars/<uuid>.webp`): its root shows nothing, as the
+bucket has no `index.html`. An S3 client connects to `http://localhost:3900`, region
+`garage`, path-style, with `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY`.
 
 **Uploads.** `frankenphp/conf.d/10-app.ini` raises `upload_max_filesize` to 9M and
 `post_max_size` to 10M, just above the 8 MB an image may weigh. The production image
@@ -190,7 +195,11 @@ Imagick loads them at run time, and reads nothing but a blob without them.
   reaches Garage by its service name;
 - mark `garage-init` with `exclude_from_hc: true`, so that Coolify does not take a
   one-shot container that has exited for an unhealthy stack;
-- keep the `garage_meta` and `garage_data` volumes in your backups.
+- keep the `garage_meta` and `garage_data` volumes in your backups;
+- to browse the bucket there too, run the `garage-webui` service of
+  `compose.override.yaml` behind a domain of its own, with `AUTH_USER_PASS` set (a
+  user and a bcrypt hash: `htpasswd -nbBC 10 <user> <password>`), since it holds
+  the admin token.
 
 ## Migrations
 
@@ -198,6 +207,23 @@ Imagick loads them at run time, and reads nothing but a blob without them.
   in `migrations/`.
 - Apply: `docker compose exec php bin/console doctrine:migrations:migrate`.
 - Keep `doctrine:schema:validate` green.
+
+## Comments
+
+No comments: names, types and tests say what the code does. What a tool reads stays:
+
+- the OpenAPI attributes;
+- PHPDoc types that say more than the native declaration: `list<…>`, `array{…}`,
+  generics such as `@extends ServiceEntityRepository<Rating>`, `@template`,
+  `@param-out`, an inline `@var` assertion. A tag that repeats the native type, and
+  any prose, goes;
+- tool directives: `// @vitest-environment`, the comment oxlint's `no-empty` wants in
+  an otherwise empty `catch`, `# hadolint ignore=`;
+- Symfony Flex recipe markers (`###> vendor/package ###`), shebangs, the Dockerfile's
+  `#syntax=` line and the makefile's `##` help.
+
+Generated files keep theirs: `config/reference.php`, and the front's
+`src/libs/api/schema.d.ts`, whose doc comments are the OpenAPI descriptions.
 
 ## Commit conventions
 
@@ -240,6 +266,16 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
 - `final class`, extends `AbstractController`, a single `__invoke`.
 - `#[Route('/api/…', name: 'api_…', methods: ['…'])]`. Route names follow
   `api_<resource>_<action>`; keep the same shape across a resource's routes.
+- **The path starts with the role it requires**: `/api/admin/…` for an administrator,
+  `/api/editor/…` for an editor, `/api/user/…` for any signed-in user.
+  `config/packages/security.yaml` grants each prefix to its role
+  (`ROLE_ADMIN` > `ROLE_EDITOR` > `ROLE_USER`). Anything else under `/api` is public
+  for `GET` only (plus `POST /api/login` and `POST /api/register`); any other method
+  there is refused, so a write route always lives under a prefix. A public read that
+  shows more to a role gets a route of its own under that role's prefix:
+  `GET /api/articles/{id}` finds a published article, `GET /api/editor/articles/{id}`
+  a draft as well. The handler still checks what the role alone does not settle: who
+  owns the resource, and what state it is in.
 - Every `{placeholder}` in the path is a `__invoke` argument **and** an
   `#[OA\Parameter(in: 'path')]`. Never document a parameter the route does not have.
 - Body: `json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)`.

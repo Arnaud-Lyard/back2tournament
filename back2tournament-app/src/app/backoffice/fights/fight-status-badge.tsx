@@ -8,7 +8,6 @@ const VARIANT = {
   finished: "secondary",
 } as const
 
-/** Where a fight stands. */
 export async function FightStatusBadge({
   fight,
 }: {

@@ -1,7 +1,3 @@
-/**
- * Reads formats typed as "1, 2, 5" (or "1v1 2v2 5v5"): players per side,
- * each once, in order. A list that holds anything else reads as none.
- */
 export function parseTeamSizes(text: string): number[] {
   const tokens = text
     .split(/[\s,;]+/)

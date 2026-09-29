@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/teams/{id}', name: 'api_team_delete', methods: ['DELETE'])]
+#[Route('/api/user/teams/{id}', name: 'api_team_delete', methods: ['DELETE'])]
 #[OA\Tag(name: 'Team')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Team ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(

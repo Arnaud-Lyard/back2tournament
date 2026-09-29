@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/comments/', name: 'api_comment_post', methods: ['POST'])]
+#[Route('/api/user/comments/', name: 'api_comment_post', methods: ['POST'])]
 #[OA\Tag(name: 'Comment')]
 #[OA\RequestBody(
     required: true,

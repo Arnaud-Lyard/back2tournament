@@ -1,11 +1,6 @@
 import { z } from "zod"
 import { message } from "@/libs/validation"
 
-/**
- * Mirrors the backend's Email, Username and Password value objects, so a
- * refusal is explained field by field, in the user's language, before the
- * request ever leaves the browser.
- */
 export const registerSchema = z
   .object({
     email: z

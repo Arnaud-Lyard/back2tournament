@@ -18,8 +18,6 @@ export default async function BackofficeLayout({
 }) {
   await requirePermission("backoffice:access")
 
-  // The sidebar writes this cookie when toggled; reading it here renders it
-  // collapsed or expanded from the first paint.
   const sidebarState = (await cookies()).get("sidebar_state")?.value
 
   return (

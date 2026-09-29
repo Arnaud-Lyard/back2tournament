@@ -6,9 +6,6 @@ namespace App\Shared\ValueObject;
 
 use App\Shared\Exception\ValidationException;
 
-/**
- * The title of an article, trimmed.
- */
 final class ArticleTitleValueObject
 {
     private const MAX_LENGTH = 255;

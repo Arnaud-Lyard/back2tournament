@@ -9,9 +9,6 @@ use App\Competition\Ranking\Application\Model\RateFightCommand;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-/**
- * A fight both sides agree on moves their ratings.
- */
 final class FightSettledEventSubscriber implements EventSubscriberInterface
 {
     private MessageBusInterface $messageBus;

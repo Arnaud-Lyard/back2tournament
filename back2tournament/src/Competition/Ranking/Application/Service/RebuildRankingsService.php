@@ -11,10 +11,6 @@ use App\Competition\Ranking\Domain\Repository\RatingChangeRepositoryInterface;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-/**
- * Counts every settled fight again, from an empty ranking, in the order the
- * fights were settled: an Elo rating depends on that order.
- */
 final class RebuildRankingsService
 {
     private RatingRepositoryInterface $ratingRepository;
@@ -34,15 +30,12 @@ final class RebuildRankingsService
         $this->messageBus = $messageBus;
     }
 
-    /**
-     * @return array{fights: int, ratings: int} the settled fights replayed, and the ratings they made
-     */
+    /** @return array{fights: int, ratings: int} */
     public function rebuild(): array
     {
         $this->ratingChangeRepository->removeAll();
         $this->ratingRepository->removeAll();
 
-        // Both results of a fight settle together: the first one seen dates the fight.
         $fightIds = [];
         $settled = $this->resultRepository->findBy(
             ['status' => [ResultStatus::WIN, ResultStatus::LOSS, ResultStatus::DRAW]],

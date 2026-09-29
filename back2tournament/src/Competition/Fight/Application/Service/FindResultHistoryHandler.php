@@ -44,13 +44,11 @@ final class FindResultHistoryHandler
 
         $playerId = $findResultHistoryQuery->getPlayerId();
         if (null !== $playerId) {
-            // The player profile itself and the teams it plays in.
             $competitors = $this->competitorRegistryProvider->competitorsOfPlayer(new PlayerId($playerId)->getValue());
             if ([] === $competitors) {
                 return $this->page([], 0, $page, $limit);
             }
 
-            // A result is settled once confirmed: its status is then the outcome.
             $criteria = [
                 'competitor' => $competitors,
                 'status' => [ResultStatus::WIN, ResultStatus::LOSS, ResultStatus::DRAW],
@@ -59,8 +57,6 @@ final class FindResultHistoryHandler
             $results = $this->resultRepository->findBy($criteria, ['updatedAt' => 'DESC', 'id' => 'ASC'], $limit, $offset);
             $total = $this->resultRepository->count($criteria);
         } else {
-            // The fights the clan played against another clan: its teams', and
-            // in 1v1 its members' duels, for the clan each result recorded.
             $clanId = new ClanId((string) $findResultHistoryQuery->getClanId())->getValue();
 
             $results = $this->resultRepository->findSettledAgainstOtherClans($clanId, $limit, $offset);
@@ -76,8 +72,6 @@ final class FindResultHistoryHandler
             foreach ($this->fightRepository->findBy(['id' => $fightIds]) as $fight) {
                 $fights[$fight->getId()->getValue()] = $fight;
             }
-            // Both sides' results, so that each item tells what the other side
-            // scored, and which clan each side played for in that fight.
             foreach ($this->resultRepository->findBy(['fight' => $fightIds]) as $sideResult) {
                 $fightId = $sideResult->getFight()->getValue();
                 $competitorId = $sideResult->getCompetitor()->getValue();
@@ -114,14 +108,10 @@ final class FindResultHistoryHandler
     }
 
     /**
-     * A settled fight, told from the side of the result. Each side goes by
-     * the tag of the clan it played for in that fight, whichever clan its
-     * players are in today.
-     *
-     * @param array<string, int>                                                   $scores    both sides' scores, keyed by competitor id
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the sides, keyed by competitor id
-     * @param array<string, ?string>                                               $clans     the clan each side played for, keyed by competitor id
-     * @param array<string, string>                                                $tags      the clans' tags, keyed by clan id
+     * @param array<string, int> $scores
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
+     * @param array<string, ?string> $clans
+     * @param array<string, string> $tags
      *
      * @return array<string, mixed>
      */
@@ -150,7 +140,6 @@ final class FindResultHistoryHandler
 
     /**
      * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
-     * @param ?string                                                              $tag       the tag of the clan the side played for
      *
      * @return array<string, mixed>
      */
@@ -168,9 +157,7 @@ final class FindResultHistoryHandler
         ];
     }
 
-    /**
-     * @param list<array<string, mixed>> $items
-     */
+    /** @param list<array<string, mixed>> $items */
     private function page(array $items, int $total, int $page, int $limit): string
     {
         return json_encode([

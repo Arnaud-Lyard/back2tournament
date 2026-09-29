@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/articles/{id}/status', name: 'api_article_status_patch', methods: ['PATCH'])]
+#[Route('/api/editor/articles/{id}/status', name: 'api_article_status_patch', methods: ['PATCH'])]
 #[OA\Tag(name: 'Article')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(

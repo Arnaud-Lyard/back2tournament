@@ -11,9 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Rating>
- */
+/** @extends ServiceEntityRepository<Rating> */
 final class RatingRepository extends ServiceEntityRepository implements RatingRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
@@ -29,7 +27,6 @@ final class RatingRepository extends ServiceEntityRepository implements RatingRe
 
     public function findRanking(RankingSubject $subjectType, string $gameId, int $teamSize, int $limit, int $offset): array
     {
-        // Equal ratings share a rank; the one with more fights behind it is listed first.
         return $this->ranking($subjectType, $gameId, $teamSize)
             ->orderBy('rating.value', 'DESC')
             ->addOrderBy('rating.fights', 'DESC')

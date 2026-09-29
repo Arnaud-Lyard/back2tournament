@@ -1,7 +1,6 @@
 import { z } from "zod"
 import { message } from "@/libs/validation"
 
-/** A score: a whole number, zero or more. */
 export function score() {
   return z
     .number(message("invalidScore"))
@@ -9,7 +8,6 @@ export function score() {
     .min(0, message("invalidScore"))
 }
 
-/** The scores of a fight, seen from the declaring side. */
 export const declareResultsSchema = z.object({
   score: score(),
   opponentScore: score(),

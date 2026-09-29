@@ -43,7 +43,6 @@ import { ListCard } from "../list-card"
 import { GameFormatsEditor } from "./game-formats-editor"
 import { LoadError } from "../load-error"
 
-/** `games` is null when the list could not be loaded. */
 export function GamesManager({ games }: { games: Game[] | null }) {
   const t = useTranslations("backoffice.games")
   const format = useFormatter()

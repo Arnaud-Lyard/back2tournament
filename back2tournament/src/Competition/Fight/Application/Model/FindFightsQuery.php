@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\Competition\Fight\Application\Model;
 
-/**
- * One page of every fight, for an administrator: by where they stand, by
- * game, and by the name of a side or the id of the fight.
- */
 final class FindFightsQuery
 {
     private string $status;
@@ -20,9 +16,6 @@ final class FindFightsQuery
 
     private int $limit;
 
-    /**
-     * @param string $status `pending`, `reporting`, `finished`, or `all`
-     */
     public function __construct(string $status, ?string $gameId, ?string $search, int $page, int $limit)
     {
         $this->status = '' === $status ? 'all' : $status;

@@ -9,9 +9,7 @@ use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Team>
- */
+/** @extends ServiceEntityRepository<Team> */
 final class TeamRepository extends ServiceEntityRepository implements TeamRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)

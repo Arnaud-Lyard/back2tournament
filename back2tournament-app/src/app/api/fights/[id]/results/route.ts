@@ -20,7 +20,7 @@ export async function PATCH(request: Request, { params }: FightContext) {
 
   const client = await getServerApiClient()
   return relayApiResult(
-    client.PATCH("/api/fights/{id}/results", {
+    client.PATCH("/api/user/fights/{id}/results", {
       params: { path: { id } },
       body: parsed.data,
     })

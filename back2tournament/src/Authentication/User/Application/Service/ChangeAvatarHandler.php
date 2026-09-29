@@ -42,14 +42,10 @@ final class ChangeAvatarHandler
         $this->serializer = $serializer;
     }
 
-    /**
-     * Answers the signed-in user as GET /api/users/me does.
-     */
     public function __invoke(ChangeAvatarCommand $changeAvatarCommand): string
     {
         $image = null === $changeAvatarCommand->getImage() ? null : new UploadedImageValueObject($changeAvatarCommand->getImage());
 
-        // Only ever the caller's own picture.
         $user = $this->currentUserProvider->getUser();
 
         $previous = $user->getAvatar();
@@ -61,7 +57,6 @@ final class ChangeAvatarHandler
                 $this->eventDispatcher->dispatch($domainEvent);
             }
 
-            // The former picture goes once the user no longer points to it.
             $this->imageProvider->remove($previous);
         }
 

@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/tournaments/{id}/participants/{participantid}', name: 'api_tournament_participant_delete', methods: ['DELETE'])]
+#[Route('/api/user/tournaments/{id}/participants/{participantid}', name: 'api_tournament_participant_delete', methods: ['DELETE'])]
 #[OA\Tag(name: 'Tournament')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Tournament ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Parameter(name: 'participantid', in: 'path', required: true, description: 'Participant ID, as the tournament lists it', schema: new OA\Schema(type: 'string', format: 'uuid'))]

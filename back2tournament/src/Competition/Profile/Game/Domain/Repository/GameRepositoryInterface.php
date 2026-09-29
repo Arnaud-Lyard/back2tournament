@@ -10,9 +10,7 @@ interface GameRepositoryInterface
 {
     public function findOneBy(array $criteria, ?array $orderBy = null): ?object;
 
-    /**
-     * @return list<Game>
-     */
+    /** @return list<Game> */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
     public function save(Game $game): void;

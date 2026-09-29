@@ -27,10 +27,9 @@ final class ChangeAvatarHandlerTest extends TestCase
     private const PLAYER_ID = '22222222-2222-4222-8222-222222222222';
     private const GAME_ID = '33333333-3333-4333-8333-333333333333';
 
-    /** A 32 x 24 PNG. */
     private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAYCAIAAAAUMWhjAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAJklEQVRIiWM8oaHBQEvARFPTRy0YtWDUglELRi0YtWDUglELqAYA1J4BSIDvLE0AAAAASUVORK5CYII=';
 
-    /** @var list<string> what happened, in order */
+    /** @var list<string> */
     private array $log = [];
 
     public function test_a_user_gives_themselves_a_picture_and_the_former_one_goes_once_it_is_saved(): void
@@ -41,7 +40,6 @@ final class ChangeAvatarHandlerTest extends TestCase
 
         $this->assertSame('avatars/new.webp', $user->getAvatar());
         $this->assertSame(['store avatars image/png', 'save', 'dispatch '.UserAvatarChangedEvent::class, 'remove avatars/old.webp'], $this->log);
-        // As GET /api/users/me answers.
         $this->assertSame([self::USER_ID, [['id' => self::PLAYER_ID, 'battletag' => 'Demo#1000', 'game' => self::GAME_ID]]], [$payload['id'], $payload['players']]);
     }
 
@@ -69,9 +67,6 @@ final class ChangeAvatarHandlerTest extends TestCase
         $this->handler($this->user(avatar: null), untouched: true)(new ChangeAvatarCommand('not an image, only words'));
     }
 
-    /**
-     * @param bool $untouched whether nothing may be stored, saved, removed or announced
-     */
     private function handler(User $user, bool $untouched = false): ChangeAvatarHandler
     {
         [$userRepository, $imageProvider, $eventDispatcher] = $untouched ? $this->untouched() : $this->logged();
@@ -88,9 +83,7 @@ final class ChangeAvatarHandlerTest extends TestCase
         return new ChangeAvatarHandler($currentUserProvider, $userRepository, $imageProvider, $playerProfileProvider, $eventDispatcher, $normalizer);
     }
 
-    /**
-     * @return array{UserRepositoryInterface&Stub, ImageProviderInterface, EventDispatcherInterface}
-     */
+    /** @return array{(UserRepositoryInterface & Stub), ImageProviderInterface, EventDispatcherInterface} */
     private function logged(): array
     {
         $userRepository = $this->createStub(UserRepositoryInterface::class);
@@ -118,9 +111,7 @@ final class ChangeAvatarHandlerTest extends TestCase
         return [$userRepository, $imageProvider, $eventDispatcher];
     }
 
-    /**
-     * @return array{UserRepositoryInterface&MockObject, ImageProviderInterface, EventDispatcherInterface}
-     */
+    /** @return array{(UserRepositoryInterface & MockObject), ImageProviderInterface, EventDispatcherInterface} */
     private function untouched(): array
     {
         $userRepository = $this->createMock(UserRepositoryInterface::class);
@@ -147,9 +138,7 @@ final class ChangeAvatarHandlerTest extends TestCase
         return $user;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);

@@ -79,9 +79,6 @@ final class CreateTournamentHandler
         return json_encode($this->normalizeTournament($tournament, [], [], []), JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * An ISO 8601 date-time with its offset, as JavaScript's toISOString() writes it.
-     */
     private static function dateTime(string $value): \DateTimeImmutable
     {
         $refusal = 'startsAt must be an ISO 8601 date-time with its offset, such as 2026-10-01T18:00:00+02:00';
@@ -99,12 +96,9 @@ final class CreateTournamentHandler
     }
 
     /**
-     * The tournament, its participants by seed and its bracket round by round.
-     * Competitors are named by battletag or team name.
-     *
-     * @param list<Participant>                                                     $participants
-     * @param list<Matchup>                                                         $bracket
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described    the competitors, keyed by id
+     * @param list<Participant> $participants
+     * @param list<Matchup> $bracket
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */

@@ -53,8 +53,6 @@ final class FindFightsHandler
             throw new PermissionDeniedException('only an administrator lists every fight');
         }
 
-        // A fight id pasted from a conversation finds that fight; a name, the
-        // fights of the player profiles and teams that bear it.
         $competitors = null;
         $fightId = null;
         $search = $findFightsQuery->getSearch();
@@ -91,9 +89,7 @@ final class FindFightsHandler
         return $this->page($items, $total, $findFightsQuery);
     }
 
-    /**
-     * @param list<array<string, mixed>> $items
-     */
+    /** @param list<array<string, mixed>> $items */
     private function page(array $items, int $total, FindFightsQuery $findFightsQuery): string
     {
         return json_encode([
@@ -106,11 +102,8 @@ final class FindFightsHandler
     }
 
     /**
-     * The fight as a whole, and its two sides, each named and carrying its
-     * own result.
-     *
-     * @param list<Result>                                                         $results
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described the sides, keyed by competitor id
+     * @param list<Result> $results
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */

@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/tournaments/', name: 'api_tournament_post', methods: ['POST'])]
+#[Route('/api/user/tournaments/', name: 'api_tournament_post', methods: ['POST'])]
 #[OA\Tag(name: 'Tournament')]
 #[OA\RequestBody(
     required: true,

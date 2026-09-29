@@ -1,5 +1,4 @@
 // @vitest-environment node
-// Node's own Request, FormData and File: the ones a route handler receives.
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { MAX_IMAGE_BYTES } from "@/features/images/lib/image-file"
 import { DELETE, POST } from "./route"
@@ -47,7 +46,7 @@ describe("POST /api/articles/[id]/image", () => {
 
     expect(backendPost).toHaveBeenCalledOnce()
     const [path, options] = backendPost.mock.calls[0]
-    expect(path).toBe("/api/articles/{id}/image")
+    expect(path).toBe("/api/editor/articles/{id}/image")
     expect(options.params.path).toEqual({ id: ARTICLE_ID })
     const form: FormData = options.bodySerializer(options.body)
     const image = form.get("image") as File
@@ -57,7 +56,7 @@ describe("POST /api/articles/[id]/image", () => {
 
   it("answers what the backend answers", async () => {
     backendPost.mockResolvedValue({
-      error: { error: "The file is not a JPEG, PNG, WebP or GIF image" },
+      error: { error: "The file is not a JPEG, PNG or WebP image" },
       response: new Response(null, { status: 400 }),
     })
 
@@ -117,7 +116,7 @@ describe("DELETE /api/articles/[id]/image", () => {
     )
 
     const [path, options] = backendDelete.mock.calls[0]
-    expect(path).toBe("/api/articles/{id}/image")
+    expect(path).toBe("/api/editor/articles/{id}/image")
     expect(options.params.path).toEqual({ id: ARTICLE_ID })
   })
 })

@@ -8,9 +8,6 @@ use App\Blog\Article\Domain\Entity\ArticleId;
 use App\Shared\Event\DomainEventInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-/**
- * An article went public: its author is the user who published it.
- */
 final class ArticlePublishedEvent extends Event implements DomainEventInterface
 {
     protected \DateTimeImmutable $occur;

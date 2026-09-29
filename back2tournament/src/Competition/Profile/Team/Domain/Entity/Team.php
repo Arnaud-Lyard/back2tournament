@@ -16,10 +16,6 @@ use App\Shared\Exception\ValidationException;
 use App\Shared\ValueObject\TeamNameValueObject;
 use App\Shared\ValueObject\TeamSizeValueObject;
 
-/**
- * A lineup a clan fields in one format: exactly `size` of its members, one of
- * them the leader who speaks for the team in fights and tournaments.
- */
 class Team extends AggregateRoot
 {
     private string $id;
@@ -111,9 +107,7 @@ class Team extends AggregateRoot
         return $this;
     }
 
-    /**
-     * @param list<PlayerId> $players the whole lineup, the leader included
-     */
+    /** @param list<PlayerId> $players */
     public static function create(
         TeamId $teamId,
         TeamNameValueObject $name,

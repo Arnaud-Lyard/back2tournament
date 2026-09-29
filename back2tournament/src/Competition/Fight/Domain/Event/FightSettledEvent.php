@@ -10,9 +10,6 @@ use App\Competition\Tournament\Domain\Entity\TournamentId;
 use App\Shared\Event\DomainEventInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-/**
- * Both sides agree on the outcome of a fight. `winner` is null for a draw.
- */
 final class FightSettledEvent extends Event implements DomainEventInterface
 {
     protected \DateTimeImmutable $occur;

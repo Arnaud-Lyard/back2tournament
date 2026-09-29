@@ -18,9 +18,7 @@ import { ArticleStatusBadge } from "./article-status-badge"
 interface ArticlesListProps {
   articles: ArticleSummary[]
   categories: Category[]
-  /** The page of the list, kept when an article is opened. */
   page: number
-  /** The article shown in the preview, highlighted in the list. */
   selectedId?: string
 }
 
@@ -69,7 +67,6 @@ export async function ArticlesList({
                 data-state={id === selectedId ? "selected" : undefined}
               >
                 <TableCell className="max-w-44 truncate font-medium">
-                  {/* Opens the article in the preview, above the list. */}
                   <Link
                     href={listHref("/backoffice/articles", {
                       page,

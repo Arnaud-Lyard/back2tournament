@@ -7,10 +7,6 @@ interface ApiCallResult<T> {
 
 export type Loaded<T> = { ok: true; data: T } | { ok: false; status: number }
 
-/**
- * Settles an openapi-fetch call for a Server Component: the payload, or the
- * status to word the failure with. An unreachable backend reads as a 502.
- */
 export async function loadApiResult<T>(
   call: Promise<ApiCallResult<T>>
 ): Promise<Loaded<T>> {

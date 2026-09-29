@@ -14,7 +14,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/games/{id}/image', name: 'api_game_image_post', methods: ['POST'])]
+#[Route('/api/admin/games/{id}/image', name: 'api_game_image_post', methods: ['POST'])]
 #[OA\Tag(name: 'Game')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Game ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(
@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
     content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/ImageUpload')),
 )]
 #[OA\Response(response: 200, description: 'The game with its new picture in `image`', content: new OA\JsonContent(ref: '#/components/schemas/Game'))]
-#[OA\Response(response: 400, description: 'No image, or not a JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 400, description: 'No image, or not a JPEG, PNG or WebP image of 8 MB and 40 megapixels at most', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
 #[OA\Response(response: 403, ref: '#/components/responses/Forbidden')]
 #[OA\Response(response: 404, ref: '#/components/responses/NotFound')]

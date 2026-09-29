@@ -19,11 +19,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Article ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(
     response: 200,
-    description: 'Every comment on the article, oldest first. An empty array when nobody has commented yet.',
+    description: 'Every comment on a published article, oldest first. An empty array when nobody has commented yet. The comments of a draft come with it on `GET /api/editor/articles/{id}`.',
     content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/Comment')),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
-#[OA\Response(response: 404, description: 'No article has this id, or it is a draft and the caller is not an editor', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'No published article has this id', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 #[Security(name: null)]
 final class GetArticleCommentsController extends AbstractController
 {

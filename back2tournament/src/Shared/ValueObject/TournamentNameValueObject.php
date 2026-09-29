@@ -6,9 +6,6 @@ namespace App\Shared\ValueObject;
 
 use App\Shared\Exception\ValidationException;
 
-/**
- * The name of a tournament, trimmed.
- */
 final class TournamentNameValueObject
 {
     private const MAX_LENGTH = 100;

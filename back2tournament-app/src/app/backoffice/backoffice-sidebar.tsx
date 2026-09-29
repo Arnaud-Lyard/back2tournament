@@ -30,7 +30,6 @@ export function BackofficeSidebar() {
   const { isMobile, setOpenMobile } = useSidebar()
 
   const groups = visibleBackofficeNav(user?.permissions ?? [])
-  // On mobile the sidebar is a sheet: it has to close once a link is followed.
   const closeOnMobile = () => {
     if (isMobile) setOpenMobile(false)
   }

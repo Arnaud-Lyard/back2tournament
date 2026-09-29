@@ -18,14 +18,9 @@ class Game extends AggregateRoot
 
     private string $title;
 
-    /**
-     * @var list<int> the formats this game is played in: 1 for 1v1, 5 for 5v5
-     */
+    /** @var list<int> */
     private array $teamSizes = [1];
 
-    /**
-     * The key of its picture in the image storage; null when it has none.
-     */
     #[StoredImage]
     private ?string $image = null;
 
@@ -55,17 +50,13 @@ class Game extends AggregateRoot
         return $this;
     }
 
-    /**
-     * @return list<int>
-     */
+    /** @return list<int> */
     public function getTeamSizes(): array
     {
         return $this->teamSizes;
     }
 
-    /**
-     * @param list<TeamSizeValueObject> $teamSizes
-     */
+    /** @param list<TeamSizeValueObject> $teamSizes */
     public function setTeamSizes(array $teamSizes): self
     {
         if ([] === $teamSizes) {
@@ -117,9 +108,7 @@ class Game extends AggregateRoot
         return $this;
     }
 
-    /**
-     * @param list<TeamSizeValueObject> $teamSizes
-     */
+    /** @param list<TeamSizeValueObject> $teamSizes */
     public static function create(
         GameId $gameId,
         string $title,
@@ -140,9 +129,7 @@ class Game extends AggregateRoot
         return $game;
     }
 
-    /**
-     * @param list<TeamSizeValueObject>|null $teamSizes null keeps the formats as they are
-     */
+    /** @param (list<TeamSizeValueObject> | null) $teamSizes */
     public static function update(Game $game, ?string $title, ?array $teamSizes): self
     {
         if (null !== $title) {
@@ -163,10 +150,6 @@ class Game extends AggregateRoot
         return $game;
     }
 
-    /**
-     * Gives the game its picture, as the key of the stored image, or takes it
-     * away with null.
-     */
     public static function illustrate(Game $game, ?string $image): self
     {
         $game->image = $image;

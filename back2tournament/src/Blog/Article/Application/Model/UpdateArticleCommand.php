@@ -18,10 +18,6 @@ final class UpdateArticleCommand
 
     private ?string $bodyEn;
 
-    /**
-     * A null field keeps what the article has. An empty English field removes
-     * the English version.
-     */
     public function __construct(
         string $articleId,
         ?string $title,

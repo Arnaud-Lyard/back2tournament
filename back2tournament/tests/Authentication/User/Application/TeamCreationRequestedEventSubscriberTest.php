@@ -38,10 +38,6 @@ final class TeamCreationRequestedEventSubscriberTest extends TestCase
         $subscriber->validateUser($this->requestedEvent());
     }
 
-    /**
-     * The team is created for the JWT identity. Nothing the caller sends can
-     * name a different account, because the payload does not carry one.
-     */
     public function test_the_authenticated_caller_is_the_one_carried_downstream(): void
     {
         $dispatched = null;

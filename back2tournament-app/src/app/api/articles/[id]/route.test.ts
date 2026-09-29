@@ -41,7 +41,7 @@ describe("PATCH /api/articles/[id]", () => {
 
     expect(backendPatch).toHaveBeenCalledOnce()
     const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/articles/{id}")
+    expect(path).toBe("/api/editor/articles/{id}")
     expect(options.params.path).toEqual({ id: ARTICLE_ID })
     expect(options.body).toEqual({ title: "New title" })
   })
@@ -79,7 +79,7 @@ describe("PATCH /api/articles/[id]/status", () => {
     )
 
     const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/articles/{id}/status")
+    expect(path).toBe("/api/editor/articles/{id}/status")
     expect(options.params.path).toEqual({ id: ARTICLE_ID })
     expect(options.body).toEqual({ status: "published" })
   })

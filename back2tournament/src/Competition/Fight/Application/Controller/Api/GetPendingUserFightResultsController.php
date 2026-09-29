@@ -13,7 +13,7 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/results/users/fights', name: 'api_results_pending_user_fights', methods: ['GET'])]
+#[Route('/api/user/results/fights', name: 'api_results_pending_user_fights', methods: ['GET'])]
 #[OA\Tag(name: 'Fight')]
 #[OA\Parameter(
     name: 'page',

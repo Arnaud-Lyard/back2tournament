@@ -6,13 +6,6 @@ import { ApiError, type ApiErrorCode } from "@/libs/api/errors"
 
 type SpecificWording = Partial<Record<number | ApiErrorCode, string>>
 
-/**
- * Turns a failed call into a sentence for the user, in their language. A
- * status means something different per action (a 403 on confirmation is not
- * a 403 on creation), so callers pass their own wording by code or status —
- * a code wins, being the more precise; the rest gets a shared one. The
- * backend's English message is never shown: fetchJson logs it to the console.
- */
 export function useApiErrorMessage() {
   const t = useTranslations("apiErrors")
 

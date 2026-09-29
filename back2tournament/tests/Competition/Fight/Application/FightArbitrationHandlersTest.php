@@ -61,7 +61,6 @@ final class FightArbitrationHandlersTest extends TestCase
         $this->assertSame(['value' => self::TWO], $read['winner']);
         $this->assertSame([['Alpha', 0], ['Bravo', 2]], array_map(static fn (array $side): array => [$side['name'], $side['score']], $read['sides']));
 
-        // The bracket and the rankings hear of it as of a confirmation.
         $settled = array_values(array_filter($this->dispatched, static fn (object $event): bool => $event instanceof FightSettledEvent));
         $this->assertCount(1, $settled);
         $this->assertSame(self::TWO, $settled[0]->getWinner()?->getValue());
@@ -92,9 +91,7 @@ final class FightArbitrationHandlersTest extends TestCase
         $this->assertSame(ResultStatus::REPORTING, $one->getStatus());
     }
 
-    /**
-     * @return iterable<string, array{string, array<string, mixed>|null}>
-     */
+    /** @return iterable<string, array{string, (array<string, mixed> | null)}> */
     public static function invalidChanges(): iterable
     {
         yield 'an unknown status' => ['reporting', null];
@@ -105,9 +102,7 @@ final class FightArbitrationHandlersTest extends TestCase
         yield 'a side that is not in the fight' => ['finished', [self::ONE => 1, self::STRANGER => 2]];
     }
 
-    /**
-     * @param array<string, mixed>|null $scores
-     */
+    /** @param (array<string, mixed> | null) $scores */
     #[\PHPUnit\Framework\Attributes\DataProvider('invalidChanges')]
     public function test_an_invalid_change_is_refused_and_nothing_is_saved(string $status, ?array $scores): void
     {
@@ -204,11 +199,7 @@ final class FightArbitrationHandlersTest extends TestCase
         $this->findHandler($this->createStub(FightRepositoryInterface::class), [])(new FindFightsQuery('disputed', null, null, 1, 20));
     }
 
-    /**
-     * A 1v1 fight between ONE and TWO, ONE having declared 3 to 1.
-     *
-     * @return array{Fight, Result, Result}
-     */
+    /** @return array{Fight, Result, Result} */
     private function declared(): array
     {
         $fight = Fight::create(new FightId(self::FIGHT_ID), new CompetitorId(self::ONE), new CompetitorId(self::TWO), new GameId(self::GAME_ID), new TeamSizeValueObject(1));
@@ -255,9 +246,7 @@ final class FightArbitrationHandlersTest extends TestCase
         );
     }
 
-    /**
-     * @param list<string> $named
-     */
+    /** @param list<string> $named */
     private function registry(array $named): CompetitorRegistryProviderInterface
     {
         $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
@@ -278,9 +267,7 @@ final class FightArbitrationHandlersTest extends TestCase
         return $currentUserProvider;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function read(string $json): array
     {
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);

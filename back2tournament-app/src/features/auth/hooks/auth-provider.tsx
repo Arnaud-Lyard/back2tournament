@@ -8,7 +8,6 @@ import type { AuthPermission, AuthUser, PlayerProfile } from "../types"
 import { fetchJson } from "@/libs/api/fetch-json"
 import { hasPermission } from "../rbac/can"
 
-/** signIn and signUp throw an ApiError, for useApiErrorMessage to word. */
 interface AuthContextValue {
   user: AuthUser | null
   isAuthenticated: boolean
@@ -16,7 +15,6 @@ interface AuthContextValue {
   signUp: (input: RegisterInput) => Promise<{ verified: boolean }>
   signOut: () => Promise<void>
   hasPermission: (permission: AuthPermission) => boolean
-  /** The caller's player profile in this game, if they created one. */
   playerFor: (gameId: string) => PlayerProfile | undefined
 }
 

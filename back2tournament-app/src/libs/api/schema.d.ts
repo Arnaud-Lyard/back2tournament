@@ -5,7 +5,7 @@
  */
 
 export interface paths {
-    "/api/users/me/avatar": {
+    "/api/user/me/avatar": {
         parameters: {
             query?: never;
             header?: never;
@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/me": {
+    "/api/user/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -69,7 +69,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/logout": {
+    "/api/user/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -101,7 +101,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/articles/{id}/image": {
+    "/api/editor/articles/{id}/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -146,7 +146,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["patch_api_article_patch"];
+        patch?: never;
         trace?: never;
     };
     "/api/articles/": {
@@ -158,6 +158,38 @@ export interface paths {
         };
         get: operations["get_api_article_list"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/editor/articles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_editor_article"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patch_api_article_patch"];
+        trace?: never;
+    };
+    "/api/editor/articles/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_editor_article_list"];
+        put?: never;
         post: operations["post_api_article_post"];
         delete?: never;
         options?: never;
@@ -165,7 +197,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/articles/{id}/status": {
+    "/api/editor/articles/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -181,7 +213,7 @@ export interface paths {
         patch: operations["patch_api_article_status_patch"];
         trace?: never;
     };
-    "/api/comments/": {
+    "/api/user/comments/": {
         parameters: {
             query?: never;
             header?: never;
@@ -206,6 +238,22 @@ export interface paths {
         };
         get: operations["get_api_category_list"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         post: operations["post_api_category_post"];
         delete?: never;
         options?: never;
@@ -229,7 +277,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/fights/{id}": {
+    "/api/user/fights/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -245,7 +293,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/fights/": {
+    "/api/admin/fights/": {
         parameters: {
             query?: never;
             header?: never;
@@ -254,14 +302,14 @@ export interface paths {
         };
         get: operations["get_api_fight_list"];
         put?: never;
-        post: operations["post_api_fight_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/results/pending/players/{gameid}": {
+    "/api/user/results/pending/players/{gameid}": {
         parameters: {
             query?: never;
             header?: never;
@@ -277,7 +325,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/results/users/fights": {
+    "/api/user/results/fights": {
         parameters: {
             query?: never;
             header?: never;
@@ -309,7 +357,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/fights/{id}/results": {
+    "/api/user/fights/{id}/results": {
         parameters: {
             query?: never;
             header?: never;
@@ -325,7 +373,7 @@ export interface paths {
         patch: operations["patch_api_fight_results_patch"];
         trace?: never;
     };
-    "/api/fights/{id}/status": {
+    "/api/admin/fights/{id}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -341,7 +389,23 @@ export interface paths {
         patch: operations["patch_api_fight_status_patch"];
         trace?: never;
     };
-    "/api/fights/{id}/results/confirmation": {
+    "/api/user/fights/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_fight_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/fights/{id}/results/confirmation": {
         parameters: {
             query?: never;
             header?: never;
@@ -357,7 +421,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/clans/{id}/members/{playerid}": {
+    "/api/user/clans/{id}/members/{playerid}": {
         parameters: {
             query?: never;
             header?: never;
@@ -405,7 +469,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/me/clans": {
+    "/api/user/me/clans": {
         parameters: {
             query?: never;
             header?: never;
@@ -421,7 +485,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/clans/": {
+    "/api/user/clans/": {
         parameters: {
             query?: never;
             header?: never;
@@ -437,7 +501,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/clans/{id}/invitations": {
+    "/api/user/clans/{id}/invitations": {
         parameters: {
             query?: never;
             header?: never;
@@ -453,7 +517,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/clans/{id}/members": {
+    "/api/user/clans/{id}/members": {
         parameters: {
             query?: never;
             header?: never;
@@ -469,7 +533,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/games/{id}/image": {
+    "/api/admin/games/{id}/image": {
         parameters: {
             query?: never;
             header?: never;
@@ -494,14 +558,14 @@ export interface paths {
         };
         get: operations["get_api_game_list"];
         put?: never;
-        post: operations["post_api_game_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/games/{id}": {
+    "/api/admin/games/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -517,14 +581,30 @@ export interface paths {
         patch: operations["patch_api_game_patch"];
         trace?: never;
     };
-    "/api/players/{id}": {
+    "/api/admin/games/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["get_api_player"];
+        get?: never;
+        put?: never;
+        post: operations["post_api_game_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/players/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put?: never;
         post?: never;
         delete: operations["delete_api_player_delete"];
@@ -549,7 +629,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/players/": {
+    "/api/players/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_player"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/players/": {
         parameters: {
             query?: never;
             header?: never;
@@ -565,6 +661,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/user/teams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_api_team_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/teams/{id}": {
         parameters: {
             query?: never;
@@ -575,13 +687,13 @@ export interface paths {
         get: operations["get_api_team"];
         put?: never;
         post?: never;
-        delete: operations["delete_api_team_delete"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/teams/": {
+    "/api/user/teams/": {
         parameters: {
             query?: never;
             header?: never;
@@ -661,7 +773,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/tournaments/{id}/participants/{participantid}": {
+    "/api/user/tournaments/{id}/participants/{participantid}": {
         parameters: {
             query?: never;
             header?: never;
@@ -702,14 +814,14 @@ export interface paths {
         };
         get: operations["get_api_tournament_list"];
         put?: never;
-        post: operations["post_api_tournament_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/tournaments/{id}/cancel": {
+    "/api/user/tournaments/{id}/cancel": {
         parameters: {
             query?: never;
             header?: never;
@@ -725,7 +837,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/tournaments/{id}/participants": {
+    "/api/user/tournaments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_tournament_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/tournaments/{id}/participants": {
         parameters: {
             query?: never;
             header?: never;
@@ -741,7 +869,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/tournaments/{id}/start": {
+    "/api/user/tournaments/{id}/start": {
         parameters: {
             query?: never;
             header?: never;
@@ -897,7 +1025,7 @@ export interface components {
         ImageUpload: {
             /**
              * Format: binary
-             * @description A JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most, 16 pixels a side at least. An animation keeps its first frame.
+             * @description A JPEG, PNG or WebP image of 8 MB and 40 megapixels at most, 16 pixels a side at least. An animated WebP keeps its first frame.
              */
             image: Blob;
         };
@@ -1420,7 +1548,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The signed-in user, as GET /api/users/me answers, with the new picture in `avatar` */
+            /** @description The signed-in user, as GET /api/user/me answers, with the new picture in `avatar` */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1429,7 +1557,7 @@ export interface operations {
                     "application/json": components["schemas"]["CurrentUser"];
                 };
             };
-            /** @description No image, or not a JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most */
+            /** @description No image, or not a JPEG, PNG or WebP image of 8 MB and 40 megapixels at most */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1450,7 +1578,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The signed-in user, as GET /api/users/me answers, without a picture; one who had none is answered as they are. */
+            /** @description The signed-in user, as GET /api/user/me answers, without a picture; one who had none is answered as they are. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1684,7 +1812,7 @@ export interface operations {
                     "application/json": components["schemas"]["Article"];
                 };
             };
-            /** @description No image, or not a JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most */
+            /** @description No image, or not a JPEG, PNG or WebP image of 8 MB and 40 megapixels at most */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1736,7 +1864,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every comment on the article, oldest first. An empty array when nobody has commented yet. */
+            /** @description Every comment on a published article, oldest first. An empty array when nobody has commented yet. The comments of a draft come with it on `GET /api/editor/articles/{id}`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1746,7 +1874,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
-            /** @description No article has this id, or it is a draft and the caller is not an editor */
+            /** @description No published article has this id */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1769,7 +1897,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The article with its comments, oldest first. A draft is found by an editor or an administrator only. */
+            /** @description A published article with its comments, oldest first. A draft is read on `GET /api/editor/articles/{id}`. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1780,7 +1908,102 @@ export interface operations {
                     };
                 };
             };
-            /** @description No article has this id, or it is a draft and the caller is not an editor */
+            /** @description No published article has this id */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    get_api_article_list: {
+        parameters: {
+            query?: {
+                /** @description Which page to read, 1 by default. */
+                page?: number;
+                /** @description How many articles that page holds, 10 by default and 50 at most. */
+                limit?: number;
+                /** @description Keeps the articles whose title or body contains this text, whatever the case. A blank value is no search. */
+                q?: string;
+                /** @description Keeps the articles filed under this category, named by its slug. */
+                category?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of published articles, newest first by their publication date. Comments are not included: `GET /api/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["Article"][];
+                        /**
+                         * @description Articles the filters match, every page taken together
+                         * @example 42
+                         */
+                        total: number;
+                        /**
+                         * @description The page these items come from
+                         * @example 1
+                         */
+                        page: number;
+                        /**
+                         * @description How many items a full page holds
+                         * @example 10
+                         */
+                        limit: number;
+                        /**
+                         * @description How many pages the filters yield, 0 when nothing matches
+                         * @example 5
+                         */
+                        pages: number;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description No category has the requested slug */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_editor_article: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Article ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requires an editor or an administrator. The article with its comments, oldest first, whether it is a draft or published. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Article"] & {
+                        comments?: components["schemas"]["Comment"][];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            /** @description No article has this id */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1837,7 +2060,7 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
-    get_api_article_list: {
+    get_api_editor_article_list: {
         parameters: {
             query?: {
                 /** @description Which page to read, 1 by default. */
@@ -1848,8 +2071,8 @@ export interface operations {
                 q?: string;
                 /** @description Keeps the articles filed under this category, named by its slug. */
                 category?: string;
-                /** @description `published` by default: the public blog. `draft` and `all` are for an editor or an administrator, and answer 403 to anyone else. */
-                status?: "published" | "draft" | "all";
+                /** @description `all` by default: drafts and published articles. `draft` or `published` keeps those only. */
+                status?: "all" | "draft" | "published";
             };
             header?: never;
             path?: never;
@@ -1857,7 +2080,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of articles, newest first: a published article by its publication date, a draft by the day it was written. Comments are not included: `GET /api/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one. */
+            /** @description Requires an editor or an administrator. One page of articles, newest first: a published article by its publication date, a draft by the day it was written. Comments are not included: `GET /api/editor/articles/{id}` returns an article with its comments. `items` is empty when the filters match nothing, or when the page is past the last one. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1889,6 +2112,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             /** @description No category has the requested slug */
             404: {
@@ -1932,7 +2156,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The article created, as a draft: it has no author until an editor publishes it (`PATCH /api/articles/{id}/status`) */
+            /** @description The article created, as a draft: it has no author until an editor publishes it (`PATCH /api/editor/articles/{id}/status`) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2182,68 +2406,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-        };
-    };
-    post_api_fight_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Name either two player profiles, for a 1v1, or two teams of the same format, for an NvN. The caller stands on one side: they own one of the two profiles, or lead one of the two teams. The game must be played in that format. */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * Format: uuid
-                     * @description First player profile of a 1v1
-                     */
-                    playerOne?: string;
-                    /**
-                     * Format: uuid
-                     * @description Second player profile of a 1v1
-                     */
-                    playerTwo?: string;
-                    /**
-                     * Format: uuid
-                     * @description First team of an NvN
-                     */
-                    teamOne?: string;
-                    /**
-                     * Format: uuid
-                     * @description Second team of an NvN
-                     */
-                    teamTwo?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Fight opened. Both sides are `pending` until one of them declares the scores. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FightSummary"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            /** @description The caller stands on neither side */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description A player profile or a team does not exist */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     get_api_results_pending_players: {
@@ -2534,6 +2696,68 @@ export interface operations {
             };
         };
     };
+    post_api_fight_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Name either two player profiles, for a 1v1, or two teams of the same format, for an NvN. The caller stands on one side: they own one of the two profiles, or lead one of the two teams. The game must be played in that format. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description First player profile of a 1v1
+                     */
+                    playerOne?: string;
+                    /**
+                     * Format: uuid
+                     * @description Second player profile of a 1v1
+                     */
+                    playerTwo?: string;
+                    /**
+                     * Format: uuid
+                     * @description First team of an NvN
+                     */
+                    teamOne?: string;
+                    /**
+                     * Format: uuid
+                     * @description Second team of an NvN
+                     */
+                    teamTwo?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Fight opened. Both sides are `pending` until one of them declares the scores. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FightSummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller stands on neither side */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A player profile or a team does not exist */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_fight_results_confirmation_post: {
         parameters: {
             query?: never;
@@ -2546,7 +2770,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The side that did not declare agrees with the scores exactly as they were declared — read them with `GET /api/fights/{id}` first. No body is read. Both sides are settled on their final `status`; in a tournament, the winner moves on in the bracket. A side that disagrees does not confirm, and settles it with an admin. */
+            /** @description The side that did not declare agrees with the scores exactly as they were declared — read them with `GET /api/user/fights/{id}` first. No body is read. Both sides are settled on their final `status`; in a tournament, the winner moves on in the bracket. A side that disagrees does not confirm, and settles it with an admin. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2782,7 +3006,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        /** @description Only the clan leader invites. The player must play the game of the clan; they become a member once they accept with `POST /api/clans/{id}/members`. */
+        /** @description Only the clan leader invites. The player must play the game of the clan; they become a member once they accept with `POST /api/user/clans/{id}/members`. */
         requestBody: {
             content: {
                 "application/json": {
@@ -2894,7 +3118,7 @@ export interface operations {
                     "application/json": components["schemas"]["Game"];
                 };
             };
-            /** @description No image, or not a JPEG, PNG, WebP or GIF image of 8 MB and 40 megapixels at most */
+            /** @description No image, or not a JPEG, PNG or WebP image of 8 MB and 40 megapixels at most */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2954,46 +3178,6 @@ export interface operations {
             };
         };
     };
-    post_api_game_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Requires a user with the administrator role (checked at the application layer) */
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @example Street Fighter 6 */
-                    title: string;
-                    /**
-                     * @description The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. `[1]` when left out.
-                     * @example [
-                     *       1,
-                     *       2,
-                     *       3
-                     *     ]
-                     */
-                    teamSizes?: number[];
-                };
-            };
-        };
-        responses: {
-            /** @description Game created */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Game"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-        };
-    };
     patch_api_game_patch: {
         parameters: {
             query?: never;
@@ -3038,29 +3222,44 @@ export interface operations {
             404: components["responses"]["NotFound"];
         };
     };
-    get_api_player: {
+    post_api_game_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description Player ID */
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        /** @description Requires a user with the administrator role (checked at the application layer) */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example Street Fighter 6 */
+                    title: string;
+                    /**
+                     * @description The formats the game is played in, as the number of players per side: `[1]` for 1v1 only, `[1, 2, 3]` for 1v1, 2v2 and 3v3. `[1]` when left out.
+                     * @example [
+                     *       1,
+                     *       2,
+                     *       3
+                     *     ]
+                     */
+                    teamSizes?: number[];
+                };
+            };
+        };
         responses: {
-            /** @description One player profile: who they are in the game they registered in. Public, so that a visitor can read a profile before deciding to challenge it. */
+            /** @description Game created */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Player"];
+                    "application/json": components["schemas"]["Game"];
                 };
             };
             400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     delete_api_player_delete: {
@@ -3209,6 +3408,31 @@ export interface operations {
             400: components["responses"]["BadRequest"];
         };
     };
+    get_api_player: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Player ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One player profile: who they are in the game they registered in. Public, so that a visitor can read a profile before deciding to challenge it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Player"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     post_api_player_post: {
         parameters: {
             query?: never;
@@ -3264,31 +3488,6 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
-    get_api_team: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Team ID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description One team and its lineup, leader first. Public. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Team"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-        };
-    };
     delete_api_team_delete: {
         parameters: {
             query?: never;
@@ -3333,6 +3532,31 @@ export interface operations {
                 };
                 content?: never;
             };
+        };
+    };
+    get_api_team: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Team ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One team and its lineup, leader first. Public. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
         };
     };
     post_api_team_post: {
@@ -3655,6 +3879,46 @@ export interface operations {
             400: components["responses"]["BadRequest"];
         };
     };
+    post_api_tournament_cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tournament ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The organizer cancels the tournament, before or while it is played. Its bracket stops moving; fights already opened stay as they are. No body is read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TournamentDetail"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not organize the tournament */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            /** @description The tournament is already finished or cancelled */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_tournament_post: {
         parameters: {
             query?: never;
@@ -3706,46 +3970,6 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             /** @description The game does not exist */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    post_api_tournament_cancel_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Tournament ID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The organizer cancels the tournament, before or while it is played. Its bracket stops moving; fights already opened stay as they are. No body is read. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TournamentDetail"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            /** @description The caller does not organize the tournament */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            404: components["responses"]["NotFound"];
-            /** @description The tournament is already finished or cancelled */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };

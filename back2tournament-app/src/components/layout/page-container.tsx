@@ -1,6 +1,5 @@
 import { cn } from "@/libs/utils"
 
-/** The centered column every site page sits in, below the header. */
 export function PageContainer({
   className,
   ...props

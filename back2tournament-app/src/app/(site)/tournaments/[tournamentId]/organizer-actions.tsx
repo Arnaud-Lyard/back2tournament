@@ -17,7 +17,6 @@ interface OrganizerActionsProps {
   participantCount: number
 }
 
-/** The organizer starts the tournament once registrations are in, or cancels it. */
 export function OrganizerActions({
   tournamentId,
   status,

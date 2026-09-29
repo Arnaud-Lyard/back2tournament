@@ -23,9 +23,6 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
- * Closes registrations, draws the bracket and opens the fights of the first round.
- */
 #[AsMessageHandler]
 final class StartTournamentHandler
 {
@@ -108,12 +105,9 @@ final class StartTournamentHandler
     }
 
     /**
-     * The tournament, its participants by seed and its bracket round by round.
-     * Competitors are named by battletag or team name.
-     *
-     * @param list<Participant>                                                     $participants
-     * @param list<Matchup>                                                         $bracket
-     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described    the competitors, keyed by id
+     * @param list<Participant> $participants
+     * @param list<Matchup> $bracket
+     * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      *
      * @return array<string, mixed>
      */

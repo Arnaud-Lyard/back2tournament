@@ -7,11 +7,6 @@ namespace App\Competition\Tournament\Domain\Entity;
 use App\Competition\Fight\Domain\Entity\FightId;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
 
-/**
- * One slot of the bracket: two competitors meet in round `round`, at `position`
- * counted from the top. A side stays empty until the matchup feeding it is
- * decided; the fight is opened once both sides are known.
- */
 class Matchup
 {
     private string $id;

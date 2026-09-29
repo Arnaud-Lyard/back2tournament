@@ -43,9 +43,6 @@ jobs:
         run: docker compose up --wait --no-build
       - name: Check HTTP reachability
         run: curl -v --fail-with-body http://localhost
-      # Uncomment when the homepage is configured, or change the path to check
-      # - name: Check HTTPS reachability
-      #   run: curl -v --insecure --fail-with-body https://localhost
       - name: Check Mercure reachability
         run: curl -vI --insecure --fail-with-body https://localhost/.well-known/mercure?topic=test
       - name: Create test database

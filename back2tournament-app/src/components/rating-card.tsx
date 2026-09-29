@@ -20,14 +20,9 @@ import { cn } from "@/libs/utils"
 interface RatingCardProps {
   rating: Loaded<SubjectRating>
   gameId: string
-  /** A player profile rates on its own fights, a clan on its members' and teams'. */
   subject: "player" | "clan"
 }
 
-/**
- * The Elo ratings of a player profile or a clan, one per format of its game:
- * the rating, the rank in the ranking of that format, and the record.
- */
 export async function RatingCard({ rating, gameId, subject }: RatingCardProps) {
   const t = await getTranslations("rankings.card")
   const view = subject === "clan" ? "clans" : "players"

@@ -79,7 +79,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const battletag = player.data.battletag ?? ""
   const roster = `/games/${encodeURIComponent(gameId)}/players`
 
-  // The caller leads a clan in this game, and this player has no place in it yet.
   const myClan = myClans.ok ? activeClanIn(myClans.data, gameId) : undefined
   const myClanId =
     myClan?.membership.role === "leader" ? myClan.clan.id?.value : undefined

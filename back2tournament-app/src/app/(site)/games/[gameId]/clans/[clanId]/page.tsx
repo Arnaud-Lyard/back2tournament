@@ -99,7 +99,6 @@ export default async function ClanPage({ params }: ClanPageProps) {
   const mine = members.find((member) => member.player?.id?.value === myPlayerId)
   const isLeader = !!myPlayerId && clan.data.leader?.value === myPlayerId
 
-  // The teams the caller leads in another clan of the game, to challenge these ones with.
   const myOtherClan = myClans.ok
     ? activeClanIn(myClans.data, gameId)
     : undefined
