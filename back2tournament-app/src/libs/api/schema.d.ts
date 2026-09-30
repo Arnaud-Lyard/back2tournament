@@ -2396,7 +2396,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every category, by name, for a tool signed in with an API token: the `slug` of one of them is the `categorySlug` its draft is filed under (`POST /api/bot/articles/`). An empty array when no category has been created yet. */
+            /** @description Every category, by name, as the public `GET /api/categories/` lists them, read with an API token: the `slug` of one of them is the `categorySlug` a draft is filed under (`POST /api/bot/articles/`). A tool sends its token to every route it calls, and the JWT firewall of `/api/categories/` refuses a token that is not a JWT. An empty array when no category has been created yet. */
             200: {
                 headers: {
                     [name: string]: unknown;

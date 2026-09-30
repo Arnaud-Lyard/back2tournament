@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Security(name: 'apiToken')]
 #[OA\Response(
     response: 200,
-    description: 'Every category, by name, for a tool signed in with an API token: the `slug` of one of them is the `categorySlug` its draft is filed under (`POST /api/bot/articles/`). An empty array when no category has been created yet.',
+    description: 'Every category, by name, as the public `GET /api/categories/` lists them, read with an API token: the `slug` of one of them is the `categorySlug` a draft is filed under (`POST /api/bot/articles/`). A tool sends its token to every route it calls, and the JWT firewall of `/api/categories/` refuses a token that is not a JWT. An empty array when no category has been created yet.',
     content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/Category')),
 )]
 #[OA\Response(response: 401, ref: '#/components/responses/ApiTokenUnauthorized')]
