@@ -40,6 +40,8 @@ Then:
    ```
 3. *(optional)* seed a development user: `make user`
 
+The API documentation is served in development only, on `https://localhost/api/doc`.
+
 Stop everything with `make down`.
 
 ## Common commands
@@ -80,7 +82,7 @@ curl -X POST https://localhost/api/bot/articles/ \
 ```
 
 The English version is optional, but whole: `titleEn` with `bodyEn`, or neither. The
-API documentation (`/api/doc`) describes both routes under the `apiToken` scheme.
+API documentation describes both routes under the `apiToken` scheme.
 
 ## Architecture
 
