@@ -48,13 +48,13 @@ make user           # seed a dev user via app:create-user
 - `Authentication/User/` — users, roles, password hashing, Symfony Security integration.
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
   any context to learn who the caller is.
-- `Authentication/ApiToken/` — the API tokens of the tools that write for the platform,
-  such as Hermes. `bin/console app:api-token:create <name> [--days=N]` issues one and
-  prints its secret once; only its SHA-256 hash is kept. `app:api-token:list` shows
-  them with their expiry and last use, `app:api-token:revoke <name>` deletes one. The
-  `bot` firewall reads the token from `Authorization: Bearer` (`ApiTokenHandler`) and
-  signs the tool in as an `ApiClient` holding `ROLE_BOT` alone: a token opens
-  `/api/bot` and nothing else, and a JWT does not open `/api/bot`.
+- `Authentication/ApiToken/` — the API token of the tool that writes for the platform,
+  such as Hermes: the value of the `BOT_API_TOKEN` environment variable, stored
+  nowhere else. The `bot` firewall reads the token from `Authorization: Bearer`
+  (`ApiTokenHandler`, a constant-time comparison) and signs the tool in as an
+  `ApiClient` holding `ROLE_BOT` alone: the token opens `/api/bot` and nothing else,
+  a JWT does not open `/api/bot`, and an empty `BOT_API_TOKEN` keeps `/api/bot`
+  closed. Changing the variable revokes the previous token.
 - `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy. An
   `Article` is a `draft` until an editor publishes it: whoever publishes it becomes its
   `author` — not whoever wrote it — and taking it back to draft clears the author. Only
@@ -208,6 +208,9 @@ Imagick loads them at run time, and reads nothing but a blob without them.
 - mark `garage-init` with `exclude_from_hc: true`, so that Coolify does not take a
   one-shot container that has exited for an unhealthy stack;
 - keep the `garage_meta` and `garage_data` volumes in your backups;
+- to let a tool such as Hermes write drafts, set `BOT_API_TOKEN`
+  (`openssl rand -hex 32`) and give the tool the same value; leave it empty to keep
+  `/api/bot` closed;
 - to browse the bucket there too, run the `garage-webui` service of
   `compose.override.yaml` behind a domain of its own, with `AUTH_USER_PASS` set (a
   user and a bcrypt hash: `htpasswd -nbBC 10 <user> <password>`), since it holds

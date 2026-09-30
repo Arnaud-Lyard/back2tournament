@@ -64,21 +64,17 @@ A tool such as Hermes writes news
 through the `/api/bot` routes, signed in with an API token instead of a user account.
 What it writes is a draft: an editor reviews it in the backoffice and publishes it.
 
-```bash
-make sf c="app:api-token:create hermes --days=365"   # prints the token, once
-make sf c="app:api-token:list"                        # expiry and last use
-make sf c="app:api-token:revoke hermes"               # the token stops working
-```
-
-Only the hash of the token is stored: keep it in the tool's secrets, and issue a new
-one if it is lost. Leave out `--days` for a token that lasts until it is revoked. The
-token opens `/api/bot` and nothing else:
+The token is the value of the `BOT_API_TOKEN` environment variable: generate one with
+`openssl rand -hex 32`, set it in `.env.local` in development (in the environment of
+the stack in production), and give the tool the same value. While the variable is
+empty, `/api/bot` stays closed; changing it revokes the previous token. The token
+opens `/api/bot` and nothing else:
 
 ```bash
-curl -H "Authorization: Bearer $B2T_TOKEN" https://localhost/api/bot/categories/
+curl -H "Authorization: Bearer $BOT_API_TOKEN" https://localhost/api/bot/categories/
 
 curl -X POST https://localhost/api/bot/articles/ \
-  -H "Authorization: Bearer $B2T_TOKEN" -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $BOT_API_TOKEN" -H 'Content-Type: application/json' \
   -d '{"title": "Les résultats du week-end", "body": "…", "categorySlug": "esport-news",
        "titleEn": "The weekend results", "bodyEn": "…"}'
 ```
@@ -109,7 +105,8 @@ Full conventions and the Deptrac ruleset are documented in [AGENTS.md](AGENTS.md
 
 The images live in the Garage service of `compose.yaml`. Before deploying (on
 Coolify, for instance), set your own `GARAGE_*` and `S3_*` secrets and give Garage's
-web endpoint a public domain: the steps are in [AGENTS.md](AGENTS.md#images).
+web endpoint a public domain: the steps are in [AGENTS.md](AGENTS.md#images). Set
+`BOT_API_TOKEN` too if a tool such as Hermes publishes drafts.
 
 ## Tests & quality
 

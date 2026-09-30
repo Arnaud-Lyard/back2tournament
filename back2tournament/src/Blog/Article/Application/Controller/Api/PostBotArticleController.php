@@ -32,7 +32,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(
     response: 200,
-    description: 'The article a tool wrote, such as Hermes, saved as a draft: it shows nowhere until an editor reviews it and publishes it (`PATCH /api/editor/articles/{id}/status`). The tool authenticates with an API token issued by `bin/console app:api-token:create`, which opens the routes under `/api/bot` and no other.',
+    description: 'The article a tool wrote, such as Hermes, saved as a draft: it shows nowhere until an editor reviews it and publishes it (`PATCH /api/editor/articles/{id}/status`). The tool authenticates with the API token set in the `BOT_API_TOKEN` environment variable of the API, which opens the routes under `/api/bot` and no other.',
     content: new OA\JsonContent(ref: '#/components/schemas/Article'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]

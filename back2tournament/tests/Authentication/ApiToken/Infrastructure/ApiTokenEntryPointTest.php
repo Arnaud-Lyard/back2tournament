@@ -23,10 +23,10 @@ final class ApiTokenEntryPointTest extends TestCase
 
     public function test_a_refused_token_is_answered_with_the_reason(): void
     {
-        $response = new ApiTokenEntryPoint()->onAuthenticationFailure(new Request(), new CustomUserMessageAuthenticationException('Expired API token'));
+        $response = new ApiTokenEntryPoint()->onAuthenticationFailure(new Request(), new CustomUserMessageAuthenticationException('Invalid API token'));
 
         $this->assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
         $this->assertSame('Bearer error="invalid_token"', $response->headers->get('WWW-Authenticate'));
-        $this->assertSame(['code' => 401, 'message' => 'Expired API token'], json_decode((string) $response->getContent(), true, 512, JSON_THROW_ON_ERROR));
+        $this->assertSame(['code' => 401, 'message' => 'Invalid API token'], json_decode((string) $response->getContent(), true, 512, JSON_THROW_ON_ERROR));
     }
 }

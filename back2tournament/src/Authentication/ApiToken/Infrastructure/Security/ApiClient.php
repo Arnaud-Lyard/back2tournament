@@ -8,6 +8,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 final class ApiClient implements UserInterface
 {
+    public const NAME = 'bot';
+
     public const ROLE = 'ROLE_BOT';
 
     private string $name;
