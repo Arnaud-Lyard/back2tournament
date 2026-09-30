@@ -416,6 +416,11 @@ The rule of thumb: the documented body and the `$parameters[...]` reads in `__in
 must be the same set of keys, and the documented status codes must be the ones the
 handler's exceptions actually produce.
 
+The documentation is served in development only: `/api/doc` (Swagger UI) and
+`/api/doc.json`, which the front's `npm run api:types` reads. Production has neither
+route, so it answers 404 there; `bin/console nelmio:apidoc:dump` prints the document
+in any environment.
+
 ## 8. Tests
 
 Two files per endpoint, both pure unit tests with mocked collaborators:
