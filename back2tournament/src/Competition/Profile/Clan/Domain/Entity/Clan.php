@@ -10,6 +10,7 @@ use App\Competition\Profile\Clan\Domain\Event\ClanCreatedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberInvitedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberJoinedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberLeftEvent;
+use App\Competition\Profile\Clan\Domain\Event\ClanMemberRequestedEvent;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Shared\Aggregate\AggregateRoot;
@@ -142,6 +143,25 @@ class Clan extends AggregateRoot
         return $membership;
     }
 
+    public static function request(Clan $clan, ClanMemberId $clanMemberId, PlayerId $playerId): ClanMember
+    {
+        if ($clan->leader === $playerId->getValue()) {
+            throw new ConflictException('the leader already belongs to the clan');
+        }
+
+        $membership = new ClanMember($clanMemberId);
+        $membership->setClan($clan->getId());
+        $membership->setPlayer($playerId);
+        $membership->setRole(ClanRole::MEMBER);
+        $membership->setStatus(ClanMemberStatus::REQUESTED);
+        $membership->setCreatedAt(new \DateTimeImmutable('now'));
+        $membership->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanMemberRequestedEvent($clanMemberId));
+
+        return $membership;
+    }
+
     public static function join(Clan $clan, ClanMember $membership): ClanMember
     {
         self::ensureBelongs($clan, $membership);
@@ -149,14 +169,25 @@ class Clan extends AggregateRoot
         if (ClanMemberStatus::ACTIVE === $membership->getStatus()) {
             throw new ConflictException('this player already is a member of the clan');
         }
+        if (ClanMemberStatus::REQUESTED === $membership->getStatus()) {
+            throw new ConflictException('the clan leader has not accepted this request yet');
+        }
 
-        $membership->setStatus(ClanMemberStatus::ACTIVE);
-        $membership->setUpdatedAt(new \DateTimeImmutable('now'));
-        $clan->setUpdatedAt(new \DateTimeImmutable('now'));
+        return self::activate($clan, $membership);
+    }
 
-        $clan->recordDomainEvent(new ClanMemberJoinedEvent($membership->getId()));
+    public static function admit(Clan $clan, ClanMember $membership): ClanMember
+    {
+        self::ensureBelongs($clan, $membership);
 
-        return $membership;
+        if (ClanMemberStatus::ACTIVE === $membership->getStatus()) {
+            throw new ConflictException('this player already is a member of the clan');
+        }
+        if (ClanMemberStatus::INVITED === $membership->getStatus()) {
+            throw new ConflictException('this player was invited: they accept the invitation themselves');
+        }
+
+        return self::activate($clan, $membership);
     }
 
     public static function remove(Clan $clan, ClanMember $membership): ClanMember
@@ -170,6 +201,17 @@ class Clan extends AggregateRoot
         $clan->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $clan->recordDomainEvent(new ClanMemberLeftEvent($membership->getId()));
+
+        return $membership;
+    }
+
+    private static function activate(Clan $clan, ClanMember $membership): ClanMember
+    {
+        $membership->setStatus(ClanMemberStatus::ACTIVE);
+        $membership->setUpdatedAt(new \DateTimeImmutable('now'));
+        $clan->setUpdatedAt(new \DateTimeImmutable('now'));
+
+        $clan->recordDomainEvent(new ClanMemberJoinedEvent($membership->getId()));
 
         return $membership;
     }

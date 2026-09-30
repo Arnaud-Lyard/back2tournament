@@ -69,6 +69,11 @@ trait CompetitionFixtures
         return Clan::invite($clan, new ClanMemberId(Uuid::v4()->toString()), new PlayerId($playerId));
     }
 
+    private static function joinRequest(Clan $clan, string $playerId): ClanMember
+    {
+        return Clan::request($clan, new ClanMemberId(Uuid::v4()->toString()), new PlayerId($playerId));
+    }
+
     private static function membership(Clan $clan, string $playerId): ClanMember
     {
         return Clan::join($clan, self::invitation($clan, $playerId));

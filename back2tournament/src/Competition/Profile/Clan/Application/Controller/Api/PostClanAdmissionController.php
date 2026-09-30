@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Competition\Profile\Clan\Application\Controller\Api;
 
-use App\Competition\Profile\Clan\Application\Model\InviteClanMemberCommand;
+use App\Competition\Profile\Clan\Application\Model\AdmitClanMemberCommand;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,30 +13,30 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/user/clans/{id}/invitations', name: 'api_clan_invitation_post', methods: ['POST'])]
+#[Route('/api/user/clans/{id}/admissions', name: 'api_clan_admission_post', methods: ['POST'])]
 #[OA\Tag(name: 'Clan')]
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Clan ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\RequestBody(
     required: true,
-    description: 'Only the clan leader invites. The player must play the game of the clan; they become a member once they accept with `POST /api/user/clans/{id}/members`.',
+    description: 'Only the clan leader accepts a request to join, sent with `POST /api/user/clans/{id}/requests`.',
     content: new OA\JsonContent(
         required: ['player'],
         properties: [
-            new OA\Property(property: 'player', type: 'string', format: 'uuid', description: 'Player profile invited'),
+            new OA\Property(property: 'player', type: 'string', format: 'uuid', description: 'Player profile that asked to join'),
         ],
     ),
 )]
 #[OA\Response(
     response: 200,
-    description: 'Invitation sent: the membership is `invited`.',
+    description: 'Request accepted: the player is an `active` member.',
     content: new OA\JsonContent(ref: '#/components/schemas/ClanMember'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
 #[OA\Response(response: 403, description: 'The caller does not lead the clan')]
-#[OA\Response(response: 404, description: 'The clan or the player does not exist')]
-#[OA\Response(response: 409, description: 'The player already is a member of the clan, invited to it or asking to join it: the leader accepts a request with `POST /api/user/clans/{id}/admissions`')]
-final class PostClanInvitationController extends AbstractController
+#[OA\Response(response: 404, description: 'The clan does not exist, or the player did not ask to join it')]
+#[OA\Response(response: 409, description: 'The player already is a member of the clan or of another one, or was invited and accepts the invitation themselves')]
+final class PostClanAdmissionController extends AbstractController
 {
     use HandleTrait;
 
@@ -53,7 +53,7 @@ final class PostClanInvitationController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        return JsonResponse::fromJsonString($this->handle(new InviteClanMemberCommand(
+        return JsonResponse::fromJsonString($this->handle(new AdmitClanMemberCommand(
             $id,
             $parameters['player'],
         )));

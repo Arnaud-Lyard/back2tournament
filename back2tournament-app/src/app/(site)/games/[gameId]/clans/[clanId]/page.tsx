@@ -1,10 +1,17 @@
-import { ArrowLeftIcon, CrownIcon, ShieldIcon, UsersIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  CrownIcon,
+  ShieldIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
+import { JoinRequestActions } from "@/components/join-request-actions"
 import { PlayerAvatar } from "@/components/player-avatar"
 import { RatingCard } from "@/components/rating-card"
 import { ResultHistory } from "@/components/result-history"
@@ -44,6 +51,7 @@ import { CreateTeamForm } from "./create-team-form"
 import { DisbandTeamButton } from "./disband-team-button"
 import { MembershipActions } from "./membership-actions"
 import { RemoveMemberButton } from "./remove-member-button"
+import { RequestToJoinButton } from "./request-to-join-button"
 
 interface ClanPageProps {
   params: Promise<{ gameId: string; clanId: string }>
@@ -94,6 +102,7 @@ export default async function ClanPage({ params }: ClanPageProps) {
   const teams = clan.data.teams ?? []
   const active = members.filter((member) => member.status === "active")
   const invited = members.filter((member) => member.status === "invited")
+  const requested = members.filter((member) => member.status === "requested")
 
   const myPlayerId = user?.playersByGame[gameId]?.id
   const mine = members.find((member) => member.player?.id?.value === myPlayerId)
@@ -103,6 +112,7 @@ export default async function ClanPage({ params }: ClanPageProps) {
     ? activeClanIn(myClans.data, gameId)
     : undefined
   const myOtherClanId = myOtherClan?.clan.id?.value
+  const canRequest = !!myPlayerId && !mine && !myOtherClan
   const challengers =
     myOtherClanId && myOtherClanId !== clanId
       ? await loadClan(myOtherClanId).then((loaded) =>
@@ -146,6 +156,8 @@ export default async function ClanPage({ params }: ClanPageProps) {
               playerId={myPlayerId}
               status={mine.status}
             />
+          ) : canRequest ? (
+            <RequestToJoinButton clanId={clanId} />
           ) : null
         }
       />
@@ -159,43 +171,78 @@ export default async function ClanPage({ params }: ClanPageProps) {
         </Alert>
       )}
 
+      {mine?.status === "requested" && (
+        <Alert>
+          <AlertTitle>{t("membership.requestedTitle")}</AlertTitle>
+          <AlertDescription>
+            {t("membership.requestedDescription")}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UsersIcon className="size-4" />
-              {t("members.title")}
-            </CardTitle>
-            {isLeader && (
-              <CardDescription>
-                {t.rich("members.inviteHint", {
-                  link: (chunks) => (
-                    <Link
-                      href={`${base}/players`}
-                      className="underline underline-offset-4"
-                    >
-                      {chunks}
-                    </Link>
-                  ),
-                })}
-              </CardDescription>
-            )}
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col divide-y">
-              {[...active, ...invited].map((member) => (
-                <MemberRow
-                  key={member.id?.value}
-                  member={member}
-                  clanId={clanId}
-                  canRemove={isLeader && member.role !== "leader"}
-                  roleLabel={t("members.leader")}
-                  invitedLabel={t("members.invited")}
-                />
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col gap-6">
+          {isLeader && requested.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlusIcon className="size-4" />
+                  {t("requests.title", { count: requested.length })}
+                </CardTitle>
+                <CardDescription>{t("requests.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="flex flex-col divide-y">
+                  {requested.map((member) => (
+                    <RequestRow
+                      key={member.id?.value}
+                      member={member}
+                      clanId={clanId}
+                      playersPath={`${base}/players`}
+                    />
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UsersIcon className="size-4" />
+                {t("members.title")}
+              </CardTitle>
+              {isLeader && (
+                <CardDescription>
+                  {t.rich("members.inviteHint", {
+                    link: (chunks) => (
+                      <Link
+                        href={`${base}/players`}
+                        className="underline underline-offset-4"
+                      >
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
+                </CardDescription>
+              )}
+            </CardHeader>
+            <CardContent>
+              <ul className="flex flex-col divide-y">
+                {[...active, ...invited].map((member) => (
+                  <MemberRow
+                    key={member.id?.value}
+                    member={member}
+                    clanId={clanId}
+                    canRemove={isLeader && member.role !== "leader"}
+                    roleLabel={t("members.leader")}
+                    invitedLabel={t("members.invited")}
+                  />
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="flex flex-col gap-6">
           <Card>
@@ -266,6 +313,44 @@ function loadedTeamsLedBy(
   playerId: string | undefined
 ): Team[] {
   return loaded.ok ? teamsLedBy(loaded.data, playerId) : []
+}
+
+function RequestRow({
+  member,
+  clanId,
+  playersPath,
+}: {
+  member: ClanMember
+  clanId: string
+  playersPath: string
+}) {
+  const playerId = member.player?.id?.value
+  const battletag = member.player?.battletag ?? "?"
+
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-3 py-2">
+      <div className="flex min-w-0 items-center gap-2">
+        <PlayerAvatar battletag={battletag} size="sm" />
+        {playerId ? (
+          <Link
+            href={`${playersPath}/${encodeURIComponent(playerId)}`}
+            className="truncate text-sm underline-offset-4 hover:underline"
+          >
+            {battletag}
+          </Link>
+        ) : (
+          <span className="truncate text-sm">{battletag}</span>
+        )}
+      </div>
+      {playerId && (
+        <JoinRequestActions
+          clanId={clanId}
+          playerId={playerId}
+          battletag={battletag}
+        />
+      )}
+    </li>
+  )
 }
 
 function MemberRow({

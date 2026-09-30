@@ -16,14 +16,15 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Clan')]
 #[OA\Response(
     response: 200,
-    description: 'Every place the authenticated user holds in a clan, whatever the game: memberships and invitations still to answer, oldest first. An empty array when there is none.',
+    description: 'Every place the authenticated user holds in a clan, whatever the game: memberships, invitations still to answer and requests to join the leader has not answered yet, oldest first. An empty array when there is none.',
     content: new OA\JsonContent(
         type: 'array',
         items: new OA\Items(
-            required: ['clan', 'membership'],
+            required: ['clan', 'membership', 'requests'],
             properties: [
                 new OA\Property(property: 'clan', ref: '#/components/schemas/Clan'),
                 new OA\Property(property: 'membership', ref: '#/components/schemas/ClanMember'),
+                new OA\Property(property: 'requests', type: 'integer', minimum: 0, example: 2, description: 'How many players ask to join the clan, for a clan the user leads: they wait for the leader to accept them (`POST /api/user/clans/{id}/admissions`) or decline them. 0 for any other clan.'),
             ],
             type: 'object',
         ),

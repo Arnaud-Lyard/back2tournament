@@ -374,20 +374,20 @@ nelmio_api_doc:
                         - { $ref: '#/components/schemas/Clan' }
                         - type: object
                           properties:
-                              members: { type: integer, example: 7, description: 'Active members, the leader included; pending invitations are not counted' }
+                              members: { type: integer, example: 7, description: 'Active members, the leader included; pending invitations and requests to join are not counted' }
                 ClanMember:
                     type: object
-                    description: 'The place one player profile holds in one clan: `invited` until they accept, `active` after.'
+                    description: 'The place one player profile holds in one clan: `invited` until they accept an invitation, `requested` until the leader accepts their request to join, `active` after.'
                     properties:
                         id: { $ref: '#/components/schemas/Uuid' }
                         clan: { $ref: '#/components/schemas/Uuid' }
                         player: { $ref: '#/components/schemas/PlayerProfile' }
                         role: { type: string, enum: [leader, member] }
-                        status: { type: string, enum: [invited, active] }
+                        status: { type: string, enum: [invited, requested, active] }
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
                 ClanDetail:
-                    description: 'A clan, its members and pending invitations (leader first), and the teams it fields.'
+                    description: 'A clan, its members, pending invitations and requests to join (leader first), and the teams it fields.'
                     allOf:
                         - { $ref: '#/components/schemas/Clan' }
                         - type: object

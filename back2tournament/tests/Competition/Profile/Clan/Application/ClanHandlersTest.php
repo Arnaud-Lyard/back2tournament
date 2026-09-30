@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Tests\Competition\Profile\Clan\Application;
 
+use App\Competition\Profile\Clan\Application\Model\AdmitClanMemberCommand;
 use App\Competition\Profile\Clan\Application\Model\CreateClanCommand;
 use App\Competition\Profile\Clan\Application\Model\InviteClanMemberCommand;
 use App\Competition\Profile\Clan\Application\Model\JoinClanCommand;
 use App\Competition\Profile\Clan\Application\Model\RemoveClanMemberCommand;
+use App\Competition\Profile\Clan\Application\Model\RequestClanMembershipCommand;
+use App\Competition\Profile\Clan\Application\Service\AdmitClanMemberHandler;
 use App\Competition\Profile\Clan\Application\Service\CreateClanHandler;
 use App\Competition\Profile\Clan\Application\Service\InviteClanMemberHandler;
 use App\Competition\Profile\Clan\Application\Service\JoinClanHandler;
 use App\Competition\Profile\Clan\Application\Service\RemoveClanMemberHandler;
+use App\Competition\Profile\Clan\Application\Service\RequestClanMembershipHandler;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
@@ -27,6 +31,7 @@ use App\Shared\Exception\PermissionDeniedException;
 use App\Shared\Exception\ValidationException;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -202,6 +207,167 @@ final class ClanHandlersTest extends TestCase
         $this->joinHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new JoinClanCommand(self::CLAN_ID));
     }
 
+    public function test_a_player_of_the_game_asks_to_join(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [self::leadership($clan)]);
+        $clanMemberRepository->expects($this->once())->method('save')->with($this->callback(
+            static fn (ClanMember $membership): bool => ClanMemberStatus::REQUESTED === $membership->getStatus()
+                && self::MEMBER_PLAYER === $membership->getPlayer()->getValue()
+                && self::CLAN_ID === $membership->getClan()->getValue()
+        ));
+
+        $this->requestHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new RequestClanMembershipCommand(self::CLAN_ID));
+    }
+
+    public function test_a_user_without_a_profile_in_the_game_asks_nothing(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::OTHER_GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, []);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(NotFoundException::class);
+
+        $this->requestHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new RequestClanMembershipCommand(self::CLAN_ID));
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function placesAlreadyHeld(): iterable
+    {
+        yield 'a member' => ['membership', 'already are a member'];
+        yield 'an invited player' => ['invitation', 'accept the invitation'];
+        yield 'a player who already asked' => ['joinRequest', 'already asked'];
+    }
+
+    #[DataProvider('placesAlreadyHeld')]
+    public function test_a_player_holding_a_place_in_the_clan_asks_nothing_more(string $place, string $reason): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [self::{$place}($clan, self::MEMBER_PLAYER)]);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains($reason);
+
+        $this->requestHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new RequestClanMembershipCommand(self::CLAN_ID));
+    }
+
+    public function test_a_member_of_another_clan_leaves_it_before_asking(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+        $other = self::aClan(self::OTHER_CLAN_ID, self::GAME_ID, self::STRANGER_USER, 'OTH');
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [self::membership($other, self::MEMBER_PLAYER)]);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('leave your current clan');
+
+        $this->requestHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new RequestClanMembershipCommand(self::CLAN_ID));
+    }
+
+    public function test_the_leader_accepts_a_request(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+        $request = self::joinRequest($clan, self::MEMBER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [$request]);
+        $clanMemberRepository->expects($this->once())->method('save');
+
+        $admitted = json_decode(
+            $this->admitHandler($clan, $clanMemberRepository, self::LEADER_USER)(new AdmitClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER)),
+            true, 512, JSON_THROW_ON_ERROR,
+        );
+
+        $this->assertSame(ClanMemberStatus::ACTIVE, $request->getStatus());
+        $this->assertSame('active', $admitted['status']);
+        $this->assertSame('Member#0002', $admitted['player']['battletag']);
+    }
+
+    public function test_only_the_leader_accepts_a_request(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [self::joinRequest($clan, self::MEMBER_PLAYER)]);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(PermissionDeniedException::class);
+
+        $this->admitHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new AdmitClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER));
+    }
+
+    public function test_a_player_who_did_not_ask_is_not_admitted(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, []);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(NotFoundException::class);
+
+        $this->admitHandler($clan, $clanMemberRepository, self::LEADER_USER)(new AdmitClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER));
+    }
+
+    public function test_a_player_who_joined_another_clan_meanwhile_is_not_admitted(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+        $other = self::aClan(self::OTHER_CLAN_ID, self::GAME_ID, self::STRANGER_USER, 'OTH');
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [
+            self::joinRequest($clan, self::MEMBER_PLAYER),
+            self::membership($other, self::MEMBER_PLAYER),
+        ]);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('another clan');
+
+        $this->admitHandler($clan, $clanMemberRepository, self::LEADER_USER)(new AdmitClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER));
+    }
+
+    public function test_the_leader_does_not_admit_an_invited_player(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [self::invitation($clan, self::MEMBER_PLAYER)]);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+
+        $this->admitHandler($clan, $clanMemberRepository, self::LEADER_USER)(new AdmitClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER));
+    }
+
+    public function test_a_player_who_asked_does_not_join_on_their_own(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [self::joinRequest($clan, self::MEMBER_PLAYER)]);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('not accepted this request yet');
+
+        $this->joinHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new JoinClanCommand(self::CLAN_ID));
+    }
+
+    public function test_a_request_is_withdrawn_by_the_player_or_declined_by_the_leader(): void
+    {
+        foreach ([self::MEMBER_USER, self::LEADER_USER] as $caller) {
+            $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+            $request = self::joinRequest($clan, self::MEMBER_PLAYER);
+
+            $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, [$request]);
+            $clanMemberRepository->expects($this->once())->method('remove')->with($request);
+
+            $this->removeHandler($clan, $clanMemberRepository, $caller)(new RemoveClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER));
+        }
+    }
+
     public function test_a_member_leaves_on_their_own(): void
     {
         $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
@@ -289,6 +455,28 @@ final class ClanHandlersTest extends TestCase
     private function inviteHandler(Clan $clan, ClanMemberRepositoryInterface $clanMemberRepository, string $caller): InviteClanMemberHandler
     {
         return new InviteClanMemberHandler(
+            $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            $clanMemberRepository,
+            $this->players(),
+            $this->signedIn($caller),
+            $this->createStub(EventDispatcherInterface::class),
+        );
+    }
+
+    private function requestHandler(Clan $clan, ClanMemberRepositoryInterface $clanMemberRepository, string $caller): RequestClanMembershipHandler
+    {
+        return new RequestClanMembershipHandler(
+            $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
+            $clanMemberRepository,
+            $this->players(),
+            $this->signedIn($caller),
+            $this->createStub(EventDispatcherInterface::class),
+        );
+    }
+
+    private function admitHandler(Clan $clan, ClanMemberRepositoryInterface $clanMemberRepository, string $caller): AdmitClanMemberHandler
+    {
+        return new AdmitClanMemberHandler(
             $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
             $clanMemberRepository,
             $this->players(),

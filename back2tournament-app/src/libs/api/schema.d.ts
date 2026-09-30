@@ -213,6 +213,22 @@ export interface paths {
         patch: operations["patch_api_article_status_patch"];
         trace?: never;
     };
+    "/api/bot/articles/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_bot_article_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/comments/": {
         parameters: {
             query?: never;
@@ -223,6 +239,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["post_api_comment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bot/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_bot_category_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -485,6 +517,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/user/clans/{id}/admissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_clan_admission_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user/clans/": {
         parameters: {
             query?: never;
@@ -527,6 +575,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["post_api_clan_member_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/clans/{id}/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_clan_request_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1261,12 +1325,12 @@ export interface components {
         /** @description A clan as a list shows it. */
         ClanSummary: components["schemas"]["Clan"] & {
             /**
-             * @description Active members, the leader included; pending invitations are not counted
+             * @description Active members, the leader included; pending invitations and requests to join are not counted
              * @example 7
              */
             members?: number;
         };
-        /** @description The place one player profile holds in one clan: `invited` until they accept, `active` after. */
+        /** @description The place one player profile holds in one clan: `invited` until they accept an invitation, `requested` until the leader accepts their request to join, `active` after. */
         ClanMember: {
             id?: components["schemas"]["Uuid"];
             clan?: components["schemas"]["Uuid"];
@@ -1274,13 +1338,13 @@ export interface components {
             /** @enum {string} */
             role?: "leader" | "member";
             /** @enum {string} */
-            status?: "invited" | "active";
+            status?: "invited" | "requested" | "active";
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
         };
-        /** @description A clan, its members and pending invitations (leader first), and the teams it fields. */
+        /** @description A clan, its members, pending invitations and requests to join (leader first), and the teams it fields. */
         ClanDetail: components["schemas"]["Clan"] & {
             members?: components["schemas"]["ClanMember"][];
             teams?: components["schemas"]["Team"][];
@@ -1495,6 +1559,20 @@ export interface components {
                     /** @example 401 */
                     code?: number;
                     /** @example JWT Token not found */
+                    message?: string;
+                };
+            };
+        };
+        /** @description Missing, unknown, expired or revoked API token */
+        ApiTokenUnauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example 401 */
+                    code?: number;
+                    /** @example Invalid API token */
                     message?: string;
                 };
             };
@@ -2210,6 +2288,53 @@ export interface operations {
             409: components["responses"]["Conflict"];
         };
     };
+    post_api_bot_article_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example Les résultats du week-end */
+                    title: string;
+                    /** @example Article content... */
+                    body: string;
+                    /**
+                     * @description Slug of an existing category, as `GET /api/bot/categories/` lists them
+                     * @example news
+                     */
+                    categorySlug: string;
+                    /**
+                     * @description The English title. Optional, but the English version is whole: send it with `bodyEn`, or neither. Blank reads as absent.
+                     * @example The weekend results
+                     */
+                    titleEn?: string | null;
+                    /**
+                     * @description The English body, sent with `titleEn`.
+                     * @example Article content...
+                     */
+                    bodyEn?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The article a tool wrote, such as Hermes, saved as a draft: it shows nowhere until an editor reviews it and publishes it (`PATCH /api/editor/articles/{id}/status`). The tool authenticates with an API token issued by `bin/console app:api-token:create`, which opens the routes under `/api/bot` and no other. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Article"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["ApiTokenUnauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
     post_api_comment_post: {
         parameters: {
             query?: never;
@@ -2260,6 +2385,27 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+        };
+    };
+    get_api_bot_category_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every category, by name, for a tool signed in with an API token: the `slug` of one of them is the `categorySlug` its draft is filed under (`POST /api/bot/articles/`). An empty array when no category has been created yet. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            401: components["responses"]["ApiTokenUnauthorized"];
         };
     };
     get_api_category_list: {
@@ -2811,14 +2957,14 @@ export interface operations {
             path: {
                 /** @description Clan ID */
                 id: string;
-                /** @description Player profile whose membership or invitation ends */
+                /** @description Player profile whose membership, invitation or request to join ends */
                 playerid: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Membership ended: the member left, the invitation was declined or withdrawn, or the leader let the member go. It is returned one last time, as it stood. */
+            /** @description Membership ended: the member left, the invitation or the request to join was declined or withdrawn, or the leader let the member go. It is returned one last time, as it stood. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2927,7 +3073,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Every place the authenticated user holds in a clan, whatever the game: memberships and invitations still to answer, oldest first. An empty array when there is none. */
+            /** @description Every place the authenticated user holds in a clan, whatever the game: memberships, invitations still to answer and requests to join the leader has not answered yet, oldest first. An empty array when there is none. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2936,10 +3082,72 @@ export interface operations {
                     "application/json": {
                         clan: components["schemas"]["Clan"];
                         membership: components["schemas"]["ClanMember"];
+                        /**
+                         * @description How many players ask to join the clan, for a clan the user leads: they wait for the leader to accept them (`POST /api/user/clans/{id}/admissions`) or decline them. 0 for any other clan.
+                         * @example 2
+                         */
+                        requests: number;
                     }[];
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    post_api_clan_admission_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Only the clan leader accepts a request to join, sent with `POST /api/user/clans/{id}/requests`. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description Player profile that asked to join
+                     */
+                    player: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Request accepted: the player is an `active` member. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanMember"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not lead the clan */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The clan does not exist, or the player did not ask to join it */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The player already is a member of the clan or of another one, or was invited and accepts the invitation themselves */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     post_api_clan_post: {
@@ -3044,7 +3252,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The player already is a member of the clan, or invited to it */
+            /** @description The player already is a member of the clan, invited to it or asking to join it: the leader accepts a request with `POST /api/user/clans/{id}/admissions` */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3083,7 +3291,46 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The caller already is a member of this clan, or of another one in the game */
+            /** @description The caller already is a member of this clan or of another one in the game, or asked to join it rather than being invited: the leader accepts that request */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_clan_request_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request sent: the player profile the authenticated user holds in the game of the clan asks to join it, and the membership is `requested` until the clan leader accepts it with `POST /api/user/clans/{id}/admissions`. `DELETE /api/user/clans/{id}/members/{playerid}` withdraws or declines it. No body is read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClanMember"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The clan does not exist, or the caller holds no profile in its game */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The caller already is a member of this clan, invited to it or asking to join it, or a member of another clan of the game */
             409: {
                 headers: {
                     [name: string]: unknown;

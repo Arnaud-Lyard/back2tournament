@@ -8,12 +8,13 @@ const ME = "33333333-3333-4333-8333-333333333333"
 
 function place(
   game: string,
-  status: "invited" | "active",
+  status: "invited" | "requested" | "active",
   name: string
 ): MyClan {
   return {
     clan: { id: { value: name }, name, game: { value: game } },
     membership: { status, role: "member" },
+    requests: 0,
   }
 }
 
@@ -31,6 +32,12 @@ describe("activeClanIn", () => {
   it("does not take a pending invitation for a membership", () => {
     expect(
       activeClanIn([place(GAME, "invited", "invited")], GAME)
+    ).toBeUndefined()
+  })
+
+  it("does not take a request to join for a membership", () => {
+    expect(
+      activeClanIn([place(GAME, "requested", "asked")], GAME)
     ).toBeUndefined()
   })
 })

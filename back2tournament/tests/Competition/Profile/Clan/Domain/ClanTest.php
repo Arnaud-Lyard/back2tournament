@@ -9,6 +9,7 @@ use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
+use App\Competition\Profile\Clan\Domain\Event\ClanMemberRequestedEvent;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
 use App\Shared\Exception\ConflictException;
@@ -118,6 +119,84 @@ final class ClanTest extends TestCase
         $this->expectException(NotFoundException::class);
 
         Clan::join($this->clan(), $membership);
+    }
+
+    public function test_a_player_asks_to_join_and_waits_for_the_leader(): void
+    {
+        $clan = $this->clan();
+        $clan->pullDomainEvents();
+
+        $membership = Clan::request($clan, new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::PLAYER_ID));
+
+        $this->assertSame(ClanMemberStatus::REQUESTED, $membership->getStatus());
+        $this->assertSame(ClanRole::MEMBER, $membership->getRole());
+        $this->assertInstanceOf(ClanMemberRequestedEvent::class, $clan->pullDomainEvents()[0]);
+    }
+
+    public function test_the_leader_never_asks_to_join_their_own_clan(): void
+    {
+        $this->expectException(ConflictException::class);
+
+        Clan::request($this->clan(), new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::LEADER_ID));
+    }
+
+    public function test_the_leader_admits_a_player_who_asked(): void
+    {
+        $clan = $this->clan();
+        $membership = Clan::request($clan, new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::PLAYER_ID));
+
+        Clan::admit($clan, $membership);
+
+        $this->assertSame(ClanMemberStatus::ACTIVE, $membership->getStatus());
+    }
+
+    public function test_a_player_who_asked_does_not_let_themselves_in(): void
+    {
+        $clan = $this->clan();
+        $membership = Clan::request($clan, new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::PLAYER_ID));
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('not accepted this request yet');
+
+        Clan::join($clan, $membership);
+    }
+
+    public function test_the_leader_does_not_accept_an_invitation_for_the_player(): void
+    {
+        $clan = $this->clan();
+        $membership = Clan::invite($clan, new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::PLAYER_ID));
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessageIsOrContains('accept the invitation themselves');
+
+        Clan::admit($clan, $membership);
+    }
+
+    public function test_a_member_is_not_admitted_twice(): void
+    {
+        $clan = $this->clan();
+        $membership = Clan::request($clan, new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::PLAYER_ID));
+        Clan::admit($clan, $membership);
+
+        $this->expectException(ConflictException::class);
+
+        Clan::admit($clan, $membership);
+    }
+
+    public function test_a_request_to_another_clan_is_not_accepted_here(): void
+    {
+        $other = Clan::create(
+            new ClanId(self::OTHER_CLAN_ID),
+            new ClanNameValueObject('Others'),
+            new ClanTagValueObject('OTH'),
+            new GameId(self::GAME_ID),
+            new PlayerId(self::LEADER_ID),
+        );
+        $membership = Clan::request($other, new ClanMemberId(self::MEMBERSHIP_ID), new PlayerId(self::PLAYER_ID));
+
+        $this->expectException(NotFoundException::class);
+
+        Clan::admit($this->clan(), $membership);
     }
 
     public function test_the_leader_never_leaves(): void

@@ -68,8 +68,9 @@ make user           # seed a dev user via app:create-user
 - `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
   `Competition/Profile/Team/` — competition profiles. A `Game` lists the formats it is
   played in (`teamSizes`: 1 for 1v1, 5 for 5v5, up to 64). A `Player` is one user in one
-  game. A `Clan` groups players of one game under a leader; players join by invitation
-  and belong to one clan at most. A `Team` is a lineup a clan fields in one format:
+  game. A `Clan` groups players of one game under a leader; players join by invitation,
+  which they accept, or by asking to join (`requested`), which the leader accepts, and
+  belong to one clan at most. A `Team` is a lineup a clan fields in one format:
   exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
   Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is

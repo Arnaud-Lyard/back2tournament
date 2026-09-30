@@ -127,7 +127,8 @@
       "loadError": {
         "title": "This profile could not be loaded",
         "description": "The server did not answer. Try again in a moment."
-      }
+      },
+      "asksToJoin": "{battletag} asks to join {clan}."
     },
     "challenge": {
       "challenge": "Challenge {battletag}",
@@ -214,16 +215,23 @@
     "membership": {
       "invitedTitle": "You are invited to join this clan",
       "invitedDescription": "Accept to become a member: the leader can then field you in the clan's teams.",
+      "requestedTitle": "Your request is sent",
+      "requestedDescription": "The clan leader accepts or declines it. Until they answer, you can withdraw it.",
       "accept": "Accept the invitation",
       "decline": "Decline",
       "leave": "Leave the clan",
+      "request": "Ask to join",
+      "withdrawRequest": "Withdraw my request",
       "joined": "Welcome to the clan!",
       "declined": "Invitation declined",
       "left": "You left the clan",
+      "requestSent": "Request sent to the clan leader",
+      "requestWithdrawn": "Request withdrawn",
       "error": "Could not do that",
       "errors": {
         "elsewhere": "Leave your current clan in this game first.",
-        "cannotLeave": "You play in a team of the clan: the leader has to disband it first."
+        "cannotLeave": "You play in a team of the clan: the leader has to disband it first.",
+        "cannotRequest": "You already are in this clan, invited to it or waiting for an answer, or a member of another clan in this game."
       }
     },
     "members": {
@@ -240,6 +248,21 @@
       "removeError": "Could not do that",
       "errors": {
         "inTeam": "This player plays in a team of the clan: disband it first."
+      }
+    },
+    "requests": {
+      "title": "{count, plural, one {Request to join the clan} other {Requests to join the clan}}",
+      "description": "These players want to join the clan. Open a profile to find out about them before you answer.",
+      "admit": "Accept",
+      "admitLabel": "Accept {battletag} into the clan",
+      "decline": "Decline",
+      "declineLabel": "Decline the request of {battletag}",
+      "admitted": "{battletag} joined the clan",
+      "declined": "Request of {battletag} declined",
+      "error": "Action not possible",
+      "errors": {
+        "withdrawn": "This player withdrew their request.",
+        "elsewhere": "This player joined another clan in this game in the meantime."
       }
     },
     "teams": {
@@ -786,16 +809,18 @@
   },
   "myClans": {
     "title": "My clans",
-    "description": "Your clans, game by game, and the invitations waiting for your answer.",
+    "description": "Your clans, game by game, the invitations waiting for your answer and your requests to join one.",
     "invited": "Invitation",
+    "requested": "Request sent",
     "leader": "Leader",
+    "requests": "{count, plural, one {# request} other {# requests}}",
     "as": "{battletag} · {game}",
     "unknownGame": "Unknown game",
     "answer": "Answer",
     "open": "Open",
     "empty": {
       "title": "No clan",
-      "description": "Found a clan from the Clans page of a game, or wait for a leader to invite you.",
+      "description": "Found a clan from the Clans page of a game, ask to join one, or wait for a leader to invite you.",
       "action": "Browse the games"
     },
     "loadError": {

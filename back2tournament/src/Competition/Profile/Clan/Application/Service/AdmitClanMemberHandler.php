@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Competition\Profile\Clan\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
-use App\Competition\Profile\Clan\Application\Model\InviteClanMemberCommand;
+use App\Competition\Profile\Clan\Application\Model\AdmitClanMemberCommand;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
-use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
+use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Entity\Player;
@@ -18,13 +18,11 @@ use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\PermissionDeniedException;
-use App\Shared\Exception\ValidationException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[AsMessageHandler]
-final class InviteClanMemberHandler
+final class AdmitClanMemberHandler
 {
     private ClanRepositoryInterface $clanRepository;
     private ClanMemberRepositoryInterface $clanMemberRepository;
@@ -46,10 +44,10 @@ final class InviteClanMemberHandler
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function __invoke(InviteClanMemberCommand $inviteClanMemberCommand): string
+    public function __invoke(AdmitClanMemberCommand $admitClanMemberCommand): string
     {
-        $clanId = new ClanId($inviteClanMemberCommand->getClanId());
-        $playerId = new PlayerId($inviteClanMemberCommand->getPlayerId());
+        $clanId = new ClanId($admitClanMemberCommand->getClanId());
+        $playerId = new PlayerId($admitClanMemberCommand->getPlayerId());
 
         $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue()]);
         if (!$clan instanceof Clan) {
@@ -59,34 +57,37 @@ final class InviteClanMemberHandler
         $leader = $this->playerRepository->findOneBy(['id' => $clan->getLeader()->getValue()]);
         if (!$leader instanceof Player
             || $leader->getUser()->getValue() !== (string) $this->currentUserProvider->getUser()->getId()) {
-            throw new PermissionDeniedException('only the clan leader invites players');
+            throw new PermissionDeniedException('only the clan leader accepts a request to join');
         }
 
-        $player = $this->playerRepository->findOneBy(['id' => $playerId->getValue()]);
-        if (!$player instanceof Player) {
-            throw new NotFoundException('player not found');
-        }
-
-        if ($player->getGame()->getValue() !== $clan->getGame()->getValue()) {
-            throw new ValidationException('this player plays another game than the clan');
-        }
-
-        if (null !== $this->clanMemberRepository->findOneBy([
+        $membership = $this->clanMemberRepository->findOneBy([
             'clan' => $clanId->getValue(),
             'player' => $playerId->getValue(),
-        ])) {
-            throw new ConflictException('this player already is a member of the clan, invited to it or asking to join it');
+        ]);
+        if (!$membership instanceof ClanMember) {
+            throw new NotFoundException('this player did not ask to join the clan');
         }
 
-        $membership = Clan::invite($clan, new ClanMemberId(Uuid::v4()->toString()), $playerId);
+        $elsewhere = $this->clanMemberRepository->findOneBy([
+            'player' => $playerId->getValue(),
+            'status' => ClanMemberStatus::ACTIVE,
+        ]);
+        if ($elsewhere instanceof ClanMember && $elsewhere->getClan()->getValue() !== $clanId->getValue()) {
+            throw new ConflictException('this player already plays for another clan');
+        }
+
+        Clan::admit($clan, $membership);
 
         $this->clanMemberRepository->save($membership);
+        $this->clanRepository->save($clan);
 
         foreach ($clan->pullDomainEvents() as $domainEvent) {
             $this->eventDispatcher->dispatch($domainEvent);
         }
 
-        return json_encode($this->normalizeMembership($membership, $player), JSON_THROW_ON_ERROR);
+        $player = $this->playerRepository->findOneBy(['id' => $playerId->getValue()]);
+
+        return json_encode($this->normalizeMembership($membership, $player instanceof Player ? $player : null), JSON_THROW_ON_ERROR);
     }
 
     /** @return array<string, mixed> */

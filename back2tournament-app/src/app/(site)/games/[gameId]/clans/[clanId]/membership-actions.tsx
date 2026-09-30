@@ -13,7 +13,7 @@ import { useApiErrorMessage } from "@/hooks/use-api-error-message"
 interface MembershipActionsProps {
   clanId: string
   playerId: string
-  status: "invited" | "active"
+  status: "invited" | "requested" | "active"
 }
 
 export function MembershipActions({
@@ -50,7 +50,12 @@ export function MembershipActions({
         onSuccess: () => {
           toast.add({
             type: "success",
-            title: status === "invited" ? t("declined") : t("left"),
+            title:
+              status === "invited"
+                ? t("declined")
+                : status === "requested"
+                  ? t("requestWithdrawn")
+                  : t("left"),
           })
           router.refresh()
         },
@@ -87,6 +92,19 @@ export function MembershipActions({
           {t("decline")}
         </Button>
       </div>
+    )
+  }
+
+  if (status === "requested") {
+    return (
+      <Button variant="outline" onClick={leave} disabled={pending}>
+        {remove.isPending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <XIcon data-icon="inline-start" />
+        )}
+        {t("withdrawRequest")}
+      </Button>
     )
   }
 
