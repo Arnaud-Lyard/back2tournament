@@ -58,12 +58,41 @@ make composer c=<>  # composer
 make user           # seed a dev user
 ```
 
+## Publishing from a tool (Hermes…)
+
+A tool such as Hermes writes news
+through the `/api/bot` routes, signed in with an API token instead of a user account.
+What it writes is a draft: an editor reviews it in the backoffice and publishes it.
+
+```bash
+make sf c="app:api-token:create hermes --days=365"   # prints the token, once
+make sf c="app:api-token:list"                        # expiry and last use
+make sf c="app:api-token:revoke hermes"               # the token stops working
+```
+
+Only the hash of the token is stored: keep it in the tool's secrets, and issue a new
+one if it is lost. Leave out `--days` for a token that lasts until it is revoked. The
+token opens `/api/bot` and nothing else:
+
+```bash
+curl -H "Authorization: Bearer $B2T_TOKEN" https://localhost/api/bot/categories/
+
+curl -X POST https://localhost/api/bot/articles/ \
+  -H "Authorization: Bearer $B2T_TOKEN" -H 'Content-Type: application/json' \
+  -d '{"title": "Les résultats du week-end", "body": "…", "categorySlug": "esport-news",
+       "titleEn": "The weekend results", "bodyEn": "…"}'
+```
+
+The English version is optional, but whole: `titleEn` with `bodyEn`, or neither. The
+API documentation (`/api/doc`) describes both routes under the `apiToken` scheme.
+
 ## Architecture
 
 ```
 src/
   Shared/                shared kernel — dependency-free (AggregateRoot, base value objects)
   Authentication/User/   users, roles, password hashing, security
+  Authentication/ApiToken/ API tokens of the tools that write drafts (Hermes…)
   Blog/                  Article, Category, Shared — editorial content
   Competition/Profile/   Game (and its formats), Player, Clan, Team — competition profiles
   Competition/Competitor/ the player-or-team that competes

@@ -48,12 +48,21 @@ make user           # seed a dev user via app:create-user
 - `Authentication/User/` — users, roles, password hashing, Symfony Security integration.
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
   any context to learn who the caller is.
+- `Authentication/ApiToken/` — the API tokens of the tools that write for the platform,
+  such as Hermes. `bin/console app:api-token:create <name> [--days=N]` issues one and
+  prints its secret once; only its SHA-256 hash is kept. `app:api-token:list` shows
+  them with their expiry and last use, `app:api-token:revoke <name>` deletes one. The
+  `bot` firewall reads the token from `Authorization: Bearer` (`ApiTokenHandler`) and
+  signs the tool in as an `ApiClient` holding `ROLE_BOT` alone: a token opens
+  `/api/bot` and nothing else, and a JWT does not open `/api/bot`.
 - `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy. An
   `Article` is a `draft` until an editor publishes it: whoever publishes it becomes its
   `author` — not whoever wrote it — and taking it back to draft clears the author. Only
   a published article is public and takes comments; a comment records who wrote it.
   An article is written in French and may carry an English version (`titleEn`,
-  `bodyEn`): both or neither, which the site shows when it is read in English.
+  `bodyEn`): both or neither, which the site shows when it is read in English. A tool
+  with an API token writes drafts too (`POST /api/bot/articles/`), after reading the
+  category slugs (`GET /api/bot/categories/`); an editor reviews and publishes them.
   `Blog/Shared/Domain/Provider/` holds `CategoryIdProviderInterface` (a category by its
   slug) and `AuthorProviderInterface` (the usernames behind author and commenter ids).
 - `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
@@ -267,9 +276,10 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
 - `#[Route('/api/…', name: 'api_…', methods: ['…'])]`. Route names follow
   `api_<resource>_<action>`; keep the same shape across a resource's routes.
 - **The path starts with the role it requires**: `/api/admin/…` for an administrator,
-  `/api/editor/…` for an editor, `/api/user/…` for any signed-in user.
+  `/api/editor/…` for an editor, `/api/user/…` for any signed-in user, `/api/bot/…`
+  for a tool signed in with an API token (`ROLE_BOT`, on its own `bot` firewall).
   `config/packages/security.yaml` grants each prefix to its role
-  (`ROLE_ADMIN` > `ROLE_EDITOR` > `ROLE_USER`). Anything else under `/api` is public
+  (`ROLE_ADMIN` > `ROLE_EDITOR` > `ROLE_USER`; `ROLE_BOT` stands apart). Anything else under `/api` is public
   for `GET` only (plus `POST /api/login` and `POST /api/register`); any other method
   there is refused, so a write route always lives under a prefix. A public read that
   shows more to a role gets a route of its own under that role's prefix:

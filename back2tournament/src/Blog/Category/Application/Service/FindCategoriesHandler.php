@@ -30,7 +30,7 @@ final class FindCategoriesHandler
 
     public function __invoke(FindCategoriesQuery $findCategoriesQuery): string
     {
-        if (!$this->currentUserProvider->isGranted('ROLE_EDITOR')) {
+        if (!$this->currentUserProvider->isGranted('ROLE_EDITOR') && !$this->currentUserProvider->isGranted('ROLE_BOT')) {
             throw new PermissionDeniedException('the user does not have the necessary permissions');
         }
 

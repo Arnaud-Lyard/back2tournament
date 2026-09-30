@@ -10,7 +10,7 @@ final class CreateArticleCommand
 
     private string $body;
 
-    private string $category;
+    private string $categorySlug;
 
     private ?string $titleEn = null;
 
@@ -36,14 +36,14 @@ final class CreateArticleCommand
         $this->body = $body;
     }
 
-    public function getCategory(): string
+    public function getCategorySlug(): string
     {
-        return $this->category;
+        return $this->categorySlug;
     }
 
-    public function setCategory(string $category): void
+    public function setCategorySlug(string $categorySlug): void
     {
-        $this->category = $category;
+        $this->categorySlug = $categorySlug;
     }
 
     public function getTitleEn(): ?string

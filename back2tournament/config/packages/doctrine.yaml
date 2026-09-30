@@ -28,6 +28,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Authentication/User/Infrastructure/DoctrineMapping'
                 prefix: 'App\Authentication\User\Domain\Entity'
                 alias: User
+            ApiToken:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Authentication/ApiToken/Infrastructure/DoctrineMapping'
+                prefix: 'App\Authentication\ApiToken\Domain\Entity'
+                alias: ApiToken
             Game:
                 type: xml
                 is_bundle: false

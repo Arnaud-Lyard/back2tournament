@@ -9,6 +9,10 @@ nelmio_api_doc:
                     type: http
                     scheme: bearer
                     bearerFormat: JWT
+                apiToken:
+                    type: http
+                    scheme: bearer
+                    description: 'The API token of a tool, such as Hermes, issued by `bin/console app:api-token:create`. It opens the routes under `/api/bot` and no other.'
             schemas:
                 Error:
                     type: object
@@ -551,6 +555,15 @@ nelmio_api_doc:
                                 properties:
                                     code: { type: integer, example: 401 }
                                     message: { type: string, example: 'JWT Token not found' }
+                ApiTokenUnauthorized:
+                    description: 'Missing, unknown, expired or revoked API token'
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code: { type: integer, example: 401 }
+                                    message: { type: string, example: 'Invalid API token' }
                 Forbidden:
                     description: 'The user is known but lacks the required role'
                     content:

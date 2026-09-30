@@ -31,7 +31,7 @@ final class FindCategoriesHandlerTest extends TestCase
                 new Category(new CategoryId(self::RULES_ID), 'Rules', 'rules'),
             ]);
 
-        $handler = new FindCategoriesHandler($categoryRepository, $this->normalizer(), $this->currentUserProvider(true));
+        $handler = new FindCategoriesHandler($categoryRepository, $this->normalizer(), $this->currentUserProvider('ROLE_EDITOR'));
 
         $listed = json_decode($handler(new FindCategoriesQuery()), true, 512, JSON_THROW_ON_ERROR);
 
@@ -49,21 +49,31 @@ final class FindCategoriesHandlerTest extends TestCase
         $categoryRepository = $this->createMock(CategoryRepositoryInterface::class);
         $categoryRepository->expects($this->never())->method('findBy');
 
-        $handler = new FindCategoriesHandler($categoryRepository, $this->normalizer(), $this->currentUserProvider(false));
+        $handler = new FindCategoriesHandler($categoryRepository, $this->normalizer(), $this->currentUserProvider('ROLE_USER'));
 
         $this->expectException(PermissionDeniedException::class);
 
         $handler(new FindCategoriesQuery());
     }
 
-    private function currentUserProvider(bool $isEditor): CurrentUserProviderInterface
+    public function test_a_tool_signed_in_with_an_api_token_gets_the_categories_to_file_its_drafts_under(): void
     {
-        $currentUserProvider = $this->createMock(CurrentUserProviderInterface::class);
-        $currentUserProvider
-            ->expects($this->once())
-            ->method('isGranted')
-            ->with('ROLE_EDITOR')
-            ->willReturn($isEditor);
+        $categoryRepository = $this->createStub(CategoryRepositoryInterface::class);
+        $categoryRepository->method('findBy')->willReturn([new Category(new CategoryId(self::NEWS_ID), 'News', 'news')]);
+
+        $handler = new FindCategoriesHandler($categoryRepository, $this->normalizer(), $this->currentUserProvider('ROLE_BOT'));
+
+        $listed = json_decode($handler(new FindCategoriesQuery()), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame([['id' => self::NEWS_ID, 'name' => 'News', 'slug' => 'news']], $listed);
+    }
+
+    private function currentUserProvider(string $role): CurrentUserProviderInterface
+    {
+        $currentUserProvider = $this->createStub(CurrentUserProviderInterface::class);
+        $currentUserProvider->method('isGranted')->willReturnCallback(
+            static fn (string $granted): bool => $granted === $role
+        );
 
         return $currentUserProvider;
     }

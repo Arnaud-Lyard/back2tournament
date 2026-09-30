@@ -27,6 +27,14 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
+        bot:
+            pattern: ^/api/bot
+            stateless: true
+            access_token:
+                token_handler: App\Authentication\ApiToken\Infrastructure\Security\ApiTokenHandler
+                failure_handler: App\Authentication\ApiToken\Infrastructure\Security\ApiTokenEntryPoint
+            entry_point: App\Authentication\ApiToken\Infrastructure\Security\ApiTokenEntryPoint
+
         api:
             pattern: ^/api
             stateless: true
@@ -39,6 +47,7 @@ security:
             provider: app_user_provider
 
     access_control:
+        - { path: ^/api/bot, roles: ROLE_BOT }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api/editor, roles: ROLE_EDITOR }
         - { path: ^/api/user, roles: ROLE_USER }

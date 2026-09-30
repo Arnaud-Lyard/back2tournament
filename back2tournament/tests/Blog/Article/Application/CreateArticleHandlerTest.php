@@ -9,6 +9,8 @@ use App\Blog\Article\Application\Service\CreateArticleHandler;
 use App\Blog\Article\Domain\Entity\Article;
 use App\Blog\Article\Domain\Enum\ArticleStatus;
 use App\Blog\Article\Domain\Repository\ArticleRepositoryInterface;
+use App\Blog\Shared\Domain\Provider\CategoryIdProviderInterface;
+use App\Shared\Exception\NotFoundException;
 use App\Shared\Exception\ValidationException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -17,6 +19,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 final class CreateArticleHandlerTest extends TestCase
 {
     private const CATEGORY_ID = '33333333-3333-4333-8333-333333333333';
+    private const CATEGORY_SLUG = 'news';
 
     public function test_a_new_article_is_saved_as_a_draft_without_author(): void
     {
@@ -77,14 +80,35 @@ final class CreateArticleHandlerTest extends TestCase
         $articleRepository = $this->createMock(ArticleRepositoryInterface::class);
         $articleRepository->expects($this->never())->method('save');
 
+        $categoryIdProvider = $this->createMock(CategoryIdProviderInterface::class);
+        $categoryIdProvider->expects($this->never())->method('bySlug');
+
         $this->expectException(ValidationException::class);
 
-        $this->handler($articleRepository, $this->createStub(NormalizerInterface::class))($this->command('  '));
+        $this->handler($articleRepository, $this->createStub(NormalizerInterface::class), $categoryIdProvider)($this->command('  '));
     }
 
-    private function handler(ArticleRepositoryInterface $articleRepository, NormalizerInterface $normalizer): CreateArticleHandler
+    public function test_an_unknown_category_saves_nothing(): void
     {
-        return new CreateArticleHandler($articleRepository, $this->createStub(EventDispatcherInterface::class), $normalizer);
+        $articleRepository = $this->createMock(ArticleRepositoryInterface::class);
+        $articleRepository->expects($this->never())->method('save');
+
+        $categoryIdProvider = $this->createStub(CategoryIdProviderInterface::class);
+        $categoryIdProvider->method('bySlug')->willThrowException(new NotFoundException('category with slug gossip not found'));
+
+        $this->expectException(NotFoundException::class);
+
+        $this->handler($articleRepository, $this->createStub(NormalizerInterface::class), $categoryIdProvider)($this->command('Patch notes'));
+    }
+
+    private function handler(ArticleRepositoryInterface $articleRepository, NormalizerInterface $normalizer, ?CategoryIdProviderInterface $categoryIdProvider = null): CreateArticleHandler
+    {
+        if (null === $categoryIdProvider) {
+            $categoryIdProvider = $this->createStub(CategoryIdProviderInterface::class);
+            $categoryIdProvider->method('bySlug')->willReturnMap([[self::CATEGORY_SLUG, self::CATEGORY_ID]]);
+        }
+
+        return new CreateArticleHandler($articleRepository, $categoryIdProvider, $this->createStub(EventDispatcherInterface::class), $normalizer);
     }
 
     /** @param callable(CreateArticleCommand): CreateArticleCommand $prepare */
@@ -119,7 +143,7 @@ final class CreateArticleHandlerTest extends TestCase
         $command = new CreateArticleCommand();
         $command->setTitle($title);
         $command->setBody('Body');
-        $command->setCategory(self::CATEGORY_ID);
+        $command->setCategorySlug(self::CATEGORY_SLUG);
 
         return $command;
     }
