@@ -84,7 +84,34 @@ final class JoinClanHandler
             $this->eventDispatcher->dispatch($domainEvent);
         }
 
+        $this->withdrawPendingRequest($player);
+
         return json_encode($this->normalizeMembership($membership, $player), JSON_THROW_ON_ERROR);
+    }
+
+    private function withdrawPendingRequest(Player $player): void
+    {
+        $request = $this->clanMemberRepository->findOneBy([
+            'player' => $player->getId()->getValue(),
+            'status' => ClanMemberStatus::REQUESTED,
+        ]);
+        if (!$request instanceof ClanMember) {
+            return;
+        }
+
+        $requestedClan = $this->clanRepository->findOneBy(['id' => $request->getClan()->getValue()]);
+        if (!$requestedClan instanceof Clan) {
+            return;
+        }
+
+        Clan::remove($requestedClan, $request);
+
+        $this->clanMemberRepository->remove($request);
+        $this->clanRepository->save($requestedClan);
+
+        foreach ($requestedClan->pullDomainEvents() as $domainEvent) {
+            $this->eventDispatcher->dispatch($domainEvent);
+        }
     }
 
     /** @return array<string, mixed> */

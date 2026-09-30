@@ -75,7 +75,7 @@ final class InviteClanMemberHandler
             'clan' => $clanId->getValue(),
             'player' => $playerId->getValue(),
         ])) {
-            throw new ConflictException('this player already is a member of the clan, or invited to it');
+            throw new ConflictException('this player already is a member of the clan, invited to it or asking to join it');
         }
 
         $membership = Clan::invite($clan, new ClanMemberId(Uuid::v4()->toString()), $playerId);

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 import type { ClanDetail, MyClan } from "../types"
-import { activeClanIn, teamFormats, teamsLedBy } from "./membership"
+import {
+  activeClanIn,
+  pendingRequestIn,
+  teamFormats,
+  teamsLedBy,
+} from "./membership"
 
 const GAME = "11111111-1111-4111-8111-111111111111"
 const OTHER_GAME = "22222222-2222-4222-8222-222222222222"
@@ -8,12 +13,13 @@ const ME = "33333333-3333-4333-8333-333333333333"
 
 function place(
   game: string,
-  status: "invited" | "active",
+  status: "invited" | "requested" | "active",
   name: string
 ): MyClan {
   return {
     clan: { id: { value: name }, name, game: { value: game } },
     membership: { status, role: "member" },
+    requests: 0,
   }
 }
 
@@ -31,6 +37,30 @@ describe("activeClanIn", () => {
   it("does not take a pending invitation for a membership", () => {
     expect(
       activeClanIn([place(GAME, "invited", "invited")], GAME)
+    ).toBeUndefined()
+  })
+
+  it("does not take a request to join for a membership", () => {
+    expect(
+      activeClanIn([place(GAME, "requested", "asked")], GAME)
+    ).toBeUndefined()
+  })
+})
+
+describe("pendingRequestIn", () => {
+  it("finds the clan the caller asked to join in that game", () => {
+    const clans = [
+      place(OTHER_GAME, "requested", "elsewhere"),
+      place(GAME, "active", "member"),
+      place(GAME, "requested", "asked"),
+    ]
+
+    expect(pendingRequestIn(clans, GAME)?.clan.name).toBe("asked")
+  })
+
+  it("leaves a request sent in another game aside", () => {
+    expect(
+      pendingRequestIn([place(OTHER_GAME, "requested", "elsewhere")], GAME)
     ).toBeUndefined()
   })
 })

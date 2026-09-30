@@ -56,12 +56,13 @@ export default async function MyClansPage() {
         </Empty>
       ) : (
         <ul className="flex flex-col gap-3">
-          {myClans.data.map(({ clan, membership }) => {
+          {myClans.data.map(({ clan, membership, requests }) => {
             const clanId = clan.id?.value
             const gameId = clan.game?.value
             if (!clanId || !gameId) return null
 
             const game = games.ok ? findGame(games.data, gameId) : undefined
+            const awaitsMe = membership.status === "invited" || requests > 0
 
             return (
               <li key={membership.id?.value}>
@@ -77,9 +78,14 @@ export default async function MyClansPage() {
                       <span className="font-medium">{clan.name}</span>
                       {membership.status === "invited" ? (
                         <Badge>{t("invited")}</Badge>
+                      ) : membership.status === "requested" ? (
+                        <Badge variant="outline">{t("requested")}</Badge>
                       ) : membership.role === "leader" ? (
                         <Badge variant="outline">{t("leader")}</Badge>
                       ) : null}
+                      {requests > 0 && (
+                        <Badge>{t("requests", { count: requests })}</Badge>
+                      )}
                     </div>
                     <span className="text-xs text-muted-foreground">
                       {t("as", {
@@ -92,15 +98,12 @@ export default async function MyClansPage() {
                     href={`/games/${encodeURIComponent(gameId)}/clans/${encodeURIComponent(clanId)}`}
                     className={cn(
                       buttonVariants({
-                        variant:
-                          membership.status === "invited"
-                            ? "default"
-                            : "outline",
+                        variant: awaitsMe ? "default" : "outline",
                         size: "sm",
                       })
                     )}
                   >
-                    {membership.status === "invited" ? t("answer") : t("open")}
+                    {awaitsMe ? t("answer") : t("open")}
                     <ArrowRightIcon data-icon="inline-end" />
                   </Link>
                 </Card>

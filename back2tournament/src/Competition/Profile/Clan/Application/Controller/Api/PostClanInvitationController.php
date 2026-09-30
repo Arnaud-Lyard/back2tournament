@@ -35,7 +35,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
 #[OA\Response(response: 403, description: 'The caller does not lead the clan')]
 #[OA\Response(response: 404, description: 'The clan or the player does not exist')]
-#[OA\Response(response: 409, description: 'The player already is a member of the clan, or invited to it')]
+#[OA\Response(response: 409, description: 'The player already is a member of the clan, invited to it or asking to join it: the leader accepts a request with `POST /api/user/clans/{id}/admissions`')]
 final class PostClanInvitationController extends AbstractController
 {
     use HandleTrait;

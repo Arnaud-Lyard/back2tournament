@@ -127,7 +127,8 @@
       "loadError": {
         "title": "Impossible de charger ce profil",
         "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
-      }
+      },
+      "asksToJoin": "{battletag} demande à rejoindre {clan}."
     },
     "challenge": {
       "challenge": "Défier {battletag}",
@@ -214,16 +215,25 @@
     "membership": {
       "invitedTitle": "Vous êtes invité à rejoindre ce clan",
       "invitedDescription": "Acceptez pour en devenir membre : le chef pourra alors vous aligner dans ses équipes.",
+      "requestedTitle": "Votre demande est envoyée",
+      "requestedDescription": "Le chef du clan l'accepte ou la refuse. Tant qu'il n'a pas répondu, vous pouvez la retirer.",
+      "requestElsewhereTitle": "Une demande est déjà en cours",
+      "requestElsewhereDescription": "Vous avez demandé à rejoindre <link>{clan}</link>. Dans un jeu, on ne demande qu'un clan à la fois : retirez cette demande pour rejoindre celui-ci.",
       "accept": "Accepter l'invitation",
       "decline": "Refuser",
       "leave": "Quitter le clan",
+      "request": "Demander à rejoindre",
+      "withdrawRequest": "Retirer ma demande",
       "joined": "Bienvenue dans le clan !",
       "declined": "Invitation refusée",
       "left": "Vous avez quitté le clan",
+      "requestSent": "Demande envoyée au chef du clan",
+      "requestWithdrawn": "Demande retirée",
       "error": "Action impossible",
       "errors": {
         "elsewhere": "Quittez d'abord votre clan actuel dans ce jeu.",
-        "cannotLeave": "Vous jouez dans une équipe du clan : le chef doit d'abord la dissoudre."
+        "cannotLeave": "Vous jouez dans une équipe du clan : le chef doit d'abord la dissoudre.",
+        "cannotRequest": "Vous êtes déjà membre ou invité ici, membre d'un autre clan de ce jeu, ou vous avez déjà une demande en cours : un seul clan à la fois par jeu."
       }
     },
     "members": {
@@ -240,6 +250,21 @@
       "removeError": "Action impossible",
       "errors": {
         "inTeam": "Ce joueur joue dans une équipe du clan : dissolvez-la d'abord."
+      }
+    },
+    "requests": {
+      "title": "{count, plural, one {Demande pour rejoindre le clan} other {Demandes pour rejoindre le clan}}",
+      "description": "Ces joueurs veulent rejoindre le clan. Ouvrez un profil pour le découvrir avant de répondre.",
+      "admit": "Accepter",
+      "admitLabel": "Accepter {battletag} dans le clan",
+      "decline": "Refuser",
+      "declineLabel": "Refuser la demande de {battletag}",
+      "admitted": "{battletag} a rejoint le clan",
+      "declined": "Demande de {battletag} refusée",
+      "error": "Action impossible",
+      "errors": {
+        "withdrawn": "Ce joueur a retiré sa demande.",
+        "elsewhere": "Ce joueur a rejoint un autre clan de ce jeu entre-temps."
       }
     },
     "teams": {
@@ -786,16 +811,18 @@
   },
   "myClans": {
     "title": "Mes clans",
-    "description": "Vos clans, jeu par jeu, et les invitations qui attendent votre réponse.",
+    "description": "Vos clans, jeu par jeu, les invitations qui attendent votre réponse et vos demandes pour en rejoindre un.",
     "invited": "Invitation",
+    "requested": "Demande envoyée",
     "leader": "Chef",
+    "requests": "{count, plural, one {# demande} other {# demandes}}",
     "as": "{battletag} · {game}",
     "unknownGame": "Jeu inconnu",
     "answer": "Répondre",
     "open": "Ouvrir",
     "empty": {
       "title": "Aucun clan",
-      "description": "Fondez un clan depuis la page Clans d'un jeu, ou attendez qu'un chef vous invite.",
+      "description": "Fondez un clan depuis la page Clans d'un jeu, demandez à en rejoindre un, ou attendez qu'un chef vous invite.",
       "action": "Parcourir les jeux"
     },
     "loadError": {

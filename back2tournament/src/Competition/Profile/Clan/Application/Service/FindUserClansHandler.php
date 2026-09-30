@@ -8,6 +8,8 @@ use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
 use App\Competition\Profile\Clan\Application\Model\FindUserClansQuery;
 use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
+use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
+use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Player\Domain\Entity\Player;
@@ -60,6 +62,8 @@ final class FindUserClansHandler
             $clans[$clan->getId()->getValue()] = $clan;
         }
 
+        $requests = $this->requestsToTheClansLed($memberships);
+
         $items = [];
         foreach ($memberships as $membership) {
             $clan = $clans[$membership->getClan()->getValue()] ?? null;
@@ -70,10 +74,38 @@ final class FindUserClansHandler
             $items[] = [
                 'clan' => $this->serializer->normalize($clan),
                 'membership' => $this->normalizeMembership($membership, $players[$membership->getPlayer()->getValue()] ?? null),
+                'requests' => $requests[$membership->getClan()->getValue()] ?? 0,
             ];
         }
 
         return json_encode($items, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @param list<ClanMember> $memberships
+     *
+     * @return array<string, int>
+     */
+    private function requestsToTheClansLed(array $memberships): array
+    {
+        $ledClanIds = [];
+        foreach ($memberships as $membership) {
+            if (ClanRole::LEADER === $membership->getRole()) {
+                $ledClanIds[] = $membership->getClan()->getValue();
+            }
+        }
+
+        if ([] === $ledClanIds) {
+            return [];
+        }
+
+        $requests = [];
+        foreach ($this->clanMemberRepository->findBy(['clan' => $ledClanIds, 'status' => ClanMemberStatus::REQUESTED]) as $request) {
+            $clanId = $request->getClan()->getValue();
+            $requests[$clanId] = ($requests[$clanId] ?? 0) + 1;
+        }
+
+        return $requests;
     }
 
     /** @return array<string, mixed> */

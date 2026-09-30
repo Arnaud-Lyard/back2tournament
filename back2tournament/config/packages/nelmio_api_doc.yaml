@@ -9,6 +9,10 @@ nelmio_api_doc:
                     type: http
                     scheme: bearer
                     bearerFormat: JWT
+                apiToken:
+                    type: http
+                    scheme: bearer
+                    description: 'The API token of a tool, such as Hermes: the value of the `BOT_API_TOKEN` environment variable of the API. It opens the routes under `/api/bot` and no other, and none while the variable is empty.'
             schemas:
                 Error:
                     type: object
@@ -370,20 +374,20 @@ nelmio_api_doc:
                         - { $ref: '#/components/schemas/Clan' }
                         - type: object
                           properties:
-                              members: { type: integer, example: 7, description: 'Active members, the leader included; pending invitations are not counted' }
+                              members: { type: integer, example: 7, description: 'Active members, the leader included; pending invitations and requests to join are not counted' }
                 ClanMember:
                     type: object
-                    description: 'The place one player profile holds in one clan: `invited` until they accept, `active` after.'
+                    description: 'The place one player profile holds in one clan: `invited` until they accept an invitation, `requested` until the leader accepts their request to join, `active` after.'
                     properties:
                         id: { $ref: '#/components/schemas/Uuid' }
                         clan: { $ref: '#/components/schemas/Uuid' }
                         player: { $ref: '#/components/schemas/PlayerProfile' }
                         role: { type: string, enum: [leader, member] }
-                        status: { type: string, enum: [invited, active] }
+                        status: { type: string, enum: [invited, requested, active] }
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
                 ClanDetail:
-                    description: 'A clan, its members and pending invitations (leader first), and the teams it fields.'
+                    description: 'A clan, its members, pending invitations and requests to join (leader first), and the teams it fields.'
                     allOf:
                         - { $ref: '#/components/schemas/Clan' }
                         - type: object
@@ -551,6 +555,15 @@ nelmio_api_doc:
                                 properties:
                                     code: { type: integer, example: 401 }
                                     message: { type: string, example: 'JWT Token not found' }
+                ApiTokenUnauthorized:
+                    description: 'Missing or invalid API token, or no token set in `BOT_API_TOKEN`'
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    code: { type: integer, example: 401 }
+                                    message: { type: string, example: 'Invalid API token' }
                 Forbidden:
                     description: 'The user is known but lacks the required role'
                     content:

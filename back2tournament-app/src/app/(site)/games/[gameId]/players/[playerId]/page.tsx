@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getFormatter, getTranslations } from "next-intl/server"
+import { JoinRequestActions } from "@/components/join-request-actions"
 import { PageContainer } from "@/components/layout/page-container"
 import { PlayerAvatar } from "@/components/player-avatar"
 import { RatingCard } from "@/components/rating-card"
@@ -86,11 +87,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     myClanId && user?.playersByGame[gameId]?.id !== playerId
       ? await loadClan(myClanId)
       : null
-  const canInvite =
-    !!clan?.ok &&
-    !(clan.data.members ?? []).some(
-      (member) => member.player?.id?.value === playerId
-    )
+  const theirPlace = clan?.ok
+    ? (clan.data.members ?? []).find(
+        (member) => member.player?.id?.value === playerId
+      )
+    : undefined
+  const canInvite = !!clan?.ok && !theirPlace
 
   return (
     <PageContainer className="max-w-3xl">
@@ -138,6 +140,21 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               playerId={playerId}
               battletag={battletag}
             />
+          )}
+          {theirPlace?.status === "requested" && myClanId && (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm">
+                {t("asksToJoin", {
+                  battletag,
+                  clan: myClan?.clan.name ?? "",
+                })}
+              </p>
+              <JoinRequestActions
+                clanId={myClanId}
+                playerId={playerId}
+                battletag={battletag}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

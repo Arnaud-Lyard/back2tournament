@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Blog\Article\Application\EventSubscriber;
 
 use App\Blog\Article\Application\Model\CreateArticleCommand;
-use App\Blog\Shared\Domain\Provider\CategoryIdProviderInterface;
 use App\Authentication\User\Application\Event\OnPublicationRequestedUserVerifiedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\HandleTrait;
@@ -15,14 +14,9 @@ final class OnPublicationRequestedUserVerifiedEventSubscriber implements EventSu
 {
     use HandleTrait;
 
-    private CategoryIdProviderInterface $categoryIdProvider;
-
-    public function __construct(
-        MessageBusInterface $messageBus,
-        CategoryIdProviderInterface $categoryIdProvider
-    ) {
+    public function __construct(MessageBusInterface $messageBus)
+    {
         $this->messageBus = $messageBus;
-        $this->categoryIdProvider = $categoryIdProvider;
     }
 
     public static function getSubscribedEvents(): array
@@ -39,9 +33,7 @@ final class OnPublicationRequestedUserVerifiedEventSubscriber implements EventSu
         $createArticleCommand->setBody($event->getBody());
         $createArticleCommand->setTitleEn($event->getTitleEn());
         $createArticleCommand->setBodyEn($event->getBodyEn());
-        $createArticleCommand->setCategory(
-            $this->categoryIdProvider->bySlug($event->getCategorySlug())
-        );
+        $createArticleCommand->setCategorySlug($event->getCategorySlug());
 
         $event->setCreatedArticle($this->handle($createArticleCommand));
     }

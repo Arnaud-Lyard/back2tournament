@@ -48,19 +48,31 @@ make user           # seed a dev user via app:create-user
 - `Authentication/User/` — users, roles, password hashing, Symfony Security integration.
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
   any context to learn who the caller is.
+- `Authentication/ApiToken/` — the API token of the tool that writes for the platform,
+  such as Hermes: the value of the `BOT_API_TOKEN` environment variable, stored
+  nowhere else. The `bot` firewall reads the token from `Authorization: Bearer`
+  (`ApiTokenHandler`, a constant-time comparison) and signs the tool in as an
+  `ApiClient` holding `ROLE_BOT` alone: the token opens `/api/bot` and nothing else,
+  a JWT does not open `/api/bot`, and an empty `BOT_API_TOKEN` keeps `/api/bot`
+  closed. Changing the variable revokes the previous token.
 - `Blog/Article/`, `Blog/Category/`, `Blog/Shared/` — blog content and its taxonomy. An
   `Article` is a `draft` until an editor publishes it: whoever publishes it becomes its
   `author` — not whoever wrote it — and taking it back to draft clears the author. Only
   a published article is public and takes comments; a comment records who wrote it.
   An article is written in French and may carry an English version (`titleEn`,
-  `bodyEn`): both or neither, which the site shows when it is read in English.
+  `bodyEn`): both or neither, which the site shows when it is read in English. A tool
+  with an API token writes drafts too (`POST /api/bot/articles/`), after reading the
+  category slugs (`GET /api/bot/categories/`); an editor reviews and publishes them.
   `Blog/Shared/Domain/Provider/` holds `CategoryIdProviderInterface` (a category by its
   slug) and `AuthorProviderInterface` (the usernames behind author and commenter ids).
 - `Competition/Profile/Game/`, `Competition/Profile/Player/`, `Competition/Profile/Clan/`,
   `Competition/Profile/Team/` — competition profiles. A `Game` lists the formats it is
   played in (`teamSizes`: 1 for 1v1, 5 for 5v5, up to 64). A `Player` is one user in one
-  game. A `Clan` groups players of one game under a leader; players join by invitation
-  and belong to one clan at most. A `Team` is a lineup a clan fields in one format:
+  game. A `Clan` groups players of one game under a leader; players join by invitation,
+  which they accept, or by asking to join (`requested`), which the leader accepts, and
+  belong to one clan at most. A player asks one clan at a time, and accepting an
+  invitation withdraws the request they had sent elsewhere. All of it holds per player
+  profile, so per game: a user plays for a different clan in each game. A `Team` is a lineup a clan fields in one format:
   exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
   Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is
@@ -196,6 +208,9 @@ Imagick loads them at run time, and reads nothing but a blob without them.
 - mark `garage-init` with `exclude_from_hc: true`, so that Coolify does not take a
   one-shot container that has exited for an unhealthy stack;
 - keep the `garage_meta` and `garage_data` volumes in your backups;
+- to let a tool such as Hermes write drafts, set `BOT_API_TOKEN`
+  (`openssl rand -hex 32`) and give the tool the same value; leave it empty to keep
+  `/api/bot` closed;
 - to browse the bucket there too, run the `garage-webui` service of
   `compose.override.yaml` behind a domain of its own, with `AUTH_USER_PASS` set (a
   user and a bcrypt hash: `htpasswd -nbBC 10 <user> <password>`), since it holds
@@ -267,9 +282,10 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
 - `#[Route('/api/…', name: 'api_…', methods: ['…'])]`. Route names follow
   `api_<resource>_<action>`; keep the same shape across a resource's routes.
 - **The path starts with the role it requires**: `/api/admin/…` for an administrator,
-  `/api/editor/…` for an editor, `/api/user/…` for any signed-in user.
+  `/api/editor/…` for an editor, `/api/user/…` for any signed-in user, `/api/bot/…`
+  for a tool signed in with an API token (`ROLE_BOT`, on its own `bot` firewall).
   `config/packages/security.yaml` grants each prefix to its role
-  (`ROLE_ADMIN` > `ROLE_EDITOR` > `ROLE_USER`). Anything else under `/api` is public
+  (`ROLE_ADMIN` > `ROLE_EDITOR` > `ROLE_USER`; `ROLE_BOT` stands apart). Anything else under `/api` is public
   for `GET` only (plus `POST /api/login` and `POST /api/register`); any other method
   there is refused, so a write route always lives under a prefix. A public read that
   shows more to a role gets a route of its own under that role's prefix:
