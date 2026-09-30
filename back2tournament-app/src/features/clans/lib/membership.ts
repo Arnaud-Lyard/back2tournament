@@ -10,6 +10,17 @@ export function activeClanIn(
   )
 }
 
+export function pendingRequestIn(
+  myClans: readonly MyClan[],
+  gameId: string
+): MyClan | undefined {
+  return myClans.find(
+    (entry) =>
+      entry.clan.game?.value === gameId &&
+      entry.membership.status === "requested"
+  )
+}
+
 export function teamsLedBy(
   clan: ClanDetail | undefined,
   playerId: string | undefined

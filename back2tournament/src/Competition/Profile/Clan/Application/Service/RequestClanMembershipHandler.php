@@ -81,6 +81,14 @@ final class RequestClanMembershipHandler
             throw new ConflictException('leave your current clan before asking to join another one');
         }
 
+        $pending = $this->clanMemberRepository->findOneBy([
+            'player' => $player->getId()->getValue(),
+            'status' => ClanMemberStatus::REQUESTED,
+        ]);
+        if ($pending instanceof ClanMember) {
+            throw new ConflictException('you already asked to join another clan: withdraw that request first');
+        }
+
         $membership = Clan::request($clan, new ClanMemberId(Uuid::v4()->toString()), $player->getId());
 
         $this->clanMemberRepository->save($membership);

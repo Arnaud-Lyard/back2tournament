@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Parameter(name: 'id', in: 'path', required: true, description: 'Clan ID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
 #[OA\Response(
     response: 200,
-    description: 'Invitation accepted: the player profile the authenticated user holds in the game of the clan is now an `active` member. No body is read.',
+    description: 'Invitation accepted: the player profile the authenticated user holds in the game of the clan is now an `active` member, and the request it had sent to another clan, if any, is withdrawn. No body is read.',
     content: new OA\JsonContent(ref: '#/components/schemas/ClanMember'),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]

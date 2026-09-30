@@ -217,6 +217,8 @@
       "invitedDescription": "Accept to become a member: the leader can then field you in the clan's teams.",
       "requestedTitle": "Your request is sent",
       "requestedDescription": "The clan leader accepts or declines it. Until they answer, you can withdraw it.",
+      "requestElsewhereTitle": "A request is already pending",
+      "requestElsewhereDescription": "You asked to join <link>{clan}</link>. In a game, you ask one clan at a time: withdraw that request to join this one.",
       "accept": "Accept the invitation",
       "decline": "Decline",
       "leave": "Leave the clan",
@@ -231,7 +233,7 @@
       "errors": {
         "elsewhere": "Leave your current clan in this game first.",
         "cannotLeave": "You play in a team of the clan: the leader has to disband it first.",
-        "cannotRequest": "You already are in this clan, invited to it or waiting for an answer, or a member of another clan in this game."
+        "cannotRequest": "You already are a member or invited here, a member of another clan in this game, or you already have a pending request: one clan at a time in each game."
       }
     },
     "members": {

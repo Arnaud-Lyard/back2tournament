@@ -70,7 +70,9 @@ make user           # seed a dev user via app:create-user
   played in (`teamSizes`: 1 for 1v1, 5 for 5v5, up to 64). A `Player` is one user in one
   game. A `Clan` groups players of one game under a leader; players join by invitation,
   which they accept, or by asking to join (`requested`), which the leader accepts, and
-  belong to one clan at most. A `Team` is a lineup a clan fields in one format:
+  belong to one clan at most. A player asks one clan at a time, and accepting an
+  invitation withdraws the request they had sent elsewhere. All of it holds per player
+  profile, so per game: a user plays for a different clan in each game. A `Team` is a lineup a clan fields in one format:
   exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
   Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is

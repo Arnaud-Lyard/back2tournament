@@ -3273,7 +3273,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Invitation accepted: the player profile the authenticated user holds in the game of the clan is now an `active` member. No body is read. */
+            /** @description Invitation accepted: the player profile the authenticated user holds in the game of the clan is now an `active` member, and the request it had sent to another clan, if any, is withdrawn. No body is read. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3312,7 +3312,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Request sent: the player profile the authenticated user holds in the game of the clan asks to join it, and the membership is `requested` until the clan leader accepts it with `POST /api/user/clans/{id}/admissions`. `DELETE /api/user/clans/{id}/members/{playerid}` withdraws or declines it. No body is read. */
+            /** @description Request sent: the player profile the authenticated user holds in the game of the clan asks to join it, and the membership is `requested` until the clan leader accepts it with `POST /api/user/clans/{id}/admissions`. `DELETE /api/user/clans/{id}/members/{playerid}` withdraws or declines it. A player profile asks one clan at a time; a user has a profile per game, so they ask one clan in each game. No body is read. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3330,7 +3330,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The caller already is a member of this clan, invited to it or asking to join it, or a member of another clan of the game */
+            /** @description The caller already is a member of this clan, invited to it or asking to join it, a member of another clan of the game, or asking to join another one: that request is withdrawn first */
             409: {
                 headers: {
                     [name: string]: unknown;

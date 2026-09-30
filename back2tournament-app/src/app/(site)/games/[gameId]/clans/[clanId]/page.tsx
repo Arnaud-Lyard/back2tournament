@@ -35,6 +35,7 @@ import {
 import { getCurrentUser } from "@/features/auth/server/get-current-user"
 import {
   activeClanIn,
+  pendingRequestIn,
   teamFormats,
   teamsLedBy,
 } from "@/features/clans/lib/membership"
@@ -112,7 +113,12 @@ export default async function ClanPage({ params }: ClanPageProps) {
     ? activeClanIn(myClans.data, gameId)
     : undefined
   const myOtherClanId = myOtherClan?.clan.id?.value
-  const canRequest = !!myPlayerId && !mine && !myOtherClan
+  const myRequest = myClans.ok
+    ? pendingRequestIn(myClans.data, gameId)
+    : undefined
+  const requestElsewhere = !mine ? myRequest : undefined
+  const requestElsewhereId = requestElsewhere?.clan.id?.value
+  const canRequest = !!myPlayerId && !mine && !myOtherClan && !myRequest
   const challengers =
     myOtherClanId && myOtherClanId !== clanId
       ? await loadClan(myOtherClanId).then((loaded) =>
@@ -167,6 +173,25 @@ export default async function ClanPage({ params }: ClanPageProps) {
           <AlertTitle>{t("membership.invitedTitle")}</AlertTitle>
           <AlertDescription>
             {t("membership.invitedDescription")}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {requestElsewhere && requestElsewhereId && (
+        <Alert>
+          <AlertTitle>{t("membership.requestElsewhereTitle")}</AlertTitle>
+          <AlertDescription>
+            {t.rich("membership.requestElsewhereDescription", {
+              clan: requestElsewhere.clan.name ?? "",
+              link: (chunks) => (
+                <Link
+                  href={`${base}/clans/${encodeURIComponent(requestElsewhereId)}`}
+                  className="underline underline-offset-4"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
           </AlertDescription>
         </Alert>
       )}

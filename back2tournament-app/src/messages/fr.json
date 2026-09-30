@@ -217,6 +217,8 @@
       "invitedDescription": "Acceptez pour en devenir membre : le chef pourra alors vous aligner dans ses équipes.",
       "requestedTitle": "Votre demande est envoyée",
       "requestedDescription": "Le chef du clan l'accepte ou la refuse. Tant qu'il n'a pas répondu, vous pouvez la retirer.",
+      "requestElsewhereTitle": "Une demande est déjà en cours",
+      "requestElsewhereDescription": "Vous avez demandé à rejoindre <link>{clan}</link>. Dans un jeu, on ne demande qu'un clan à la fois : retirez cette demande pour rejoindre celui-ci.",
       "accept": "Accepter l'invitation",
       "decline": "Refuser",
       "leave": "Quitter le clan",
@@ -231,7 +233,7 @@
       "errors": {
         "elsewhere": "Quittez d'abord votre clan actuel dans ce jeu.",
         "cannotLeave": "Vous jouez dans une équipe du clan : le chef doit d'abord la dissoudre.",
-        "cannotRequest": "Vous êtes déjà dans ce clan, invité ou en attente de réponse, ou membre d'un autre clan de ce jeu."
+        "cannotRequest": "Vous êtes déjà membre ou invité ici, membre d'un autre clan de ce jeu, ou vous avez déjà une demande en cours : un seul clan à la fois par jeu."
       }
     },
     "members": {
