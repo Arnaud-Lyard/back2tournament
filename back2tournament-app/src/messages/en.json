@@ -174,7 +174,7 @@
   },
   "clans": {
     "title": "Clans",
-    "description": "The clans of this game: players gathered under a leader, fielding teams in 2v2, 3v3, 5v5…",
+    "description": "The clans of this game: players gathered under a leader, fielding teams in 2v2, 3v3, 5v5… Open one to ask to join it.",
     "empty": {
       "title": "No clan",
       "description": "Found the first clan of this game and invite players into it.",
@@ -229,6 +229,12 @@
       "left": "You left the clan",
       "requestSent": "Request sent to the clan leader",
       "requestWithdrawn": "Request withdrawn",
+      "signInPrompt": "Sign in to ask to join this clan.",
+      "signIn": "Sign in",
+      "noProfile": "Create your profile in this game to ask to join this clan.",
+      "createProfile": "Create my profile",
+      "memberElsewhere": "You play for {clan} in this game: a player belongs to one clan per game, so leave it to ask to join this one.",
+      "openMyClan": "Open my clan",
       "error": "Could not do that",
       "errors": {
         "elsewhere": "Leave your current clan in this game first.",

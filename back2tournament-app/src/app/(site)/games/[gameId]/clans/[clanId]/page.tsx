@@ -6,6 +6,7 @@ import {
   UsersIcon,
 } from "lucide-react"
 import type { Metadata } from "next"
+import type { ReactNode } from "react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
@@ -177,6 +178,39 @@ export default async function ClanPage({ params }: ClanPageProps) {
         </Alert>
       )}
 
+      {!user ? (
+        <JoinHint text={t("membership.signInPrompt")}>
+          <Link
+            href="/login"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            {t("membership.signIn")}
+          </Link>
+        </JoinHint>
+      ) : !myPlayerId ? (
+        <JoinHint text={t("membership.noProfile")}>
+          <Link
+            href={`/players/new?gameId=${encodeURIComponent(gameId)}`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            {t("membership.createProfile")}
+          </Link>
+        </JoinHint>
+      ) : !mine && myOtherClan && myOtherClanId ? (
+        <JoinHint
+          text={t("membership.memberElsewhere", {
+            clan: myOtherClan.clan.name ?? "",
+          })}
+        >
+          <Link
+            href={`${base}/clans/${encodeURIComponent(myOtherClanId)}`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            {t("membership.openMyClan")}
+          </Link>
+        </JoinHint>
+      ) : null}
+
       {requestElsewhere && requestElsewhereId && (
         <Alert>
           <AlertTitle>{t("membership.requestElsewhereTitle")}</AlertTitle>
@@ -330,6 +364,15 @@ export default async function ClanPage({ params }: ClanPageProps) {
         </div>
       </div>
     </PageContainer>
+  )
+}
+
+function JoinHint({ text, children }: { text: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <p className="text-sm text-muted-foreground">{text}</p>
+      {children}
+    </div>
   )
 }
 

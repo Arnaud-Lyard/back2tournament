@@ -174,7 +174,7 @@
   },
   "clans": {
     "title": "Clans",
-    "description": "Les clans de ce jeu : des joueurs réunis sous un chef, qui alignent des équipes en 2v2, 3v3, 5v5…",
+    "description": "Les clans de ce jeu : des joueurs réunis sous un chef, qui alignent des équipes en 2v2, 3v3, 5v5… Ouvrez-en un pour demander à le rejoindre.",
     "empty": {
       "title": "Aucun clan",
       "description": "Fondez le premier clan de ce jeu et invitez-y des joueurs.",
@@ -229,6 +229,12 @@
       "left": "Vous avez quitté le clan",
       "requestSent": "Demande envoyée au chef du clan",
       "requestWithdrawn": "Demande retirée",
+      "signInPrompt": "Connectez-vous pour demander à rejoindre ce clan.",
+      "signIn": "Se connecter",
+      "noProfile": "Créez votre profil dans ce jeu pour demander à rejoindre ce clan.",
+      "createProfile": "Créer mon profil",
+      "memberElsewhere": "Vous jouez pour {clan} dans ce jeu : un joueur n'appartient qu'à un clan par jeu, quittez-le pour demander à rejoindre celui-ci.",
+      "openMyClan": "Voir mon clan",
       "error": "Action impossible",
       "errors": {
         "elsewhere": "Quittez d'abord votre clan actuel dans ce jeu.",
