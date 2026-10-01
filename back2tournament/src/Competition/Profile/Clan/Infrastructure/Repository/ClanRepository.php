@@ -47,6 +47,7 @@ final class ClanRepository extends ServiceEntityRepository implements ClanReposi
     {
         $queryBuilder = $this->createQueryBuilder('clan')
             ->andWhere('clan.game = :gameId')
+            ->andWhere('clan.dissolvedAt IS NULL')
             ->setParameter('gameId', $gameId);
 
         if (null !== $search) {

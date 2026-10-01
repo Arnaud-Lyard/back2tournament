@@ -6,7 +6,11 @@
 
     <entity name="App\Competition\Profile\Clan\Domain\Entity\Clan" table="clan" repository-class="App\Competition\Profile\Clan\Infrastructure\Repository\ClanRepository">
         <unique-constraints>
-            <unique-constraint columns="game,tag" name="uniq_clan_game_tag" />
+            <unique-constraint columns="game,tag" name="uniq_clan_game_tag">
+                <options>
+                    <option name="where">(dissolved_at IS NULL)</option>
+                </options>
+            </unique-constraint>
         </unique-constraints>
 
         <id name="id" type="guid" column="id" length="36" />
@@ -19,6 +23,7 @@
 
         <field name="createdAt" type="datetime_immutable" column="created_at" />
         <field name="updatedAt" type="datetime_immutable" column="updated_at" />
+        <field name="dissolvedAt" type="datetime_immutable" column="dissolved_at" nullable="true" />
     </entity>
 
 </doctrine-mapping>

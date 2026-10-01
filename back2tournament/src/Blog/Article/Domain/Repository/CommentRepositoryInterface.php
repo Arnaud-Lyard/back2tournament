@@ -11,4 +11,6 @@ interface CommentRepositoryInterface
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
     public function save(Comment $comment): void;
+
+    public function remove(Comment $comment): void;
 }

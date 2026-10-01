@@ -51,7 +51,7 @@ final class InviteClanMemberHandler
         $clanId = new ClanId($inviteClanMemberCommand->getClanId());
         $playerId = new PlayerId($inviteClanMemberCommand->getPlayerId());
 
-        $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue()]);
+        $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue(), 'dissolvedAt' => null]);
         if (!$clan instanceof Clan) {
             throw new NotFoundException('clan not found');
         }
@@ -63,7 +63,7 @@ final class InviteClanMemberHandler
         }
 
         $player = $this->playerRepository->findOneBy(['id' => $playerId->getValue()]);
-        if (!$player instanceof Player) {
+        if (!$player instanceof Player || null !== $player->getAnonymizedAt()) {
             throw new NotFoundException('player not found');
         }
 

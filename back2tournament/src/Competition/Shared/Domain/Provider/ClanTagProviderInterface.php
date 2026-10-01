@@ -19,4 +19,11 @@ interface ClanTagProviderInterface
      * @return array<string, string>
      */
     public function tagsOfClans(array $clanIds): array;
+
+    /**
+     * @param list<string> $clanIds
+     *
+     * @return list<string>
+     */
+    public function dissolvedAmong(array $clanIds): array;
 }

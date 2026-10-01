@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Competition\Ranking\Infrastructure\Repository;
 
+use App\Competition\Profile\Clan\Domain\Entity\Clan;
+use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Ranking\Domain\Entity\Rating;
 use App\Competition\Ranking\Domain\Enum\RankingSubject;
 use App\Competition\Ranking\Domain\Repository\RatingRepositoryInterface;
@@ -62,12 +64,25 @@ final class RatingRepository extends ServiceEntityRepository implements RatingRe
 
     private function ranking(RankingSubject $subjectType, string $gameId, int $teamSize): QueryBuilder
     {
-        return $this->createQueryBuilder('rating')
+        $queryBuilder = $this->createQueryBuilder('rating')
             ->andWhere('rating.subjectType = :subjectType')
             ->andWhere('rating.game = :gameId')
             ->andWhere('rating.teamSize = :teamSize')
             ->setParameter('subjectType', $subjectType)
             ->setParameter('gameId', $gameId)
             ->setParameter('teamSize', $teamSize);
+
+        $gone = match ($subjectType) {
+            RankingSubject::CLAN => \sprintf(
+                'NOT EXISTS (SELECT dissolved.id FROM %s dissolved WHERE dissolved.id = rating.subject AND dissolved.dissolvedAt IS NOT NULL)',
+                Clan::class,
+            ),
+            RankingSubject::PLAYER => \sprintf(
+                'NOT EXISTS (SELECT anonymized.id FROM %s anonymized WHERE anonymized.id = rating.subject AND anonymized.anonymizedAt IS NOT NULL)',
+                Player::class,
+            ),
+        };
+
+        return $queryBuilder->andWhere($gone);
     }
 }

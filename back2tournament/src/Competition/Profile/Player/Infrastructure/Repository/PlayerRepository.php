@@ -68,6 +68,7 @@ final class PlayerRepository extends ServiceEntityRepository implements PlayerRe
     {
         $queryBuilder = $this->createQueryBuilder('player')
             ->andWhere('player.game = :gameId')
+            ->andWhere('player.anonymizedAt IS NULL')
             ->setParameter('gameId', $gameId);
 
         if (null !== $search) {

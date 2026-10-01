@@ -32,6 +32,17 @@ final class AuthorProviderTest extends TestCase
         );
     }
 
+    public function test_a_deleted_account_names_no_author(): void
+    {
+        $deleted = new User(self::RIVAL_ID)->setUsername('rival');
+        User::erase($deleted, 'unusable-hash');
+
+        $userRepository = $this->createStub(UserRepositoryInterface::class);
+        $userRepository->method('findBy')->willReturn([new User(self::DEMO_ID)->setUsername('demo'), $deleted]);
+
+        $this->assertSame([self::DEMO_ID => 'demo'], new AuthorProvider($userRepository)->usernames([self::DEMO_ID, self::RIVAL_ID]));
+    }
+
     public function test_a_user_who_no_longer_exists_is_left_out(): void
     {
         $userRepository = $this->createStub(UserRepositoryInterface::class);

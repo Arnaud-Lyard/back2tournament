@@ -76,6 +76,17 @@ final class FindResultHistoryHandlerTest extends TestCase
         $page = $this->read($this->handler([$won], [$mine, $theirs])(FindResultHistoryQuery::ofPlayer(self::PLAYER_ID, 1, 10)));
 
         $this->assertSame([null, 'RIV'], [$page['items'][0]['side']['tag'], $page['items'][0]['opponent']['tag']]);
+        $this->assertSame([false, false], [$page['items'][0]['side']['clanDissolved'], $page['items'][0]['opponent']['clanDissolved']]);
+    }
+
+    public function test_a_side_whose_clan_was_dissolved_keeps_its_tag_and_says_so(): void
+    {
+        [$won, $mine, $theirs] = $this->settledFight(self::WON, self::MY_SIDE, self::RIVAL, 3, 1, 1, self::CLAN_ID, self::RIVAL_CLAN);
+
+        $page = $this->read($this->handler([$won], [$mine, $theirs], dissolvedClans: [self::RIVAL_CLAN])(FindResultHistoryQuery::ofPlayer(self::PLAYER_ID, 1, 10)));
+
+        $this->assertSame(['B2T', false], [$page['items'][0]['side']['tag'], $page['items'][0]['side']['clanDissolved']]);
+        $this->assertSame(['RIV', true], [$page['items'][0]['opponent']['tag'], $page['items'][0]['opponent']['clanDissolved']]);
     }
 
     public function test_a_clan_history_tells_its_team_fights_and_its_members_duels_from_its_side(): void
@@ -149,8 +160,9 @@ final class FindResultHistoryHandlerTest extends TestCase
     /**
      * @param list<Fight> $fights
      * @param list<Result> $results
+     * @param list<string> $dissolvedClans
      */
-    private function handler(array $fights, array $results = [], ?ResultRepositoryInterface $resultRepository = null): FindResultHistoryHandler
+    private function handler(array $fights, array $results = [], ?ResultRepositoryInterface $resultRepository = null, array $dissolvedClans = []): FindResultHistoryHandler
     {
         $registry = $this->createStub(CompetitorRegistryProviderInterface::class);
         $registry->method('competitorsOfPlayer')->willReturn([self::MY_SIDE]);
@@ -164,6 +176,9 @@ final class FindResultHistoryHandlerTest extends TestCase
         $clanTagProvider = $this->createStub(ClanTagProviderInterface::class);
         $clanTagProvider->method('tagsOfClans')->willReturnCallback(
             static fn (array $clanIds): array => array_intersect_key([self::CLAN_ID => 'B2T', self::RIVAL_CLAN => 'RIV'], array_flip($clanIds))
+        );
+        $clanTagProvider->method('dissolvedAmong')->willReturnCallback(
+            static fn (array $clanIds): array => array_values(array_intersect($dissolvedClans, $clanIds))
         );
 
         return new FindResultHistoryHandler(

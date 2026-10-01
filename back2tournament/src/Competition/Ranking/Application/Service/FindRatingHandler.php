@@ -65,7 +65,7 @@ final class FindRatingHandler
 
             $perFormat[] = [
                 'teamSize' => $teamSize,
-                'rank' => $rated ? 1 + $this->ratingRepository->countAbove($subjectType, $subject['game'], $teamSize, $rating->getValue()) : null,
+                'rank' => $rated && $subject['ranked'] ? 1 + $this->ratingRepository->countAbove($subjectType, $subject['game'], $teamSize, $rating->getValue()) : null,
                 'total' => $this->ratingRepository->countRanking($subjectType, $subject['game'], $teamSize),
                 'rating' => $rated ? $rating->getValue() : Rating::INITIAL,
                 'fights' => $rated ? $rating->getFights() : 0,
@@ -87,7 +87,7 @@ final class FindRatingHandler
         ], JSON_THROW_ON_ERROR);
     }
 
-    /** @return array{id: string, game: string, name: string, tag: ?string} */
+    /** @return array{id: string, game: string, name: string, tag: ?string, ranked: bool} */
     private function player(string $playerId): array
     {
         $player = $this->playerRepository->findOneBy(['id' => new PlayerId($playerId)->getValue()]);
@@ -102,10 +102,11 @@ final class FindRatingHandler
             'game' => $player->getGame()->getValue(),
             'name' => (string) $player->getBattletag(),
             'tag' => $this->clanTagProvider->clansOfPlayers([$id])[$id]['tag'] ?? null,
+            'ranked' => null === $player->getAnonymizedAt(),
         ];
     }
 
-    /** @return array{id: string, game: string, name: string, tag: string} */
+    /** @return array{id: string, game: string, name: string, tag: string, ranked: bool} */
     private function clan(string $clanId): array
     {
         $clan = $this->clanRepository->findOneBy(['id' => new ClanId($clanId)->getValue()]);
@@ -118,6 +119,7 @@ final class FindRatingHandler
             'game' => $clan->getGame()->getValue(),
             'name' => $clan->getName(),
             'tag' => $clan->getTag(),
+            'ranked' => !$clan->isDissolved(),
         ];
     }
 }

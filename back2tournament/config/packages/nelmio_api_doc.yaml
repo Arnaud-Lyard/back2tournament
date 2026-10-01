@@ -163,6 +163,11 @@ nelmio_api_doc:
                         updatedAt: { type: string, format: date-time }
                         game: { $ref: '#/components/schemas/Uuid' }
                         user: { $ref: '#/components/schemas/Uuid' }
+                        anonymizedAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: 'When its account was deleted: the profile had fought, so it stays for the record under an anonymous battletag (`Anonyme#1234`), out of the player lists and the rankings, and enters no new fight, tournament or clan. Null for the profile of a live account.'
                 Result:
                     type: object
                     description: What one side of a fight scored, and where that claim stands
@@ -232,6 +237,9 @@ nelmio_api_doc:
                             nullable: true
                             example: 'B2T'
                             description: 'The tag of the clan the side plays for: the clan the profile is an active member of, or the clan of the team. Null for a profile in no clan.'
+                        clanDissolved:
+                            type: boolean
+                            description: 'The clan of `tag` was dissolved since. Only a settled result tells it.'
                 FightSide:
                     description: 'One side of a fight, and what it claims or settled on.'
                     allOf:
@@ -368,6 +376,11 @@ nelmio_api_doc:
                         leader: { $ref: '#/components/schemas/Uuid' }
                         createdAt: { type: string, format: date-time }
                         updatedAt: { type: string, format: date-time }
+                        dissolvedAt:
+                            type: string
+                            format: date-time
+                            nullable: true
+                            description: 'When its leader dissolved the clan. A dissolved clan has no member left, takes none, is out of the clan lists and the rankings, and its tag may be founded again; its page and the fights it played remain. Null for a live clan.'
                 ClanSummary:
                     description: 'A clan as a list shows it.'
                     allOf:
@@ -523,7 +536,7 @@ nelmio_api_doc:
                     required: [teamSize, rank, total, rating, fights, wins, draws, losses]
                     properties:
                         teamSize: { type: integer, minimum: 1, example: 1, description: 'The format, as the number of players per side' }
-                        rank: { type: integer, nullable: true, example: 3, description: 'Null until the first settled fight in this format' }
+                        rank: { type: integer, nullable: true, example: 3, description: 'Null until the first settled fight in this format, and for good once the clan is dissolved or the profile belongs to a deleted account: both leave the rankings' }
                         total: { type: integer, example: 42, description: 'How many player profiles, or clans, the ranking of this format holds' }
                         rating: { type: integer, example: 1087, description: '1000 until the first settled fight in this format' }
                         fights: { type: integer, example: 12 }

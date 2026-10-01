@@ -17,6 +17,10 @@ final class UserChecker implements UserCheckerInterface
             return;
         }
 
+        if ($user->isDeleted()) {
+            throw new CustomUserMessageAccountStatusException('this account was deleted');
+        }
+
         if (!$user->isVerified()) {
             throw new CustomUserMessageAccountStatusException('please verify your email before logging in');
         }

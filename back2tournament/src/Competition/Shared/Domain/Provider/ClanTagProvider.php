@@ -59,4 +59,21 @@ final class ClanTagProvider implements ClanTagProviderInterface
 
         return $tags;
     }
+
+    public function dissolvedAmong(array $clanIds): array
+    {
+        $clanIds = array_values(array_unique($clanIds));
+        if ([] === $clanIds) {
+            return [];
+        }
+
+        $dissolved = [];
+        foreach ($this->clanRepository->findBy(['id' => $clanIds]) as $clan) {
+            if ($clan->isDissolved()) {
+                $dissolved[] = $clan->getId()->getValue();
+            }
+        }
+
+        return $dissolved;
+    }
 }

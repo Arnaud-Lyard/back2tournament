@@ -7,10 +7,14 @@ namespace App\Competition\Shared\Domain\Provider;
 use App\Competition\Competitor\Domain\Entity\Competitor;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
+use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
+use App\Competition\Profile\Team\Domain\Entity\Team;
+use App\Competition\Profile\Team\Domain\Entity\TeamPlayer;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Entity\ValueObject\CompetitorId;
+use App\Shared\Exception\ConflictException;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -43,11 +47,31 @@ final class CompetitorRegistryProvider implements CompetitorRegistryProviderInte
 
     public function enlistPlayer(string $playerId): string
     {
+        $player = $this->playerRepository->findOneBy(['id' => $playerId]);
+        if ($player instanceof Player && null !== $player->getAnonymizedAt()) {
+            throw new ConflictException('this player profile belongs to a deleted account');
+        }
+
         return $this->enlist(CompetitorType::PLAYER, $playerId);
     }
 
     public function enlistTeam(string $teamId): string
     {
+        $team = $this->teamRepository->findOneBy(['id' => $teamId]);
+        if ($team instanceof Team && [] !== $this->clanTagProvider->dissolvedAmong([$team->getClan()->getValue()])) {
+            throw new ConflictException('the clan of this team was dissolved');
+        }
+
+        $lineup = array_map(
+            static fn (TeamPlayer $teamPlayer): string => $teamPlayer->getPlayer()->getValue(),
+            $this->teamPlayerRepository->findBy(['team' => $teamId]),
+        );
+        foreach ([] === $lineup ? [] : $this->playerRepository->findBy(['id' => $lineup]) as $player) {
+            if (null !== $player->getAnonymizedAt()) {
+                throw new ConflictException('this team fields the profile of a deleted account');
+            }
+        }
+
         return $this->enlist(CompetitorType::TEAM, $teamId);
     }
 

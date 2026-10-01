@@ -6,6 +6,7 @@ namespace App\Authentication\User\Domain\Entity;
 
 use App\Authentication\User\Domain\Event\UserAvatarChangedEvent;
 use App\Authentication\User\Domain\Event\UserCreatedEvent;
+use App\Authentication\User\Domain\Event\UserDeletedEvent;
 use App\Media\Image\Domain\Attribute\StoredImage;
 use App\Shared\Aggregate\AggregateRoot;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -33,6 +34,9 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
 
     #[StoredImage]
     private ?string $avatar = null;
+
+    #[Ignore]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     public function __construct(string $id)
     {
@@ -145,6 +149,32 @@ class User extends AggregateRoot implements UserInterface, PasswordAuthenticated
         $user->avatar = $avatar;
 
         $user->recordDomainEvent(new UserAvatarChangedEvent($user->id));
+    }
+
+    #[Ignore]
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    #[Ignore]
+    public function isDeleted(): bool
+    {
+        return null !== $this->deletedAt;
+    }
+
+    public static function erase(User $user, string $unusablePasswordHash): void
+    {
+        $user->email = \sprintf('deleted-%s@deleted.invalid', $user->id);
+        $user->username = \sprintf('deleted-%s', $user->id);
+        $user->password = $unusablePasswordHash;
+        $user->roles = [];
+        $user->verified = false;
+        $user->verificationToken = null;
+        $user->avatar = null;
+        $user->deletedAt = new \DateTimeImmutable('now');
+
+        $user->recordDomainEvent(new UserDeletedEvent($user->id));
     }
 
     public function verifyEmail(): self

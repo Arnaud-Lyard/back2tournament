@@ -25,7 +25,7 @@ final class AuthorProvider implements AuthorProviderInterface
 
         $usernames = [];
         foreach ($this->userRepository->findBy(['id' => $userIds]) as $user) {
-            if ($user instanceof User && null !== $user->getId()) {
+            if ($user instanceof User && null !== $user->getId() && !$user->isDeleted()) {
                 $usernames[$user->getId()] = (string) $user->getUsername();
             }
         }

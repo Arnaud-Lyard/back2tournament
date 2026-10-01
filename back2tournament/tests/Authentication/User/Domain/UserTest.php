@@ -11,6 +11,7 @@ use App\Authentication\User\Domain\Entity\User;
 use App\Authentication\User\Domain\Entity\Username;
 use App\Authentication\User\Domain\Event\UserAvatarChangedEvent;
 use App\Authentication\User\Domain\Event\UserCreatedEvent;
+use App\Authentication\User\Domain\Event\UserDeletedEvent;
 use PHPUnit\Framework\TestCase;
 
 final class UserTest extends TestCase
@@ -33,6 +34,37 @@ final class UserTest extends TestCase
         self::assertEqualsCanonicalizing(['ROLE_ADMIN', 'ROLE_USER'], $user->getRoles());
         self::assertFalse($user->isVerified());
         self::assertNotNull($user->getVerificationToken());
+    }
+
+    public function test_an_erased_account_keeps_nothing_that_names_its_owner_and_says_so(): void
+    {
+        $user = User::registerUser(
+            new Email('arnaud@back2tournament.fr'),
+            new Username('arnaud'),
+            ['ROLE_EDITOR'],
+            new Password('Password123!'),
+            new Locale('fr'),
+        );
+        User::changeAvatar($user, 'avatars/arnaud.webp');
+        $user->pullDomainEvents();
+        $id = (string) $user->getId();
+
+        User::erase($user, 'unusable-hash');
+
+        self::assertSame("deleted-{$id}@deleted.invalid", $user->getEmail());
+        self::assertSame("deleted-{$id}", $user->getUsername());
+        self::assertSame('unusable-hash', $user->getPassword());
+        self::assertSame(['ROLE_USER'], $user->getRoles());
+        self::assertNull($user->getAvatar());
+        self::assertNull($user->getVerificationToken());
+        self::assertFalse($user->isVerified());
+        self::assertTrue($user->isDeleted());
+        self::assertNotNull($user->getDeletedAt());
+
+        $events = $user->pullDomainEvents();
+        self::assertCount(1, $events);
+        self::assertInstanceOf(UserDeletedEvent::class, $events[0]);
+        self::assertSame($id, $events[0]->getUserId());
     }
 
     public function test_verify_email_marks_user_as_verified_and_clears_token(): void
