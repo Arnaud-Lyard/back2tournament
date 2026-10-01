@@ -452,7 +452,11 @@
       "errors": {
         "notYours": "This profile belongs to another account.",
         "gone": "This profile no longer exists.",
-        "fighting": "This profile takes part in fights: it can no longer be deleted."
+        "fighting": "This profile takes part in fights: it can no longer be deleted.",
+        "leadsClan": "This profile leads a clan: it cannot be deleted.",
+        "inClan": "This profile is a member of a clan: leave it before deleting the profile.",
+        "invitedToClan": "This profile is invited to a clan: decline the invitation before deleting the profile.",
+        "asksToJoinClan": "This profile asked to join a clan: withdraw the request before deleting the profile."
       }
     },
     "back": "Back to my profiles"

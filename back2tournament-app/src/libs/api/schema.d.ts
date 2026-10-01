@@ -3546,7 +3546,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The profile takes part in fights: deleting it would leave that history hanging */
+            /** @description The profile is kept, and the message says why: it takes part in fights, as deleting it would leave that history hanging, or it leads a clan; or it belongs to a clan, is invited to one or asks to join one, until it leaves the clan, declines the invitation or withdraws the request */
             409: {
                 headers: {
                     [name: string]: unknown;

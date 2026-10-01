@@ -49,6 +49,7 @@ describe("PlayerProfiles", () => {
   it("toasts the refusal when the profile takes part in fights", async () => {
     backendAnswers(409, {
       message: "this player profile takes part in fights and cannot be deleted",
+      code: "playerHasFights",
     })
     renderWithProviders(<PlayerProfiles games={games} />, { user })
 
@@ -64,6 +65,57 @@ describe("PlayerProfiles", () => {
       })
     )
     expect(refresh).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    [
+      "playerLeadsClan",
+      "this player profile leads a clan and cannot be deleted",
+      "This profile leads a clan: it cannot be deleted.",
+    ],
+    [
+      "playerInClan",
+      "this player profile belongs to a clan: leave it first",
+      "This profile is a member of a clan: leave it before deleting the profile.",
+    ],
+    [
+      "playerInvitedToClan",
+      "this player profile is invited to a clan: decline the invitation first",
+      "This profile is invited to a clan: decline the invitation before deleting the profile.",
+    ],
+    [
+      "playerAsksToJoinClan",
+      "this player profile asks to join a clan: withdraw the request first",
+      "This profile asked to join a clan: withdraw the request before deleting the profile.",
+    ],
+  ])(
+    "says what holds the profile in a clan (%s)",
+    async (code, message, description) => {
+      backendAnswers(409, { message, code })
+      renderWithProviders(<PlayerProfiles games={games} />, { user })
+
+      await userEvent.click(screen.getByRole("button", { name: "Delete" }))
+      await userEvent.click(screen.getByRole("button", { name: "Confirm" }))
+
+      await waitFor(() =>
+        expect(add).toHaveBeenCalledWith({
+          type: "error",
+          title: "The profile could not be deleted",
+          description,
+        })
+      )
+    }
+  )
+
+  it("does not blame fights for a conflict it cannot name", async () => {
+    backendAnswers(409, { message: "something else entirely" })
+    renderWithProviders(<PlayerProfiles games={games} />, { user })
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }))
+    await userEvent.click(screen.getByRole("button", { name: "Confirm" }))
+
+    await waitFor(() => expect(add).toHaveBeenCalled())
+    expect(add.mock.calls[0]?.[0]?.description).not.toMatch(/fights/)
   })
 
   it("deletes a profile that never fought", async () => {

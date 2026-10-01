@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Competition\Profile\Player\Application\Service;
 
 use App\Authentication\User\Domain\Security\CurrentUserProviderInterface;
+use App\Competition\Profile\Clan\Domain\Entity\ClanMember;
+use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
+use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Player\Application\Model\DeletePlayerCommand;
 use App\Competition\Profile\Player\Domain\Entity\Player;
@@ -61,8 +64,9 @@ final class DeletePlayerHandler
             throw new ConflictException('this player profile takes part in fights and cannot be deleted');
         }
 
-        if (null !== $this->clanMemberRepository->findOneBy(['player' => $playerId->getValue()])) {
-            throw new ConflictException('this player profile belongs to a clan, or is invited to one: leave it or decline first');
+        $places = $this->clanMemberRepository->findBy(['player' => $playerId->getValue()]);
+        if ([] !== $places) {
+            throw new ConflictException(self::whatHoldsTheProfile($places));
         }
 
         Player::delete($player);
@@ -76,5 +80,18 @@ final class DeletePlayerHandler
         }
 
         return $deletedPlayer;
+    }
+
+    /** @param non-empty-list<ClanMember> $places */
+    private static function whatHoldsTheProfile(array $places): string
+    {
+        $holds = static fn (callable $matches): bool => [] !== array_filter($places, $matches);
+
+        return match (true) {
+            $holds(static fn (ClanMember $place): bool => ClanRole::LEADER === $place->getRole()) => 'this player profile leads a clan and cannot be deleted',
+            $holds(static fn (ClanMember $place): bool => ClanMemberStatus::ACTIVE === $place->getStatus()) => 'this player profile belongs to a clan: leave it first',
+            $holds(static fn (ClanMember $place): bool => ClanMemberStatus::INVITED === $place->getStatus()) => 'this player profile is invited to a clan: decline the invitation first',
+            default => 'this player profile asks to join a clan: withdraw the request first',
+        };
     }
 }

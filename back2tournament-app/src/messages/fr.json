@@ -452,7 +452,11 @@
       "errors": {
         "notYours": "Ce profil appartient à un autre compte.",
         "gone": "Ce profil n'existe plus.",
-        "fighting": "Ce profil participe à des combats : il ne peut plus être supprimé."
+        "fighting": "Ce profil participe à des combats : il ne peut plus être supprimé.",
+        "leadsClan": "Ce profil est le chef d'un clan : il ne peut pas être supprimé.",
+        "inClan": "Ce profil est membre d'un clan : quittez-le avant de supprimer le profil.",
+        "invitedToClan": "Ce profil est invité dans un clan : refusez l'invitation avant de supprimer le profil.",
+        "asksToJoinClan": "Ce profil a demandé à rejoindre un clan : retirez la demande avant de supprimer le profil."
       }
     },
     "back": "Retour à mes profils"

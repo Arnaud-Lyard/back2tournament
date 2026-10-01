@@ -131,7 +131,11 @@ export function PlayerProfiles({ games }: { games: Game[] }) {
         const message = describeError(error, {
           403: t("errors.notYours"),
           404: t("errors.gone"),
-          409: t("errors.fighting"),
+          playerHasFights: t("errors.fighting"),
+          playerLeadsClan: t("errors.leadsClan"),
+          playerInClan: t("errors.inClan"),
+          playerInvitedToClan: t("errors.invitedToClan"),
+          playerAsksToJoinClan: t("errors.asksToJoinClan"),
         })
         setConfirming(null)
         toast.add({

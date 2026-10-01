@@ -2,6 +2,14 @@ const KNOWN_BACKEND_ERRORS = {
   "email already used": "emailTaken",
   "username already used": "usernameTaken",
   "please verify your email before logging in": "emailNotVerified",
+  "this player profile takes part in fights and cannot be deleted":
+    "playerHasFights",
+  "this player profile leads a clan and cannot be deleted": "playerLeadsClan",
+  "this player profile belongs to a clan: leave it first": "playerInClan",
+  "this player profile is invited to a clan: decline the invitation first":
+    "playerInvitedToClan",
+  "this player profile asks to join a clan: withdraw the request first":
+    "playerAsksToJoinClan",
 } as const
 
 export type ApiErrorCode =

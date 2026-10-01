@@ -42,6 +42,35 @@ describe("relayApiResult", () => {
     })
   })
 
+  it.each([
+    [
+      "this player profile takes part in fights and cannot be deleted",
+      "playerHasFights",
+    ],
+    [
+      "this player profile leads a clan and cannot be deleted",
+      "playerLeadsClan",
+    ],
+    ["this player profile belongs to a clan: leave it first", "playerInClan"],
+    [
+      "this player profile is invited to a clan: decline the invitation first",
+      "playerInvitedToClan",
+    ],
+    [
+      "this player profile asks to join a clan: withdraw the request first",
+      "playerAsksToJoinClan",
+    ],
+  ])("tags the refused deletion of a profile: %s", async (message, code) => {
+    const response = await relayApiResult(
+      Promise.resolve({
+        error: { error: message },
+        response: new Response(null, { status: 409 }),
+      })
+    )
+
+    expect(await response.json()).toEqual({ message, code })
+  })
+
   it("still reports an error whose body was empty", async () => {
     const response = await relayApiResult(
       Promise.resolve({
