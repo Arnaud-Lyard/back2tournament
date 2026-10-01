@@ -56,6 +56,7 @@ export function RegisterActions({
             description: describeError(error, {
               403: t("errors.notYours"),
               409: t("errors.closed"),
+              teamFieldsDeletedAccount: t("errors.deletedAccount"),
             }),
           })
         },

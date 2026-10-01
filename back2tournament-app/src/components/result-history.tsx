@@ -77,7 +77,14 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
                       {named && (
                         <>
                           {subject === "player" && (
-                            <ClanTag tag={result.side.tag} />
+                            <ClanTag
+                              tag={result.side.tag}
+                              dissolvedLabel={
+                                result.side.clanDissolved
+                                  ? t("dissolved")
+                                  : undefined
+                              }
+                            />
                           )}
                           <span className="truncate font-medium">
                             {result.side.name ?? t("unknown")}
@@ -85,7 +92,14 @@ export async function ResultHistory({ history, subject }: ResultHistoryProps) {
                         </>
                       )}
                       <span className="shrink-0">{t("against")}</span>
-                      <ClanTag tag={result.opponent?.tag} />
+                      <ClanTag
+                        tag={result.opponent?.tag}
+                        dissolvedLabel={
+                          result.opponent?.clanDissolved
+                            ? t("dissolved")
+                            : undefined
+                        }
+                      />
                       {href ? (
                         <Link
                           href={href}

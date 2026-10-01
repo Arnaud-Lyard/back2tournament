@@ -17,6 +17,11 @@ export interface AdmitMemberVariables {
   playerId: string
 }
 
+export interface DissolveClanVariables {
+  clanId: string
+  password: string
+}
+
 export function createClan(input: CreateClanInput): Promise<Clan> {
   return fetchJson<Clan>("/api/clans", { method: "POST", body: input })
 }
@@ -52,6 +57,16 @@ export function admitMember({
   return fetchJson<ClanMember>(
     `/api/clans/${encodeURIComponent(clanId)}/admissions`,
     { method: "POST", body: { player: playerId } }
+  )
+}
+
+export function dissolveClan({
+  clanId,
+  password,
+}: DissolveClanVariables): Promise<Clan> {
+  return fetchJson<Clan>(
+    `/api/clans/${encodeURIComponent(clanId)}/dissolution`,
+    { method: "POST", body: { password } }
   )
 }
 

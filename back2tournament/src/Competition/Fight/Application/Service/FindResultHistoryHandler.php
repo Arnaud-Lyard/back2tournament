@@ -85,6 +85,7 @@ final class FindResultHistoryHandler
             }
         }
         $tags = $this->clanTagProvider->tagsOfClans(array_keys($clanIds));
+        $dissolved = array_fill_keys($this->clanTagProvider->dissolvedAmong(array_keys($clanIds)), true);
 
         $competitorIds = [];
         foreach ($fights as $fight) {
@@ -101,7 +102,7 @@ final class FindResultHistoryHandler
             }
 
             $fightId = $fight->getId()->getValue();
-            $items[] = $this->normalizeResult($result, $fight, $scores[$fightId] ?? [], $described, $clans[$fightId] ?? [], $tags);
+            $items[] = $this->normalizeResult($result, $fight, $scores[$fightId] ?? [], $described, $clans[$fightId] ?? [], $tags, $dissolved);
         }
 
         return $this->page($items, $total, $page, $limit);
@@ -112,10 +113,11 @@ final class FindResultHistoryHandler
      * @param array<string, array{type: string, reference: string, name: ?string, tag: ?string}> $described
      * @param array<string, ?string> $clans
      * @param array<string, string> $tags
+     * @param array<string, true> $dissolved
      *
      * @return array<string, mixed>
      */
-    private function normalizeResult(Result $result, Fight $fight, array $scores, array $described, array $clans, array $tags): array
+    private function normalizeResult(Result $result, Fight $fight, array $scores, array $described, array $clans, array $tags, array $dissolved): array
     {
         $side = $result->getCompetitor()->getValue();
         $opponent = $fight->opponentOf($result->getCompetitor())?->getValue();
@@ -124,6 +126,7 @@ final class FindResultHistoryHandler
 
             return null === $clan ? null : ($tags[$clan] ?? null);
         };
+        $dissolvedOf = static fn (string $competitorId): bool => isset($dissolved[$clans[$competitorId] ?? '']);
 
         return [
             'fight' => ['value' => $fight->getId()->getValue()],
@@ -133,8 +136,8 @@ final class FindResultHistoryHandler
             'outcome' => $result->getStatus()->value,
             'arbitrated' => $fight->isArbitrated(),
             'settledAt' => $result->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
-            'side' => $this->normalizeSide($side, $scores[$side] ?? $result->getScore(), $described, $tagOf($side)),
-            'opponent' => null === $opponent ? null : $this->normalizeSide($opponent, $scores[$opponent] ?? 0, $described, $tagOf($opponent)),
+            'side' => $this->normalizeSide($side, $scores[$side] ?? $result->getScore(), $described, $tagOf($side), $dissolvedOf($side)),
+            'opponent' => null === $opponent ? null : $this->normalizeSide($opponent, $scores[$opponent] ?? 0, $described, $tagOf($opponent), $dissolvedOf($opponent)),
         ];
     }
 
@@ -143,7 +146,7 @@ final class FindResultHistoryHandler
      *
      * @return array<string, mixed>
      */
-    private function normalizeSide(string $competitorId, int $score, array $described, ?string $tag): array
+    private function normalizeSide(string $competitorId, int $score, array $described, ?string $tag, bool $clanDissolved): array
     {
         $description = $described[$competitorId] ?? null;
 
@@ -153,6 +156,7 @@ final class FindResultHistoryHandler
             'reference' => null === $description ? null : ['value' => $description['reference']],
             'name' => $description['name'] ?? null,
             'tag' => $tag,
+            'clanDissolved' => $clanDissolved,
             'score' => $score,
         ];
     }

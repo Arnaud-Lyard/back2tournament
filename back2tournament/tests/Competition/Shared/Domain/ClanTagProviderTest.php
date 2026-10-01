@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Competition\Shared\Domain;
 
+use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Shared\Domain\Provider\ClanTagProvider;
@@ -49,10 +50,22 @@ final class ClanTagProviderTest extends TestCase
         );
     }
 
-    private function provider(): ClanTagProvider
+    public function test_a_dissolved_clan_is_told_apart_and_keeps_its_tag(): void
+    {
+        $provider = $this->provider(dissolveTheOther: true);
+
+        $this->assertSame([self::OTHER_CLAN], $provider->dissolvedAmong([self::CLAN_ID, self::OTHER_CLAN, self::UNKNOWN_CLAN]));
+        $this->assertSame('OTH', $provider->tagsOfClans([self::OTHER_CLAN])[self::OTHER_CLAN]);
+        $this->assertSame([], $provider->dissolvedAmong([]));
+    }
+
+    private function provider(bool $dissolveTheOther = false): ClanTagProvider
     {
         $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER, 'B2T');
         $other = self::aClan(self::OTHER_CLAN, self::GAME_ID, self::LONER, 'OTH');
+        if ($dissolveTheOther) {
+            Clan::dissolve($other);
+        }
 
         return new ClanTagProvider(
             $this->repositoryStub(ClanMemberRepositoryInterface::class, [

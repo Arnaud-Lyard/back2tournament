@@ -7,13 +7,16 @@ namespace App\Tests\Competition\Shared\Domain;
 use App\Competition\Competitor\Domain\Entity\Competitor;
 use App\Competition\Competitor\Domain\Enum\CompetitorType;
 use App\Competition\Competitor\Domain\Repository\CompetitorRepositoryInterface;
+use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
+use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
 use App\Competition\Shared\Domain\Provider\ClanTagProvider;
 use App\Competition\Shared\Domain\Provider\CompetitorRegistryProvider;
+use App\Shared\Exception\ConflictException;
 use App\Tests\Support\CompetitionFixtures;
 use App\Tests\Support\RepositoryStubs;
 use PHPUnit\Framework\TestCase;
@@ -157,13 +160,53 @@ final class CompetitorRegistryProviderTest extends TestCase
         $this->assertSame([], $registry->named('nobody'));
     }
 
-    private function registry(CompetitorRepositoryInterface $competitorRepository): CompetitorRegistryProvider
+    public function test_a_team_of_a_dissolved_clan_enters_no_new_fight(): void
+    {
+        $competitorRepository = $this->repositoryMock(CompetitorRepositoryInterface::class, []);
+        $competitorRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessage('the clan of this team was dissolved');
+
+        $this->registry($competitorRepository, dissolved: true)->enlistTeam(self::TEAM_ID);
+    }
+
+    public function test_the_profile_of_a_deleted_account_enters_no_new_fight(): void
+    {
+        $competitorRepository = $this->repositoryMock(CompetitorRepositoryInterface::class, []);
+        $competitorRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessage('this player profile belongs to a deleted account');
+
+        $this->registry($competitorRepository, anonymized: true)->enlistPlayer(self::MATE_PLAYER);
+    }
+
+    public function test_a_team_fielding_the_profile_of_a_deleted_account_enters_no_new_fight(): void
+    {
+        $competitorRepository = $this->repositoryMock(CompetitorRepositoryInterface::class, []);
+        $competitorRepository->expects($this->never())->method('save');
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessage('this team fields the profile of a deleted account');
+
+        $this->registry($competitorRepository, anonymized: true)->enlistTeam(self::TEAM_ID);
+    }
+
+    private function registry(CompetitorRepositoryInterface $competitorRepository, bool $dissolved = false, bool $anonymized = false): CompetitorRegistryProvider
     {
         $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID);
+        if ($dissolved) {
+            Clan::dissolve($clan);
+        }
         [$team, $lineup] = self::aTeam(self::TEAM_ID, $clan, [self::PLAYER_ID, self::MATE_PLAYER]);
+        $mate = self::aPlayer(self::MATE_PLAYER, self::MATE_USER, self::GAME_ID, 'Mate#0002');
+        if ($anonymized) {
+            Player::anonymize($mate);
+        }
         $players = [
             self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001'),
-            self::aPlayer(self::MATE_PLAYER, self::MATE_USER, self::GAME_ID, 'Mate#0002'),
+            $mate,
         ];
 
         $playerRepository = $this->repositoryStub(PlayerRepositoryInterface::class, $players);

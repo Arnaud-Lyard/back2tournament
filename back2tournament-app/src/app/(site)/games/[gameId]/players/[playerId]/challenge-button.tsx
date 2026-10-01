@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/toast"
 import { useAuth } from "@/features/auth/hooks/use-auth"
 import { useCreateFight } from "@/features/fights/hooks/use-create-fight"
 import { useApiErrorMessage } from "@/hooks/use-api-error-message"
+import { cn } from "@/libs/utils"
 
 interface ChallengeButtonProps {
   gameId: string
@@ -33,7 +34,10 @@ export function ChallengeButton({
   if (!isAuthenticated) {
     return (
       <Hint text={t("signInPrompt")}>
-        <Link href="/login" className={buttonVariants({ variant: "outline" })}>
+        <Link
+          href="/login"
+          className={cn(buttonVariants({ variant: "outline" }))}
+        >
           {t("signIn")}
         </Link>
       </Hint>
@@ -47,7 +51,7 @@ export function ChallengeButton({
       <Hint text={t("noProfile")}>
         <Link
           href={`/players/new?gameId=${encodeURIComponent(gameId)}`}
-          className={buttonVariants({ variant: "outline" })}
+          className={cn(buttonVariants({ variant: "outline" }))}
         >
           {t("createProfile")}
         </Link>

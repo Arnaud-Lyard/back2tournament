@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Competition\Ranking\Application;
 
 use App\Competition\Fight\Domain\Entity\FightId;
+use App\Competition\Profile\Clan\Domain\Entity\Clan;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Game\Domain\Repository\GameRepositoryInterface;
+use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Ranking\Application\Model\FindRatingQuery;
 use App\Competition\Ranking\Application\Service\FindRatingHandler;
@@ -71,6 +73,32 @@ final class FindRatingHandlerTest extends TestCase
         ));
     }
 
+    public function test_a_profile_of_a_deleted_account_keeps_its_record_but_leaves_the_ranking(): void
+    {
+        $in2v2 = $this->rating(RankingSubject::PLAYER, self::PLAYER_ID, teamSize: 2);
+
+        $read = $this->read($this->handler([$in2v2], above: [2 => 2], total: [2 => 4], gone: true)(FindRatingQuery::ofPlayer(self::PLAYER_ID)));
+
+        $this->assertSame([2, null, 1016, 1], [
+            $read['ratings'][1]['teamSize'],
+            $read['ratings'][1]['rank'],
+            $read['ratings'][1]['rating'],
+            $read['ratings'][1]['fights'],
+        ]);
+    }
+
+    public function test_a_dissolved_clan_keeps_its_record_but_leaves_the_ranking(): void
+    {
+        $read = $this->read($this->handler(
+            [$this->rating(RankingSubject::CLAN, self::CLAN_ID, teamSize: 1)],
+            above: [1 => 0],
+            total: [1 => 2],
+            gone: true,
+        )(FindRatingQuery::ofClan(self::CLAN_ID)));
+
+        $this->assertSame([1, null, 1016], [$read['ratings'][0]['teamSize'], $read['ratings'][0]['rank'], $read['ratings'][0]['rating']]);
+    }
+
     public function test_a_rating_of_another_subject_or_player_is_not_read(): void
     {
         $someoneElse = $this->rating(RankingSubject::PLAYER, '55555555-5555-4555-8555-555555555555', teamSize: 1);
@@ -109,7 +137,7 @@ final class FindRatingHandlerTest extends TestCase
      * @param array<int, int> $above
      * @param array<int, int> $total
      */
-    private function handler(array $ratings, array $above, array $total): FindRatingHandler
+    private function handler(array $ratings, array $above, array $total, bool $gone = false): FindRatingHandler
     {
         $ratingRepository = $this->repositoryStub(RatingRepositoryInterface::class, $ratings);
         $ratingRepository->method('countAbove')->willReturnCallback(
@@ -120,11 +148,16 @@ final class FindRatingHandlerTest extends TestCase
         );
 
         $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::PLAYER_ID);
+        $player = self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001');
+        if ($gone) {
+            Clan::dissolve($clan);
+            Player::anonymize($player);
+        }
 
         return new FindRatingHandler(
             $ratingRepository,
             $this->repositoryStub(GameRepositoryInterface::class, [self::aGame(self::GAME_ID, [1, 2])]),
-            $this->repositoryStub(PlayerRepositoryInterface::class, [self::aPlayer(self::PLAYER_ID, self::USER_ID, self::GAME_ID, 'Leader#0001')]),
+            $this->repositoryStub(PlayerRepositoryInterface::class, [$player]),
             $this->repositoryStub(ClanRepositoryInterface::class, [$clan]),
             new ClanTagProvider(
                 $this->repositoryStub(ClanMemberRepositoryInterface::class, [self::leadership($clan)]),

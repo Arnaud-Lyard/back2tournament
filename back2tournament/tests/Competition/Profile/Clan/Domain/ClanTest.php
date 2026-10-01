@@ -9,6 +9,7 @@ use App\Competition\Profile\Clan\Domain\Entity\ClanId;
 use App\Competition\Profile\Clan\Domain\Entity\ClanMemberId;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
+use App\Competition\Profile\Clan\Domain\Event\ClanDissolvedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberRequestedEvent;
 use App\Competition\Profile\Game\Domain\Entity\GameId;
 use App\Competition\Profile\Player\Domain\Entity\PlayerId;
@@ -220,6 +221,31 @@ final class ClanTest extends TestCase
         Clan::remove($clan, $membership);
 
         $this->assertCount(1, $clan->pullDomainEvents());
+    }
+
+    public function test_a_dissolved_clan_says_when_it_was_dissolved(): void
+    {
+        $clan = $this->clan();
+        $clan->pullDomainEvents();
+
+        $this->assertFalse($clan->isDissolved());
+
+        Clan::dissolve($clan);
+
+        $this->assertTrue($clan->isDissolved());
+        $this->assertNotNull($clan->getDissolvedAt());
+        $this->assertSame([ClanDissolvedEvent::class], array_map(static fn (object $event): string => $event::class, $clan->pullDomainEvents()));
+    }
+
+    public function test_a_clan_is_dissolved_once(): void
+    {
+        $clan = $this->clan();
+        Clan::dissolve($clan);
+
+        $this->expectException(ConflictException::class);
+        $this->expectExceptionMessage('this clan is already dissolved');
+
+        Clan::dissolve($clan);
     }
 
     private function clan(): Clan

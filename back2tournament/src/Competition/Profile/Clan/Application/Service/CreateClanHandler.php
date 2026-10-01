@@ -71,7 +71,7 @@ final class CreateClanHandler
             throw new ConflictException('you already belong to a clan in this game');
         }
 
-        if (null !== $this->clanRepository->findOneBy(['game' => $gameId->getValue(), 'tag' => $tag->getValue()])) {
+        if (null !== $this->clanRepository->findOneBy(['game' => $gameId->getValue(), 'tag' => $tag->getValue(), 'dissolvedAt' => null])) {
             throw new ConflictException(\sprintf('the tag %s is already taken in this game', $tag->getValue()));
         }
 

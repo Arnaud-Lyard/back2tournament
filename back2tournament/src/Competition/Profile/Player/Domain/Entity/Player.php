@@ -14,6 +14,8 @@ use App\Shared\Aggregate\AggregateRoot;
 
 class Player extends AggregateRoot
 {
+    public const ANONYMOUS = 'Anonyme';
+
     private string $id;
 
     private string $battletag;
@@ -25,6 +27,8 @@ class Player extends AggregateRoot
     private string $game;
 
     private string $user;
+
+    private ?\DateTimeImmutable $anonymizedAt = null;
 
     public function __construct(PlayerId $id)
     {
@@ -96,6 +100,11 @@ class Player extends AggregateRoot
         return $this;
     }
 
+    public function getAnonymizedAt(): ?\DateTimeImmutable
+    {
+        return $this->anonymizedAt;
+    }
+
     public static function create(
         PlayerId $playerId,
         string $battletag,
@@ -120,6 +129,17 @@ class Player extends AggregateRoot
         $player->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $player->recordDomainEvent(new PlayerUpdatedEvent(new PlayerId($player->id)));
+
+        return $player;
+    }
+
+    public static function anonymize(Player $player): self
+    {
+        $now = new \DateTimeImmutable('now');
+
+        $player->setBattletag(\sprintf('%s#%04d', self::ANONYMOUS, random_int(0, 9999)));
+        $player->anonymizedAt = $now;
+        $player->setUpdatedAt($now);
 
         return $player;
     }

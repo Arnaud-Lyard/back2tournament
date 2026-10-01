@@ -67,7 +67,7 @@ final class CreateTeamHandler
         $lineup = array_map(static fn (string $player): PlayerId => new PlayerId($player), $createTeamCommand->getPlayers());
         $lineupIds = array_values(array_unique(array_map(static fn (PlayerId $player): string => $player->getValue(), $lineup)));
 
-        $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue()]);
+        $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue(), 'dissolvedAt' => null]);
         if (!$clan instanceof Clan) {
             throw new NotFoundException('clan not found');
         }

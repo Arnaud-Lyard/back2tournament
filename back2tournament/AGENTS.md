@@ -47,7 +47,17 @@ make user           # seed a dev user via app:create-user
   (`AggregateRootId`, `EmailValueObject`, `PasswordValueObject`, …).
 - `Authentication/User/` — users, roles, password hashing, Symfony Security integration.
   Publishes `Shared/Provider/CurrentUserProviderInterface`, the only sanctioned way for
-  any context to learn who the caller is.
+  any context to learn who the caller is, and to have them type their password again
+  (`confirmPassword()`, a `PermissionDeniedException` when it does not match) before
+  an action that cannot be undone: deleting the account, dissolving a clan. A user
+  deletes their account (`POST /api/user/me/deletion`): the row stays, erased by
+  `User::erase()` (email, username, password, picture and roles; `deletedAt` set, and
+  `UserChecker` refuses it at sign-in), and `UserDeletedEvent` lets each context forget
+  them. The Blog removes their comments; Competition removes their places in clans,
+  deletes their player profiles that never fought and anonymizes the others
+  (`Player::anonymize()`: `Anonyme#1234`, out of the player lists and the rankings, and
+  in no new fight, tournament or clan). `AccountErasureProviderInterface` refuses the
+  deletion while they lead a clan or organize a tournament still open for registration.
 - `Authentication/ApiToken/` — the API token of the tool that writes for the platform,
   such as Hermes: the value of the `BOT_API_TOKEN` environment variable, stored
   nowhere else. The `bot` firewall reads the token from `Authorization: Bearer`
@@ -72,7 +82,12 @@ make user           # seed a dev user via app:create-user
   which they accept, or by asking to join (`requested`), which the leader accepts, and
   belong to one clan at most. A player asks one clan at a time, and accepting an
   invitation withdraws the request they had sent elsewhere. All of it holds per player
-  profile, so per game: a user plays for a different clan in each game. A `Team` is a lineup a clan fields in one format:
+  profile, so per game: a user plays for a different clan in each game. Its leader
+  dissolves a clan (`Clan::dissolve()`, `POST /api/user/clans/{id}/dissolution`) after
+  typing their password again: the clan stays for the record with `dissolvedAt` and
+  frees its tag; its members, invitations, requests and the teams that never competed
+  go; it leaves the clan lists and the rankings, and the fights it played keep it,
+  marked `clanDissolved` in the results. A `Team` is a lineup a clan fields in one format:
   exactly `size` active members, one of them the leader who speaks for the team.
 - `Competition/Competitor/` — the polymorphic player-or-team that actually competes.
   Enlisted lazily, through `CompetitorRegistryProviderInterface`, when a fight is
@@ -103,6 +118,8 @@ make user           # seed a dev user via app:create-user
   duels of its active members, against another clan only (two sides of one clan leave
   it as it is). Moved as `FightSettledEvent` comes in; a `RatingChange` per rating and
   fight records the move and keeps a fight from counting twice.
+  A dissolved clan and the profile of a deleted account leave the rankings: their
+  ratings stay, with no rank.
   `bin/console app:rankings:rebuild` empties the rankings and replays every settled
   fight in the order it was settled — run it after a migration that creates or empties
   the rankings, as `Version20260927160000` (ratings per format) does. A side counts for
@@ -115,9 +132,11 @@ make user           # seed a dev user via app:create-user
   `CompetitorRegistryProviderInterface` (enlist a player or a team, who a user speaks
   for, which competitors a player profile or a clan plays as, name the sides and tag
   them with their clan, what a competitor ranks as, which competitors bear a name),
-  `ClanTagProviderInterface` (the clan a player profile is an active member of, and
-  the tag of a clan: lists show it before a battletag or a team name) and
-  `FightSchedulerProviderInterface` (open a fight with its two pending results). Each
+  `ClanTagProviderInterface` (the clan a player profile is an active member of, the
+  tag of a clan: lists show it before a battletag or a team name, and which clans were
+  dissolved), `AccountErasureProviderInterface` (whether a user may delete their
+  account) and `FightSchedulerProviderInterface` (open a fight with its two pending
+  results). Each
   `…ProviderInterface` has its `…Provider` implementation next to it, in the same
   folder.
 
@@ -323,6 +342,10 @@ Names line up across the four files: `PostFightResultsConfirmationController` �
   `ServiceEntityRepository`. Passing a bare id string is a `TypeError`.
 - State transitions live on the entity, never in the handler. The handler orchestrates:
   load, call the domain method, save, dispatch the recorded domain events.
+- Each command runs in one database transaction: the bus carries the
+  `doctrine_transaction` middleware, so a handler and the subscribers its events reach
+  synchronously commit together or not at all. Refuse by throwing, never by returning
+  halfway: the exception rolls the whole command back.
 - A scalar that carries a business rule gets a value object, built at the top of the
   handler before any repository read, so an invalid payload costs no query. Follow the
   house shape: one `final class <Concept>ValueObject` per concept in
@@ -364,13 +387,15 @@ interface under `src/<BC>/Shared/…`, implements it against its own repositorie
 the caller injects the interface. `CurrentUserProviderInterface`,
 `CompetitorIdProviderInterface`, `PlayerProfileProviderInterface`,
 `CompetitorRegistryProviderInterface`, `ClanTagProviderInterface`,
-`FightSchedulerProviderInterface`, `CategoryIdProviderInterface`,
-`AuthorProviderInterface` and `ImageProviderInterface` are the ones in place. Prefer this over chaining finder services, and over events.
+`FightSchedulerProviderInterface`, `AccountErasureProviderInterface`,
+`CategoryIdProviderInterface`, `AuthorProviderInterface` and `ImageProviderInterface`
+are the ones in place. Prefer this over chaining finder services, and over events.
 
 **A domain or application event.** Use it only when another context must *react* to
 something that already happened — sending a mail after a user registers, moving a
 tournament winner on and the ratings of both sides once a fight is settled
-(`FightSettledEvent`). Do not use an
+(`FightSettledEvent`), forgetting a deleted account in every context
+(`UserDeletedEvent`). Do not use an
 event chain to assemble the data one request needs: each hop adds an event class, a
 subscriber, a constructor signature and a silent `ArgumentCountError` when one of them
 drifts, and the response then has nowhere to go but the session.

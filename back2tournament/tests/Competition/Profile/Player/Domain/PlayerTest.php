@@ -19,6 +19,19 @@ final class PlayerTest extends TestCase
     private const GAME_ID = '22222222-2222-4222-8222-222222222222';
     private const USER_ID = '33333333-3333-4333-8333-333333333333';
 
+    public function test_an_anonymized_profile_keeps_its_game_and_account_under_an_anonymous_battletag(): void
+    {
+        $player = Player::create(new PlayerId(self::PLAYER_ID), 'PlayerOne#1234', new GameId(self::GAME_ID), new UserId(self::USER_ID));
+        $player->pullDomainEvents();
+
+        Player::anonymize($player);
+
+        $this->assertMatchesRegularExpression('/^Anonyme#\d{4}$/', (string) $player->getBattletag());
+        $this->assertNotNull($player->getAnonymizedAt());
+        $this->assertSame([self::GAME_ID, self::USER_ID], [$player->getGame()->getValue(), $player->getUser()->getValue()]);
+        $this->assertSame([], $player->pullDomainEvents());
+    }
+
     public function test_a_new_profile_carries_its_battletag_game_and_account(): void
     {
         $player = $this->player();

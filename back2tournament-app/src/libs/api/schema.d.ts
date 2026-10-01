@@ -53,6 +53,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/user/me/deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_account_deletion_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/login": {
         parameters: {
             query?: never;
@@ -543,6 +559,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["post_api_clan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user/clans/{id}/dissolution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_clan_dissolution_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1103,6 +1135,11 @@ export interface components {
             updatedAt?: string;
             game?: components["schemas"]["Uuid"];
             user?: components["schemas"]["Uuid"];
+            /**
+             * Format: date-time
+             * @description When its account was deleted: the profile had fought, so it stays for the record under an anonymous battletag (`Anonyme#1234`), out of the player lists and the rankings, and enters no new fight, tournament or clan. Null for the profile of a live account.
+             */
+            anonymizedAt?: string | null;
         };
         /** @description What one side of a fight scored, and where that claim stands */
         Result: {
@@ -1166,6 +1203,8 @@ export interface components {
              * @example B2T
              */
             tag?: string | null;
+            /** @description The clan of `tag` was dissolved since. Only a settled result tells it. */
+            clanDissolved?: boolean;
         };
         /** @description One side of a fight, and what it claims or settled on. */
         FightSide: components["schemas"]["NamedSide"] & {
@@ -1321,6 +1360,11 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             updatedAt?: string;
+            /**
+             * Format: date-time
+             * @description When its leader dissolved the clan. A dissolved clan has no member left, takes none, is out of the clan lists and the rankings, and its tag may be founded again; its page and the fights it played remain. Null for a live clan.
+             */
+            dissolvedAt?: string | null;
         };
         /** @description A clan as a list shows it. */
         ClanSummary: components["schemas"]["Clan"] & {
@@ -1509,7 +1553,7 @@ export interface components {
              */
             teamSize: number;
             /**
-             * @description Null until the first settled fight in this format
+             * @description Null until the first settled fight in this format, and for good once the clan is dissolved or the profile belongs to a deleted account: both leave the rankings
              * @example 3
              */
             rank: number | null;
@@ -1728,6 +1772,56 @@ export interface operations {
                         error?: string;
                     };
                 };
+            };
+        };
+    };
+    post_api_account_deletion_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The authenticated user deletes their own account, and confirms it with their password. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: password
+                     * @description The password of the account
+                     */
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Account deleted. Its email, username, password and picture are erased, and nobody signs in with it again: the JWT it held stops working. Its comments and its places in clans are gone, and so are its player profiles that never competed; the profiles that did stay for the record under an anonymous battletag (`Anonyme#1234`), with their results and ratings. The articles it published stay, without an author name. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example true */
+                        deleted: boolean;
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The password does not match */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The account still holds something others depend on: a clan it leads, to dissolve first, or a tournament it organizes still open for registration, to start or cancel first */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3204,6 +3298,56 @@ export interface operations {
             };
         };
     };
+    post_api_clan_dissolution_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Clan ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description Only the clan leader dissolves the clan, and confirms it with their password. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: password
+                     * @description The password of the leader
+                     */
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Clan dissolved, as it stands now: `dissolvedAt` is set. Its members, invitations and requests to join are gone, and so are its teams that never competed; the teams that did stay for the record, and enter no new fight or tournament. It leaves the clan lists and the rankings, and its tag may be founded again. The fights it played keep it, marked dissolved. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Clan"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The caller does not lead the clan, or the password does not match */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The clan does not exist, or is already dissolved */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_clan_invitation_post: {
         parameters: {
             query?: never;
@@ -3546,7 +3690,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The profile takes part in fights: deleting it would leave that history hanging */
+            /** @description The profile is kept, and the message says why: it takes part in fights, as deleting it would leave that history hanging, or it leads a clan; or it belongs to a clan, is invited to one or asks to join one, until it leaves the clan, declines the invitation or withdraws the request */
             409: {
                 headers: {
                     [name: string]: unknown;

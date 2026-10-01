@@ -52,7 +52,10 @@ export function ChallengeTeamButton({
           toast.add({
             type: "error",
             title: t("challengeError"),
-            description: describeError(error, { 400: t("errors.cannotFight") }),
+            description: describeError(error, {
+              400: t("errors.cannotFight"),
+              teamFieldsDeletedAccount: t("errors.deletedAccount"),
+            }),
           })
         },
       }

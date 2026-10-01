@@ -7,6 +7,7 @@ namespace App\Competition\Profile\Clan\Domain\Entity;
 use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
 use App\Competition\Profile\Clan\Domain\Event\ClanCreatedEvent;
+use App\Competition\Profile\Clan\Domain\Event\ClanDissolvedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberInvitedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberJoinedEvent;
 use App\Competition\Profile\Clan\Domain\Event\ClanMemberLeftEvent;
@@ -18,6 +19,7 @@ use App\Shared\Exception\ConflictException;
 use App\Shared\Exception\NotFoundException;
 use App\Shared\ValueObject\ClanNameValueObject;
 use App\Shared\ValueObject\ClanTagValueObject;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 class Clan extends AggregateRoot
 {
@@ -34,6 +36,8 @@ class Clan extends AggregateRoot
     private \DateTimeImmutable $createdAt;
 
     private \DateTimeImmutable $updatedAt;
+
+    private ?\DateTimeImmutable $dissolvedAt = null;
 
     public function __construct(ClanId $id)
     {
@@ -68,6 +72,17 @@ class Clan extends AggregateRoot
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getDissolvedAt(): ?\DateTimeImmutable
+    {
+        return $this->dissolvedAt;
+    }
+
+    #[Ignore]
+    public function isDissolved(): bool
+    {
+        return null !== $this->dissolvedAt;
     }
 
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
@@ -105,6 +120,21 @@ class Clan extends AggregateRoot
         $clan->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $clan->recordDomainEvent(new ClanCreatedEvent($clanId));
+
+        return $clan;
+    }
+
+    public static function dissolve(Clan $clan): Clan
+    {
+        if ($clan->isDissolved()) {
+            throw new ConflictException('this clan is already dissolved');
+        }
+
+        $now = new \DateTimeImmutable('now');
+        $clan->dissolvedAt = $now;
+        $clan->setUpdatedAt($now);
+
+        $clan->recordDomainEvent(new ClanDissolvedEvent($clan->getId()));
 
         return $clan;
     }

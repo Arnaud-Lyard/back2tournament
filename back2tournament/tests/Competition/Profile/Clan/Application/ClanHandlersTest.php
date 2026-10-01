@@ -22,6 +22,7 @@ use App\Competition\Profile\Clan\Domain\Enum\ClanMemberStatus;
 use App\Competition\Profile\Clan\Domain\Enum\ClanRole;
 use App\Competition\Profile\Clan\Domain\Repository\ClanMemberRepositoryInterface;
 use App\Competition\Profile\Clan\Domain\Repository\ClanRepositoryInterface;
+use App\Competition\Profile\Player\Domain\Entity\Player;
 use App\Competition\Profile\Player\Domain\Repository\PlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamPlayerRepositoryInterface;
 use App\Competition\Profile\Team\Domain\Repository\TeamRepositoryInterface;
@@ -50,6 +51,8 @@ final class ClanHandlersTest extends TestCase
     private const MEMBER_USER = '44444444-4444-4444-8444-444444444444';
     private const MEMBER_PLAYER = '45454545-4545-4545-8545-454545454545';
     private const MEMBER_PLAYER_IN_OTHER_GAME = '46464646-4646-4646-8646-464646464646';
+    private const ANONYMIZED_USER = '47474747-4747-4747-8747-474747474747';
+    private const ANONYMIZED_PLAYER = '48484848-4848-4848-8848-484848484848';
     private const STRANGER_USER = '55555555-5555-4555-8555-555555555555';
     private const TEAM_ID = '66666666-6666-4666-8666-666666666666';
 
@@ -151,6 +154,33 @@ final class ClanHandlersTest extends TestCase
         $this->expectException(ValidationException::class);
 
         $this->inviteHandler($clan, $clanMemberRepository, self::LEADER_USER)(new InviteClanMemberCommand(self::CLAN_ID, self::MEMBER_PLAYER));
+    }
+
+    public function test_the_profile_of_a_deleted_account_is_not_invited(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, []);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('player not found');
+
+        $this->inviteHandler($clan, $clanMemberRepository, self::LEADER_USER)(new InviteClanMemberCommand(self::CLAN_ID, self::ANONYMIZED_PLAYER));
+    }
+
+    public function test_a_dissolved_clan_takes_no_new_member(): void
+    {
+        $clan = self::aClan(self::CLAN_ID, self::GAME_ID, self::LEADER_PLAYER);
+        Clan::dissolve($clan);
+
+        $clanMemberRepository = $this->repositoryMock(ClanMemberRepositoryInterface::class, []);
+        $clanMemberRepository->expects($this->never())->method('save');
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('clan not found');
+
+        $this->requestHandler($clan, $clanMemberRepository, self::MEMBER_USER)(new RequestClanMembershipCommand(self::CLAN_ID));
     }
 
     public function test_a_player_is_invited_once(): void
@@ -493,6 +523,7 @@ final class ClanHandlersTest extends TestCase
             self::aPlayer(self::LEADER_PLAYER, self::LEADER_USER, self::GAME_ID, 'Leader#0001'),
             self::aPlayer(self::MEMBER_PLAYER, self::MEMBER_USER, self::GAME_ID, 'Member#0002'),
             self::aPlayer(self::MEMBER_PLAYER_IN_OTHER_GAME, self::MEMBER_USER, self::OTHER_GAME_ID, 'Member#0003'),
+            Player::anonymize(self::aPlayer(self::ANONYMIZED_PLAYER, self::ANONYMIZED_USER, self::GAME_ID)),
         ]);
     }
 

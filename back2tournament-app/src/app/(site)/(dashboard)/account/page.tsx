@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { requireUser } from "@/features/auth/rbac/require"
+import { DeleteAccountForm } from "./delete-account-form"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("account")
@@ -58,6 +59,15 @@ export default async function AccountPage() {
                 <Badge variant="secondary">{tRoles(user.role)}</Badge>
               </dd>
             </dl>
+          </CardContent>
+        </Card>
+        <Card className="ring-destructive/30">
+          <CardHeader>
+            <CardTitle>{t("deletion.title")}</CardTitle>
+            <CardDescription>{t("deletion.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DeleteAccountForm />
           </CardContent>
         </Card>
       </div>

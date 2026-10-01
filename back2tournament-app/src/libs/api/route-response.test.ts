@@ -42,6 +42,73 @@ describe("relayApiResult", () => {
     })
   })
 
+  it.each([
+    [
+      "this player profile takes part in fights and cannot be deleted",
+      "playerHasFights",
+    ],
+    [
+      "this player profile leads a clan and cannot be deleted",
+      "playerLeadsClan",
+    ],
+    ["this player profile belongs to a clan: leave it first", "playerInClan"],
+    [
+      "this player profile is invited to a clan: decline the invitation first",
+      "playerInvitedToClan",
+    ],
+    [
+      "this player profile asks to join a clan: withdraw the request first",
+      "playerAsksToJoinClan",
+    ],
+  ])("tags the refused deletion of a profile: %s", async (message, code) => {
+    const response = await relayApiResult(
+      Promise.resolve({
+        error: { error: message },
+        response: new Response(null, { status: 409 }),
+      })
+    )
+
+    expect(await response.json()).toEqual({ message, code })
+  })
+
+  it.each([
+    [403, "the password does not match", "wrongPassword"],
+    [409, "you lead a clan: dissolve it first", "accountLeadsClan"],
+    [
+      409,
+      "you organize a tournament still open for registration: start or cancel it first",
+      "accountOrganizesTournament",
+    ],
+  ])(
+    "tags a refused deletion confirmed by password: %s %s",
+    async (status, message, code) => {
+      const response = await relayApiResult(
+        Promise.resolve({
+          error: { error: message },
+          response: new Response(null, { status }),
+        })
+      )
+
+      expect(response.status).toBe(status)
+      expect(await response.json()).toEqual({ message, code })
+    }
+  )
+
+  it("tags a team that fields the profile of a deleted account", async () => {
+    const message = "this team fields the profile of a deleted account"
+    const response = await relayApiResult(
+      Promise.resolve({
+        error: { error: message },
+        response: new Response(null, { status: 409 }),
+      })
+    )
+
+    expect(await response.json()).toEqual({
+      message,
+      code: "teamFieldsDeletedAccount",
+    })
+  })
+
   it("still reports an error whose body was empty", async () => {
     const response = await relayApiResult(
       Promise.resolve({

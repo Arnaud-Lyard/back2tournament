@@ -92,7 +92,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         (member) => member.player?.id?.value === playerId
       )
     : undefined
-  const canInvite = !!clan?.ok && !theirPlace
+  const anonymized = !!player.data.anonymizedAt
+  const canInvite = !!clan?.ok && !theirPlace && !anonymized
 
   return (
     <PageContainer className="max-w-3xl">
@@ -128,11 +129,18 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             </p>
           )}
           <Separator />
-          <ChallengeButton
-            gameId={gameId}
-            playerId={playerId}
-            battletag={battletag}
-          />
+          {anonymized ? (
+            <Alert>
+              <AlertTitle>{t("anonymized.title")}</AlertTitle>
+              <AlertDescription>{t("anonymized.description")}</AlertDescription>
+            </Alert>
+          ) : (
+            <ChallengeButton
+              gameId={gameId}
+              playerId={playerId}
+              battletag={battletag}
+            />
+          )}
           {canInvite && myClanId && (
             <InviteToClanButton
               clanId={myClanId}
@@ -159,7 +167,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         </CardContent>
       </Card>
 
-      <RatingCard rating={rating} gameId={gameId} subject="player" />
+      {!anonymized && (
+        <RatingCard rating={rating} gameId={gameId} subject="player" />
+      )}
 
       <ResultHistory history={history} subject="player" />
     </PageContainer>

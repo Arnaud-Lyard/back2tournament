@@ -49,7 +49,7 @@ final class AdmitClanMemberHandler
         $clanId = new ClanId($admitClanMemberCommand->getClanId());
         $playerId = new PlayerId($admitClanMemberCommand->getPlayerId());
 
-        $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue()]);
+        $clan = $this->clanRepository->findOneBy(['id' => $clanId->getValue(), 'dissolvedAt' => null]);
         if (!$clan instanceof Clan) {
             throw new NotFoundException('clan not found');
         }

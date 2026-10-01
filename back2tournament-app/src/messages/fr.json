@@ -128,7 +128,11 @@
         "title": "Impossible de charger ce profil",
         "description": "Le serveur n'a pas pu répondre. Réessayez dans quelques instants."
       },
-      "asksToJoin": "{battletag} demande à rejoindre {clan}."
+      "asksToJoin": "{battletag} demande à rejoindre {clan}.",
+      "anonymized": {
+        "title": "Compte supprimé",
+        "description": "Ce profil appartient à un compte supprimé. Ses résultats restent visibles, mais il ne peut plus être défié ni invité dans un clan."
+      }
     },
     "challenge": {
       "challenge": "Défier {battletag}",
@@ -174,7 +178,7 @@
   },
   "clans": {
     "title": "Clans",
-    "description": "Les clans de ce jeu : des joueurs réunis sous un chef, qui alignent des équipes en 2v2, 3v3, 5v5…",
+    "description": "Les clans de ce jeu : des joueurs réunis sous un chef, qui alignent des équipes en 2v2, 3v3, 5v5… Ouvrez-en un pour demander à le rejoindre.",
     "empty": {
       "title": "Aucun clan",
       "description": "Fondez le premier clan de ce jeu et invitez-y des joueurs.",
@@ -229,6 +233,12 @@
       "left": "Vous avez quitté le clan",
       "requestSent": "Demande envoyée au chef du clan",
       "requestWithdrawn": "Demande retirée",
+      "signInPrompt": "Connectez-vous pour demander à rejoindre ce clan.",
+      "signIn": "Se connecter",
+      "noProfile": "Créez votre profil dans ce jeu pour demander à rejoindre ce clan.",
+      "createProfile": "Créer mon profil",
+      "memberElsewhere": "Vous jouez pour {clan} dans ce jeu : un joueur n'appartient qu'à un clan par jeu, quittez-le pour demander à rejoindre celui-ci.",
+      "openMyClan": "Voir mon clan",
       "error": "Action impossible",
       "errors": {
         "elsewhere": "Quittez d'abord votre clan actuel dans ce jeu.",
@@ -296,8 +306,27 @@
       "errors": {
         "competed": "Cette équipe a déjà joué : elle est conservée pour l'historique.",
         "notLeader": "Seul le chef du clan compose les équipes.",
-        "cannotFight": "Ces deux équipes ne peuvent pas s'affronter : même format, même jeu, et aucun joueur en commun."
+        "cannotFight": "Ces deux équipes ne peuvent pas s'affronter : même format, même jeu, et aucun joueur en commun.",
+        "deletedAccount": "Une des deux équipes aligne le profil d'un compte supprimé : le chef de son clan doit composer une nouvelle équipe."
       }
+    },
+    "dissolution": {
+      "title": "Dissoudre le clan",
+      "description": "Le clan quitte les listes et les classements, ses membres sont libérés, ses invitations, ses demandes et ses équipes qui n'ont jamais joué disparaissent, et son tag redevient libre. Les matchs déjà joués le gardent, marqué dissous. Cette action est définitive.",
+      "trigger": "Dissoudre le clan",
+      "confirm": "Dissoudre définitivement",
+      "done": "{name} est dissous",
+      "error": "Impossible de dissoudre le clan",
+      "errors": {
+        "wrongPassword": "Le mot de passe ne correspond pas.",
+        "notLeader": "Seul le chef du clan peut le dissoudre.",
+        "gone": "Ce clan n'existe plus ou est déjà dissous."
+      }
+    },
+    "dissolved": {
+      "title": "Clan dissous",
+      "description": "Ce clan n'accueille plus de membres et ne joue plus de matchs. Ses résultats restent visibles ci-dessous.",
+      "since": "Dissous le {date}"
     }
   },
   "challenges": {
@@ -446,7 +475,11 @@
       "errors": {
         "notYours": "Ce profil appartient à un autre compte.",
         "gone": "Ce profil n'existe plus.",
-        "fighting": "Ce profil participe à des combats : il ne peut plus être supprimé."
+        "fighting": "Ce profil participe à des combats : il ne peut plus être supprimé.",
+        "leadsClan": "Ce profil est le chef d'un clan : il ne peut pas être supprimé.",
+        "inClan": "Ce profil est membre d'un clan : quittez-le avant de supprimer le profil.",
+        "invitedToClan": "Ce profil est invité dans un clan : refusez l'invitation avant de supprimer le profil.",
+        "asksToJoinClan": "Ce profil a demandé à rejoindre un clan : retirez la demande avant de supprimer le profil."
       }
     },
     "back": "Retour à mes profils"
@@ -462,7 +495,23 @@
       "title": "Identité",
       "username": "Nom d'utilisateur",
       "role": "Rôle"
+    },
+    "deletion": {
+      "title": "Supprimer mon compte",
+      "description": "Votre adresse e-mail, votre nom d'utilisateur, votre mot de passe et votre photo sont effacés, et vous ne pourrez plus vous connecter. Vos commentaires et vos places dans les clans disparaissent. Vos profils joueurs qui ont déjà joué restent dans les résultats sous un nom anonyme, les autres sont supprimés. Si vous dirigez un clan, dissolvez-le d'abord. Cette action est définitive.",
+      "trigger": "Supprimer mon compte",
+      "confirm": "Supprimer définitivement",
+      "done": "Votre compte a été supprimé",
+      "error": "Impossible de supprimer votre compte",
+      "errors": {
+        "wrongPassword": "Le mot de passe ne correspond pas.",
+        "leadsClan": "Vous dirigez un clan : dissolvez-le d'abord depuis sa page.",
+        "organizesTournament": "Vous organisez un tournoi encore ouvert aux inscriptions : lancez-le ou annulez-le d'abord."
+      }
     }
+  },
+  "passwordConfirmation": {
+    "label": "Confirmez avec votre mot de passe"
   },
   "images": {
     "alt": "Image de {name}",
@@ -893,7 +942,8 @@
       "errors": {
         "notYours": "Vous n'inscrivez que votre profil, ou une équipe dont vous êtes le capitaine.",
         "closed": "Les inscriptions sont closes, le tournoi est complet, ou vous êtes déjà inscrit.",
-        "started": "Le tournoi a déjà commencé."
+        "started": "Le tournoi a déjà commencé.",
+        "deletedAccount": "Cette équipe aligne le profil d'un compte supprimé : le chef du clan doit composer une nouvelle équipe."
       }
     },
     "organizer": {
@@ -945,7 +995,8 @@
     "unknown": "adversaire inconnu",
     "tournament": "Tournoi",
     "latest": "Les {shown} derniers sur {total}",
-    "loadError": "Impossible de charger les résultats pour le moment."
+    "loadError": "Impossible de charger les résultats pour le moment.",
+    "dissolved": "dissous"
   },
   "rankings": {
     "title": "Classement",
