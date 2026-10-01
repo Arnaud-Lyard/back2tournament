@@ -11,4 +11,6 @@ interface CurrentUserProviderInterface
     public function getUser(): User;
 
     public function isGranted(string $role): bool;
+
+    public function confirmPassword(string $password): void;
 }

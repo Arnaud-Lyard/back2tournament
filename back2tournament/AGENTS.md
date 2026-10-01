@@ -342,6 +342,10 @@ Names line up across the four files: `PostFightResultsConfirmationController` â†
 
 - Entities keep private properties, so `json_encode($entity)` yields `{}`. Always go
   through `SerializerInterface` / `NormalizerInterface`.
+- Each command runs in one database transaction: the bus carries the
+  `doctrine_transaction` middleware, so a handler and the subscribers its events reach
+  synchronously commit together or not at all. Refuse by throwing, never by returning
+  halfway: the exception rolls the whole command back.
 - Value objects serialize as `{"value": "<uuid>"}`. Document that shape in the OpenAPI
   response schema.
 - The handler builds the response it returns: normalize the entity, or, when the
