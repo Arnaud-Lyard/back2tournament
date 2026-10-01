@@ -71,6 +71,44 @@ describe("relayApiResult", () => {
     expect(await response.json()).toEqual({ message, code })
   })
 
+  it.each([
+    [403, "the password does not match", "wrongPassword"],
+    [409, "you lead a clan: dissolve it first", "accountLeadsClan"],
+    [
+      409,
+      "you organize a tournament still open for registration: start or cancel it first",
+      "accountOrganizesTournament",
+    ],
+  ])(
+    "tags a refused deletion confirmed by password: %s %s",
+    async (status, message, code) => {
+      const response = await relayApiResult(
+        Promise.resolve({
+          error: { error: message },
+          response: new Response(null, { status }),
+        })
+      )
+
+      expect(response.status).toBe(status)
+      expect(await response.json()).toEqual({ message, code })
+    }
+  )
+
+  it("tags a team that fields the profile of a deleted account", async () => {
+    const message = "this team fields the profile of a deleted account"
+    const response = await relayApiResult(
+      Promise.resolve({
+        error: { error: message },
+        response: new Response(null, { status: 409 }),
+      })
+    )
+
+    expect(await response.json()).toEqual({
+      message,
+      code: "teamFieldsDeletedAccount",
+    })
+  })
+
   it("still reports an error whose body was empty", async () => {
     const response = await relayApiResult(
       Promise.resolve({

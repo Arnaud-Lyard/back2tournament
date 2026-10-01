@@ -9,7 +9,7 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+import { getFormatter, getTranslations } from "next-intl/server"
 import { PageContainer } from "@/components/layout/page-container"
 import { PageHeader } from "@/components/layout/page-header"
 import { JoinRequestActions } from "@/components/join-request-actions"
@@ -51,6 +51,7 @@ import { cn } from "@/libs/utils"
 import { ChallengeTeamButton } from "./challenge-team-button"
 import { CreateTeamForm } from "./create-team-form"
 import { DisbandTeamButton } from "./disband-team-button"
+import { DissolveClanForm } from "./dissolve-clan-form"
 import { MembershipActions } from "./membership-actions"
 import { RemoveMemberButton } from "./remove-member-button"
 import { RequestToJoinButton } from "./request-to-join-button"
@@ -75,15 +76,17 @@ export default async function ClanPage({ params }: ClanPageProps) {
   const clanId = readUuidSegment(rawClanId)
   if (!gameId || !clanId) notFound()
 
-  const [t, clan, game, user, myClans, history, rating] = await Promise.all([
-    getTranslations("clans"),
-    loadClan(clanId),
-    loadGame(gameId),
-    getCurrentUser(),
-    loadMyClans(),
-    loadClanHistory(clanId),
-    loadClanRating(clanId),
-  ])
+  const [t, format, clan, game, user, myClans, history, rating] =
+    await Promise.all([
+      getTranslations("clans"),
+      getFormatter(),
+      loadClan(clanId),
+      loadGame(gameId),
+      getCurrentUser(),
+      loadMyClans(),
+      loadClanHistory(clanId),
+      loadClanRating(clanId),
+    ])
 
   if (!clan.ok) {
     if (clan.status === 404) notFound()
@@ -99,6 +102,48 @@ export default async function ClanPage({ params }: ClanPageProps) {
   }
 
   if (clan.data.game?.value !== gameId) notFound()
+
+  const base = `/games/${encodeURIComponent(gameId)}`
+  const back = (
+    <Link
+      href={`${base}/clans`}
+      className={cn(
+        buttonVariants({ variant: "ghost", size: "sm" }),
+        "self-start"
+      )}
+    >
+      <ArrowLeftIcon data-icon="inline-start" />
+      {t("back")}
+    </Link>
+  )
+
+  if (clan.data.dissolvedAt) {
+    return (
+      <PageContainer>
+        {back}
+        <PageHeader
+          title={
+            <span className="inline-flex items-center gap-3">
+              <Badge variant="outline" className="font-mono text-base">
+                {clan.data.tag}
+              </Badge>
+              {clan.data.name}
+            </span>
+          }
+          description={t("dissolved.since", {
+            date: format.dateTime(new Date(clan.data.dissolvedAt), {
+              dateStyle: "long",
+            }),
+          })}
+        />
+        <Alert>
+          <AlertTitle>{t("dissolved.title")}</AlertTitle>
+          <AlertDescription>{t("dissolved.description")}</AlertDescription>
+        </Alert>
+        <ResultHistory history={history} subject="clan" />
+      </PageContainer>
+    )
+  }
 
   const members = clan.data.members ?? []
   const teams = clan.data.teams ?? []
@@ -128,20 +173,10 @@ export default async function ClanPage({ params }: ClanPageProps) {
       : []
 
   const formats = teamFormats(game.ok ? game.data.teamSizes : [])
-  const base = `/games/${encodeURIComponent(gameId)}`
 
   return (
     <PageContainer>
-      <Link
-        href={`${base}/clans`}
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "sm" }),
-          "self-start"
-        )}
-      >
-        <ArrowLeftIcon data-icon="inline-start" />
-        {t("back")}
-      </Link>
+      {back}
 
       <PageHeader
         title={
@@ -301,6 +336,24 @@ export default async function ClanPage({ params }: ClanPageProps) {
               </ul>
             </CardContent>
           </Card>
+
+          {isLeader && (
+            <Card className="ring-destructive/30">
+              <CardHeader>
+                <CardTitle>{t("dissolution.title")}</CardTitle>
+                <CardDescription>
+                  {t("dissolution.description")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DissolveClanForm
+                  clanId={clanId}
+                  gameId={gameId}
+                  clanName={clan.data.name ?? ""}
+                />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="flex flex-col gap-6">

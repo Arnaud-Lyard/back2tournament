@@ -10,6 +10,12 @@ const KNOWN_BACKEND_ERRORS = {
     "playerInvitedToClan",
   "this player profile asks to join a clan: withdraw the request first":
     "playerAsksToJoinClan",
+  "the password does not match": "wrongPassword",
+  "you lead a clan: dissolve it first": "accountLeadsClan",
+  "you organize a tournament still open for registration: start or cancel it first":
+    "accountOrganizesTournament",
+  "this team fields the profile of a deleted account":
+    "teamFieldsDeletedAccount",
 } as const
 
 export type ApiErrorCode =

@@ -128,7 +128,11 @@
         "title": "This profile could not be loaded",
         "description": "The server did not answer. Try again in a moment."
       },
-      "asksToJoin": "{battletag} asks to join {clan}."
+      "asksToJoin": "{battletag} asks to join {clan}.",
+      "anonymized": {
+        "title": "Deleted account",
+        "description": "This profile belongs to a deleted account. Its results stay visible, but it can no longer be challenged or invited to a clan."
+      }
     },
     "challenge": {
       "challenge": "Challenge {battletag}",
@@ -302,8 +306,27 @@
       "errors": {
         "competed": "This team has already played: it is kept for the record.",
         "notLeader": "Only the clan leader composes teams.",
-        "cannotFight": "These two teams cannot fight: same format, same game, and no player in common."
+        "cannotFight": "These two teams cannot fight: same format, same game, and no player in common.",
+        "deletedAccount": "One of the two teams fields the profile of a deleted account: its clan leader has to compose a new team."
       }
+    },
+    "dissolution": {
+      "title": "Dissolve the clan",
+      "description": "The clan leaves the lists and the rankings, its members are freed, its invitations, requests and teams that never played are removed, and its tag becomes free again. The fights already played keep it, marked dissolved. This cannot be undone.",
+      "trigger": "Dissolve the clan",
+      "confirm": "Dissolve for good",
+      "done": "{name} is dissolved",
+      "error": "The clan could not be dissolved",
+      "errors": {
+        "wrongPassword": "The password does not match.",
+        "notLeader": "Only the clan leader can dissolve it.",
+        "gone": "This clan no longer exists or is already dissolved."
+      }
+    },
+    "dissolved": {
+      "title": "Dissolved clan",
+      "description": "This clan takes no members and plays no fights anymore. Its results stay visible below.",
+      "since": "Dissolved on {date}"
     }
   },
   "challenges": {
@@ -472,7 +495,23 @@
       "title": "Identity",
       "username": "Username",
       "role": "Role"
+    },
+    "deletion": {
+      "title": "Delete my account",
+      "description": "Your email address, username, password and picture are erased, and you can no longer sign in. Your comments and your places in clans are removed. Your player profiles that already played stay in the results under an anonymous name; the others are deleted. If you lead a clan, dissolve it first. This cannot be undone.",
+      "trigger": "Delete my account",
+      "confirm": "Delete for good",
+      "done": "Your account was deleted",
+      "error": "Your account could not be deleted",
+      "errors": {
+        "wrongPassword": "The password does not match.",
+        "leadsClan": "You lead a clan: dissolve it first from its page.",
+        "organizesTournament": "You organize a tournament still open for registration: start or cancel it first."
+      }
     }
+  },
+  "passwordConfirmation": {
+    "label": "Confirm with your password"
   },
   "images": {
     "alt": "Image of {name}",
@@ -903,7 +942,8 @@
       "errors": {
         "notYours": "You register only your own profile, or a team you captain.",
         "closed": "Registrations are closed, the tournament is full, or you are already registered.",
-        "started": "The tournament has already started."
+        "started": "The tournament has already started.",
+        "deletedAccount": "This team fields the profile of a deleted account: the clan leader has to compose a new team."
       }
     },
     "organizer": {
@@ -955,7 +995,8 @@
     "unknown": "unknown opponent",
     "tournament": "Tournament",
     "latest": "The latest {shown} of {total}",
-    "loadError": "The results cannot be loaded right now."
+    "loadError": "The results cannot be loaded right now.",
+    "dissolved": "dissolved"
   },
   "rankings": {
     "title": "Rankings",
