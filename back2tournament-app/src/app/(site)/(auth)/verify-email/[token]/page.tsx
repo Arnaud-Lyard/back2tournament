@@ -11,7 +11,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { createApiClient } from "@/libs/api/client"
+import { getVerifyEmail } from "@/libs/api/generated/authentication"
+import { succeeded } from "@/libs/api/symfony-fetch"
 
 interface VerifyEmailPageProps {
   params: Promise<{ token: string }>
@@ -23,22 +24,20 @@ export default async function VerifyEmailPage({
   const { token } = await params
   const t = await getTranslations("auth")
 
-  const client = createApiClient()
-  const { error } = await client.GET("/api/verify-email/{token}", {
-    params: { path: { token } },
-  })
+  const { status } = await getVerifyEmail(token)
+  const verified = succeeded(status)
 
   return (
     <Empty className="max-w-sm border">
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          {error ? <MailXIcon /> : <MailCheckIcon />}
+          {verified ? <MailCheckIcon /> : <MailXIcon />}
         </EmptyMedia>
         <EmptyTitle>
           <h1>{t("verifyEmailTitle")}</h1>
         </EmptyTitle>
         <EmptyDescription>
-          {error ? t("verifyEmailError") : t("verifyEmailSuccess")}
+          {verified ? t("verifyEmailSuccess") : t("verifyEmailError")}
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>

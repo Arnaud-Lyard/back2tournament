@@ -6,8 +6,8 @@ import {
 import { decodeSymfonyJwt, getJwtExpirySeconds } from "@/features/auth/lib/jwt"
 import { authUserFromJwt } from "@/features/auth/lib/to-auth-user"
 import { loginSchema } from "@/features/auth/schemas/login.schema"
-import { createApiClient } from "@/libs/api/client"
 import { toApiError } from "@/libs/api/errors"
+import { postLogin } from "@/libs/api/generated/authentication"
 import { invalidInput, parseRequestBody } from "@/libs/api/route-response"
 
 export async function POST(request: Request) {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
   let result
   try {
-    result = await createApiClient().POST("/api/login", { body: parsed.data })
+    result = await postLogin(parsed.data)
   } catch {
     return NextResponse.json(
       { message: "Backend unavailable" },
@@ -24,15 +24,15 @@ export async function POST(request: Request) {
     )
   }
 
-  if (!result.response.ok) {
-    const apiError = toApiError(result.response.status, result.error)
+  if (result.status !== 200) {
+    const apiError = toApiError(result.status, result.data)
     return NextResponse.json(
       { message: apiError.message, code: apiError.code },
       { status: apiError.status }
     )
   }
 
-  const token = result.data?.token
+  const token = result.data.token
   const payload = token ? decodeSymfonyJwt(token) : null
   if (!token || !payload?.username) {
     return NextResponse.json(

@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { postTournamentParticipant } from "@/libs/api/generated/tournament"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import {
   invalidInput,
@@ -18,11 +19,7 @@ export async function POST(request: Request, { params }: TournamentContext) {
   const parsed = await parseRequestBody(request, registerParticipantSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/user/tournaments/{id}/participants", {
-      params: { path: { id } },
-      body: parsed.data,
-    })
+    postTournamentParticipant(id, parsed.data, await withSession())
   )
 }

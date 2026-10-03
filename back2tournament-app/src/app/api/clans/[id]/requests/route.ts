@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { postClanRequest } from "@/libs/api/generated/clan"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import { relayApiResult } from "@/libs/api/route-response"
 
@@ -10,8 +11,5 @@ export async function POST(_request: Request, { params }: ClanContext) {
   const id = await readIdParam(params, "id")
   if (!id) return unknownResource("Unknown clan")
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.POST("/api/user/clans/{id}/requests", { params: { path: { id } } })
-  )
+  return relayApiResult(postClanRequest(id, await withSession()))
 }

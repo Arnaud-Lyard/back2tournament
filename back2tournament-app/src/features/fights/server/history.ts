@@ -1,23 +1,18 @@
 import "server-only"
 
-import { getServerApiClient } from "@/libs/api/client"
+import { getResultsClan, getResultsPlayer } from "@/libs/api/generated/fight"
 import { loadApiResult } from "@/libs/api/load"
+import { withSession } from "@/libs/api/session"
 import { HISTORY_SIZE } from "../types"
 
 export async function loadPlayerHistory(playerId: string) {
-  const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/results/players/{id}", {
-      params: { path: { id: playerId }, query: { limit: HISTORY_SIZE } },
-    })
+    getResultsPlayer(playerId, { limit: HISTORY_SIZE }, await withSession())
   )
 }
 
 export async function loadClanHistory(clanId: string) {
-  const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/results/clans/{id}", {
-      params: { path: { id: clanId }, query: { limit: HISTORY_SIZE } },
-    })
+    getResultsClan(clanId, { limit: HISTORY_SIZE }, await withSession())
   )
 }

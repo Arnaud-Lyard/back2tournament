@@ -1,6 +1,6 @@
 import { cookies } from "next/headers"
-import { createApiClient } from "@/libs/api/client"
-import type { paths } from "@/libs/api/schema"
+import { postRegister } from "@/libs/api/generated/authentication"
+import { PostRegisterBodyLocale } from "@/libs/api/generated/endpoints.schemas"
 import {
   invalidInput,
   parseRequestBody,
@@ -9,14 +9,9 @@ import {
 import { registerSchema } from "@/features/auth/schemas/register.schema"
 import { LOCALE_COOKIE_NAME, resolveLocale } from "@/features/i18n/routing"
 
-type RegisterBody = NonNullable<
-  paths["/api/register"]["post"]["requestBody"]
->["content"]["application/json"]
-type MailLocale = NonNullable<RegisterBody["locale"]>
+const MAIL_LOCALES: readonly string[] = Object.values(PostRegisterBodyLocale)
 
-const MAIL_LOCALES: readonly string[] = ["fr", "en"] satisfies MailLocale[]
-
-function isMailLocale(locale: string): locale is MailLocale {
+function isMailLocale(locale: string): locale is PostRegisterBodyLocale {
   return MAIL_LOCALES.includes(locale)
 }
 
@@ -27,11 +22,9 @@ export async function POST(request: Request) {
   const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value)
 
   return relayApiResult(
-    createApiClient().POST("/api/register", {
-      body: {
-        ...parsed.data,
-        locale: isMailLocale(locale) ? locale : "fr",
-      },
+    postRegister({
+      ...parsed.data,
+      locale: isMailLocale(locale) ? locale : PostRegisterBodyLocale.fr,
     })
   )
 }

@@ -1,20 +1,21 @@
 import "server-only"
 
-interface ApiCallResult<T> {
-  data?: T
-  response: Response
-}
+import {
+  succeeded,
+  type SuccessData,
+  type SymfonyResponse,
+} from "./symfony-fetch"
 
 export type Loaded<T> = { ok: true; data: T } | { ok: false; status: number }
 
-export async function loadApiResult<T>(
-  call: Promise<ApiCallResult<T>>
-): Promise<Loaded<T>> {
+export async function loadApiResult<TResponse extends SymfonyResponse>(
+  call: Promise<TResponse>
+): Promise<Loaded<SuccessData<TResponse>>> {
   try {
-    const { data, response } = await call
-    return response.ok && data !== undefined
-      ? { ok: true, data }
-      : { ok: false, status: response.status }
+    const { data, status } = await call
+    return succeeded(status) && data !== undefined
+      ? { ok: true, data: data as SuccessData<TResponse> }
+      : { ok: false, status }
   } catch {
     return { ok: false, status: 502 }
   }

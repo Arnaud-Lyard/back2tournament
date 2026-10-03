@@ -1,16 +1,14 @@
-import type { components, paths } from "@/libs/api/schema"
+import type {
+  Clan,
+  ClanDetail,
+  ClanMember,
+  ClanSummary,
+  GetClanMine200Item,
+  Team,
+} from "@/libs/api/generated/endpoints.schemas"
 
-export type Clan = components["schemas"]["Clan"]
+export type { Clan, ClanDetail, ClanMember, ClanSummary, Team }
 
-export type ClanSummary = components["schemas"]["ClanSummary"]
-
-export type ClanDetail = components["schemas"]["ClanDetail"]
-
-export type ClanMember = components["schemas"]["ClanMember"]
-
-export type MyClan =
-  paths["/api/user/me/clans"]["get"]["responses"][200]["content"]["application/json"][number]
-
-export type Team = components["schemas"]["Team"]
+export type MyClan = GetClanMine200Item
 
 export const CLANS_PER_PAGE = 12

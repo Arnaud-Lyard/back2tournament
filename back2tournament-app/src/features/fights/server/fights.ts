@@ -1,7 +1,12 @@
 import "server-only"
 
-import { getServerApiClient } from "@/libs/api/client"
+import {
+  getFight,
+  getFightList,
+  getResultsPendingUserFights,
+} from "@/libs/api/generated/fight"
 import { loadApiResult } from "@/libs/api/load"
+import { withSession } from "@/libs/api/session"
 import {
   ADMIN_FIGHTS_PER_PAGE,
   FIGHTS_PER_PAGE,
@@ -12,11 +17,8 @@ export async function loadChallenges({
   page = 1,
   limit = FIGHTS_PER_PAGE,
 }: { page?: number; limit?: number } = {}) {
-  const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/user/results/fights", {
-      params: { query: { page, limit } },
-    })
+    getResultsPendingUserFights({ page, limit }, await withSession())
   )
 }
 
@@ -29,24 +31,14 @@ export async function loadFights({
   search?: string
   page?: number
 }) {
-  const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/admin/fights/", {
-      params: {
-        query: {
-          status,
-          page,
-          limit: ADMIN_FIGHTS_PER_PAGE,
-          ...(search ? { q: search } : {}),
-        },
-      },
-    })
+    getFightList(
+      { status, page, limit: ADMIN_FIGHTS_PER_PAGE, q: search || undefined },
+      await withSession()
+    )
   )
 }
 
 export async function loadFight(fightId: string) {
-  const client = await getServerApiClient()
-  return loadApiResult(
-    client.GET("/api/user/fights/{id}", { params: { path: { id: fightId } } })
-  )
+  return loadApiResult(getFight(fightId, await withSession()))
 }

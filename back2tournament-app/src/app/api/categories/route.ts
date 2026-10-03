@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { postCategory } from "@/libs/api/generated/category"
+import { withSession } from "@/libs/api/session"
 import {
   invalidInput,
   parseRequestBody,
@@ -10,8 +11,5 @@ export async function POST(request: Request) {
   const parsed = await parseRequestBody(request, createCategorySchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.POST("/api/admin/categories/", { body: parsed.data })
-  )
+  return relayApiResult(postCategory(parsed.data, await withSession()))
 }

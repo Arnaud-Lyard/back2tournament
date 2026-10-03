@@ -1,12 +1,17 @@
+// @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest"
+import {
+  jsonBody,
+  SESSION_TOKEN,
+  SYMFONY,
+  symfonyAnswers,
+} from "@tests/symfony-api"
 import { PATCH } from "./route"
 
 vi.mock("server-only", () => ({}))
 
-const backendPatch = vi.fn()
-
-vi.mock("@/libs/api/client", () => ({
-  getServerApiClient: async () => ({ PATCH: backendPatch }),
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => ({ value: SESSION_TOKEN }) }),
 }))
 
 const FIGHT_ID = "11111111-1111-4111-8111-111111111111"
@@ -25,55 +30,61 @@ function patchRequest(body: unknown) {
 }
 
 afterEach(() => {
-  backendPatch.mockReset()
+  vi.unstubAllGlobals()
 })
 
 describe("PATCH /api/fights/[id]/status", () => {
   it("sends the scores an administrator imposes, keyed by side", async () => {
-    backendPatch.mockResolvedValue({ data: {}, response: new Response(null) })
+    const requests = symfonyAnswers(200)
 
     await PATCH(
       patchRequest({ status: "finished", scores: { [ONE]: 3, [TWO]: 1 } }),
       context(FIGHT_ID)
     )
 
-    const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/admin/fights/{id}/status")
-    expect(options.params.path).toEqual({ id: FIGHT_ID })
-    expect(options.body).toEqual({
+    expect(requests[0]).toMatchObject({
+      url: `${SYMFONY}/api/admin/fights/${FIGHT_ID}/status`,
+      method: "PATCH",
+      authorization: `Bearer ${SESSION_TOKEN}`,
+    })
+    expect(jsonBody(requests[0])).toEqual({
       status: "finished",
       scores: { [ONE]: 3, [TWO]: 1 },
     })
   })
 
   it("sets a declaration aside with the status alone", async () => {
-    backendPatch.mockResolvedValue({ data: {}, response: new Response(null) })
+    const requests = symfonyAnswers(200)
 
     await PATCH(
       patchRequest({ status: "pending", scores: { [ONE]: 3 } }),
       context(FIGHT_ID)
     )
 
-    expect(backendPatch.mock.calls[0][1].body).toEqual({ status: "pending" })
+    expect(jsonBody(requests[0])).toEqual({ status: "pending" })
   })
 
   it("refuses a negative score, without asking the backend", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await PATCH(
       patchRequest({ status: "finished", scores: { [ONE]: -1, [TWO]: 2 } }),
       context(FIGHT_ID)
     )
 
     expect(response.status).toBe(400)
-    expect(backendPatch).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 
   it("refuses a status the backend does not know", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await PATCH(
       patchRequest({ status: "reporting" }),
       context(FIGHT_ID)
     )
 
     expect(response.status).toBe(400)
-    expect(backendPatch).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 })

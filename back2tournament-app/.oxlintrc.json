@@ -19,7 +19,7 @@
     "playwright-report/**",
     "test-results/**",
     "*.min.js",
-    "src/libs/api/schema.d.ts"
+    "src/libs/api/generated/**"
   ],
   "rules": {
     "constructor-super": "error",

@@ -1,12 +1,12 @@
+// @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { SESSION_TOKEN, SYMFONY, symfonyAnswers } from "@tests/symfony-api"
 import { POST } from "./route"
 
 vi.mock("server-only", () => ({}))
 
-const backendPost = vi.fn()
-
-vi.mock("@/libs/api/client", () => ({
-  getServerApiClient: async () => ({ POST: backendPost }),
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => ({ value: SESSION_TOKEN }) }),
 }))
 
 const CLAN_ID = "11111111-1111-4111-8111-111111111111"
@@ -16,15 +16,12 @@ function context(id: string) {
 }
 
 afterEach(() => {
-  backendPost.mockReset()
+  vi.unstubAllGlobals()
 })
 
 describe("POST /api/clans/[id]/requests", () => {
   it("asks to join the clan named in the path", async () => {
-    backendPost.mockResolvedValue({
-      data: { status: "requested" },
-      response: new Response(null),
-    })
+    const requests = symfonyAnswers(200, { status: "requested" })
 
     const response = await POST(
       new Request(`http://localhost/api/clans/${CLAN_ID}/requests`, {
@@ -34,13 +31,18 @@ describe("POST /api/clans/[id]/requests", () => {
     )
 
     expect(response.status).toBe(200)
-    expect(backendPost).toHaveBeenCalledOnce()
-    const [path, options] = backendPost.mock.calls[0]
-    expect(path).toBe("/api/user/clans/{id}/requests")
-    expect(options.params.path).toEqual({ id: CLAN_ID })
+    expect(await response.json()).toEqual({ status: "requested" })
+    expect(requests).toHaveLength(1)
+    expect(requests[0]).toMatchObject({
+      url: `${SYMFONY}/api/user/clans/${CLAN_ID}/requests`,
+      method: "POST",
+      authorization: `Bearer ${SESSION_TOKEN}`,
+    })
   })
 
   it("refuses an id that is not a backend identifier, without asking the backend", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await POST(
       new Request("http://localhost/api/clans/nope/requests", {
         method: "POST",
@@ -49,6 +51,6 @@ describe("POST /api/clans/[id]/requests", () => {
     )
 
     expect(response.status).toBe(404)
-    expect(backendPost).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 })

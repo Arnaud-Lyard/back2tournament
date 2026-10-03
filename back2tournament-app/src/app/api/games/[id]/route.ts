@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { patchGame } from "@/libs/api/generated/game"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import {
   invalidInput,
@@ -18,11 +19,5 @@ export async function PATCH(request: Request, { params }: GameContext) {
   const parsed = await parseRequestBody(request, updateGameSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.PATCH("/api/admin/games/{id}", {
-      params: { path: { id } },
-      body: parsed.data,
-    })
-  )
+  return relayApiResult(patchGame(id, parsed.data, await withSession()))
 }

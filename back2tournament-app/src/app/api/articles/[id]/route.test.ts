@@ -1,13 +1,18 @@
+// @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest"
+import {
+  jsonBody,
+  SESSION_TOKEN,
+  SYMFONY,
+  symfonyAnswers,
+} from "@tests/symfony-api"
 import { PATCH } from "./route"
 import { PATCH as PATCH_STATUS } from "./status/route"
 
 vi.mock("server-only", () => ({}))
 
-const backendPatch = vi.fn()
-
-vi.mock("@/libs/api/client", () => ({
-  getServerApiClient: async () => ({ PATCH: backendPatch }),
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => ({ value: SESSION_TOKEN }) }),
 }))
 
 const ARTICLE_ID = "11111111-1111-4111-8111-111111111111"
@@ -24,12 +29,12 @@ function patchRequest(path: string, body: unknown) {
 }
 
 afterEach(() => {
-  backendPatch.mockReset()
+  vi.unstubAllGlobals()
 })
 
 describe("PATCH /api/articles/[id]", () => {
   it("sends the article id in the path and only the fields given, trimmed", async () => {
-    backendPatch.mockResolvedValue({ data: {}, response: new Response(null) })
+    const requests = symfonyAnswers(200)
 
     await PATCH(
       patchRequest(`/api/articles/${ARTICLE_ID}`, {
@@ -39,37 +44,43 @@ describe("PATCH /api/articles/[id]", () => {
       context(ARTICLE_ID)
     )
 
-    expect(backendPatch).toHaveBeenCalledOnce()
-    const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/editor/articles/{id}")
-    expect(options.params.path).toEqual({ id: ARTICLE_ID })
-    expect(options.body).toEqual({ title: "New title" })
+    expect(requests).toHaveLength(1)
+    expect(requests[0]).toMatchObject({
+      url: `${SYMFONY}/api/editor/articles/${ARTICLE_ID}`,
+      method: "PATCH",
+      authorization: `Bearer ${SESSION_TOKEN}`,
+    })
+    expect(jsonBody(requests[0])).toEqual({ title: "New title" })
   })
 
   it("refuses a blank title, without asking the backend", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await PATCH(
       patchRequest(`/api/articles/${ARTICLE_ID}`, { title: "   " }),
       context(ARTICLE_ID)
     )
 
     expect(response.status).toBe(400)
-    expect(backendPatch).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 
   it("refuses an id that is not a backend identifier, without asking the backend", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await PATCH(
       patchRequest("/api/articles/nope", { title: "New title" }),
       context("nope")
     )
 
     expect(response.status).toBe(404)
-    expect(backendPatch).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 })
 
 describe("PATCH /api/articles/[id]/status", () => {
   it("sends the status asked for", async () => {
-    backendPatch.mockResolvedValue({ data: {}, response: new Response(null) })
+    const requests = symfonyAnswers(200)
 
     await PATCH_STATUS(
       patchRequest(`/api/articles/${ARTICLE_ID}/status`, {
@@ -78,19 +89,22 @@ describe("PATCH /api/articles/[id]/status", () => {
       context(ARTICLE_ID)
     )
 
-    const [path, options] = backendPatch.mock.calls[0]
-    expect(path).toBe("/api/editor/articles/{id}/status")
-    expect(options.params.path).toEqual({ id: ARTICLE_ID })
-    expect(options.body).toEqual({ status: "published" })
+    expect(requests[0]).toMatchObject({
+      url: `${SYMFONY}/api/editor/articles/${ARTICLE_ID}/status`,
+      method: "PATCH",
+    })
+    expect(jsonBody(requests[0])).toEqual({ status: "published" })
   })
 
   it("refuses a status the backend does not know, without asking it", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await PATCH_STATUS(
       patchRequest(`/api/articles/${ARTICLE_ID}/status`, { status: "online" }),
       context(ARTICLE_ID)
     )
 
     expect(response.status).toBe(400)
-    expect(backendPatch).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 })

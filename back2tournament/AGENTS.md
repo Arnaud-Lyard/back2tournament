@@ -257,7 +257,7 @@ No comments: names, types and tests say what the code does. What a tool reads st
   `#syntax=` line and the makefile's `##` help.
 
 Generated files keep theirs: `config/reference.php`, and the front's
-`src/libs/api/schema.d.ts`, whose doc comments are the OpenAPI descriptions.
+`src/libs/api/generated/`, whose doc comments are the OpenAPI descriptions.
 
 ## Commit conventions
 
@@ -442,7 +442,7 @@ must be the same set of keys, and the documented status codes must be the ones t
 handler's exceptions actually produce.
 
 The documentation is served in development only: `/api/doc` (Swagger UI) and
-`/api/doc.json`, which the front's `npm run api:types` reads. Production has neither
+`/api/doc.json`, which the front's `npm run api:generate` reads. Production has neither
 route, so it answers 404 there; `bin/console nelmio:apidoc:dump` prints the document
 in any environment.
 

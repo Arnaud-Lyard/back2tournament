@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { deleteTournamentParticipant } from "@/libs/api/generated/tournament"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import { relayApiResult } from "@/libs/api/route-response"
 
@@ -14,10 +15,7 @@ export async function DELETE(
   const participantId = await readIdParam(params, "participantId")
   if (!id || !participantId) return unknownResource("Unknown registration")
 
-  const client = await getServerApiClient()
   return relayApiResult(
-    client.DELETE("/api/user/tournaments/{id}/participants/{participantid}", {
-      params: { path: { id, participantid: participantId } },
-    })
+    deleteTournamentParticipant(id, participantId, await withSession())
   )
 }

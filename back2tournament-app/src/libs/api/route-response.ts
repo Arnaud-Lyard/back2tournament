@@ -3,17 +3,12 @@ import "server-only"
 import { NextResponse } from "next/server"
 import type { z } from "zod"
 import { toApiError } from "./errors"
+import { succeeded, type SymfonyResponse } from "./symfony-fetch"
 
-interface ApiCallResult<T> {
-  data?: T
-  error?: unknown
-  response: Response
-}
-
-export async function relayApiResult<T>(
-  call: Promise<ApiCallResult<T>>
+export async function relayApiResult(
+  call: Promise<SymfonyResponse>
 ): Promise<NextResponse> {
-  let result: ApiCallResult<T>
+  let result: SymfonyResponse
   try {
     result = await call
   } catch {
@@ -23,8 +18,8 @@ export async function relayApiResult<T>(
     )
   }
 
-  if (!result.response.ok) {
-    const apiError = toApiError(result.response.status, result.error)
+  if (!succeeded(result.status)) {
+    const apiError = toApiError(result.status, result.data)
     return NextResponse.json(
       { message: apiError.message, code: apiError.code },
       { status: apiError.status }

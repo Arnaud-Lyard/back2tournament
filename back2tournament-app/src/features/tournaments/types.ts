@@ -1,21 +1,16 @@
-import type { components } from "@/libs/api/schema"
+import {
+  TournamentSummaryStatus,
+  type TournamentDetail,
+  type TournamentMatchup,
+  type TournamentParticipant,
+} from "@/libs/api/generated/endpoints.schemas"
 
-export type TournamentSummary = components["schemas"]["TournamentSummary"]
+export type { TournamentDetail, TournamentMatchup, TournamentParticipant }
 
-export type TournamentDetail = components["schemas"]["TournamentDetail"]
+export type TournamentStatus = TournamentSummaryStatus
 
-export type TournamentParticipant =
-  components["schemas"]["TournamentParticipant"]
-
-export type TournamentMatchup = components["schemas"]["TournamentMatchup"]
-
-export type TournamentStatus = NonNullable<TournamentSummary["status"]>
-
-export const TOURNAMENT_STATUSES: readonly TournamentStatus[] = [
-  "upcoming",
-  "ongoing",
-  "finished",
-  "cancelled",
-]
+export const TOURNAMENT_STATUSES: readonly TournamentStatus[] = Object.values(
+  TournamentSummaryStatus
+)
 
 export const TOURNAMENTS_PER_PAGE = 12

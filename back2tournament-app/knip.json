@@ -3,14 +3,12 @@
   "entry": [
     "src/app/**/{page,layout,loading,error,not-found,template,default,sitemap,robots,manifest,route,global-error}.{ts,tsx}",
     "src/libs/query-client.ts",
-    "src/libs/api/client.ts",
     "src/features/auth/hooks/*.tsx",
     "src/features/auth/server/*.ts",
     "src/features/auth/rbac/*.ts",
     "src/features/auth/schemas/*.ts",
     "src/features/i18n/*.ts",
     "src/features/site/config.ts",
-    "scripts/*.mjs",
     "tests/test-utils.tsx"
   ],
   "project": [
@@ -21,6 +19,7 @@
   "ignoreDependencies": ["tw-animate-css", "tailwindcss", "shadcn"],
   "ignoreExportsUsedInFile": true,
   "ignoreIssues": {
-    "src/components/ui/**": ["exports", "types"]
+    "src/components/ui/**": ["exports", "types"],
+    "src/libs/api/generated/**": ["exports", "types"]
   }
 }
