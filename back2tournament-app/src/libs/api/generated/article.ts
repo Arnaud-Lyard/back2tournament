@@ -187,7 +187,7 @@ export type getArticleListResponse400 = {
 }
 
 export type getArticleListResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
@@ -383,7 +383,7 @@ export type getEditorArticleListResponse403 = {
 }
 
 export type getEditorArticleListResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 

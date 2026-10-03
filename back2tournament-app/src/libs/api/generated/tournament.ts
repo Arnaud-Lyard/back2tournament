@@ -6,6 +6,7 @@
  */
 import type {
   BadRequestResponse,
+  Error,
   GetTournamentList200,
   GetTournamentListParams,
   NotFoundResponse,
@@ -34,17 +35,17 @@ export type deleteTournamentParticipantResponse401 = {
 }
 
 export type deleteTournamentParticipantResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type deleteTournamentParticipantResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type deleteTournamentParticipantResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -196,7 +197,7 @@ export type postTournamentCancelResponse401 = {
 }
 
 export type postTournamentCancelResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
@@ -206,7 +207,7 @@ export type postTournamentCancelResponse404 = {
 }
 
 export type postTournamentCancelResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -261,7 +262,7 @@ export type postTournamentResponse401 = {
 }
 
 export type postTournamentResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
@@ -336,17 +337,17 @@ export type postTournamentParticipantResponse401 = {
 }
 
 export type postTournamentParticipantResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postTournamentParticipantResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postTournamentParticipantResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -428,7 +429,7 @@ export type postTournamentStartResponse401 = {
 }
 
 export type postTournamentStartResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
@@ -438,7 +439,7 @@ export type postTournamentStartResponse404 = {
 }
 
 export type postTournamentStartResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 

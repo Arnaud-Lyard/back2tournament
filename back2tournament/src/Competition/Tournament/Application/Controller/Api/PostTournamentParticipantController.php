@@ -34,9 +34,9 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller does not own the profile, or does not lead the team')]
-#[OA\Response(response: 404, description: 'The tournament, the profile or the team does not exist')]
-#[OA\Response(response: 409, description: 'Registrations are closed, the tournament is full, or the participant is already registered')]
+#[OA\Response(response: 403, description: 'The caller does not own the profile, or does not lead the team', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'The tournament, the profile or the team does not exist', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'Registrations are closed, the tournament is full, or the participant is already registered', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostTournamentParticipantController extends AbstractController
 {
     use HandleTrait;

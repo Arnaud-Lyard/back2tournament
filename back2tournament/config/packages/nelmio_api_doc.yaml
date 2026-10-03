@@ -16,10 +16,19 @@ nelmio_api_doc:
             schemas:
                 Error:
                     type: object
+                    description: 'Why the API refused the request: every 400, 403, 404 and 409 answers this shape'
+                    required: [error]
                     properties:
                         error:
                             type: string
                             description: Human-readable reason for the failure
+                AuthenticationError:
+                    type: object
+                    description: 'Why the caller could not be authenticated: the 401 the security firewall answers, for a missing or invalid JWT or API token, wrong credentials or an account that may not sign in'
+                    required: [code, message]
+                    properties:
+                        code: { type: integer, example: 401 }
+                        message: { type: string, example: 'JWT Token not found' }
                 Uuid:
                     type: object
                     description: An identifier, serialized as a value object
@@ -563,20 +572,12 @@ nelmio_api_doc:
                     description: 'Missing, invalid, expired or revoked JWT'
                     content:
                         application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    code: { type: integer, example: 401 }
-                                    message: { type: string, example: 'JWT Token not found' }
+                            schema: { $ref: '#/components/schemas/AuthenticationError' }
                 ApiTokenUnauthorized:
                     description: 'Missing or invalid API token, or no token set in `BOT_API_TOKEN`'
                     content:
                         application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    code: { type: integer, example: 401 }
-                                    message: { type: string, example: 'Invalid API token' }
+                            schema: { $ref: '#/components/schemas/AuthenticationError' }
                 Forbidden:
                     description: 'The user is known but lacks the required role'
                     content:

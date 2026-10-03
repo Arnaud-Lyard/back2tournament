@@ -33,9 +33,9 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller does not lead the clan')]
-#[OA\Response(response: 404, description: 'The clan does not exist, or the player did not ask to join it')]
-#[OA\Response(response: 409, description: 'The player already is a member of the clan or of another one, or was invited and accepts the invitation themselves')]
+#[OA\Response(response: 403, description: 'The caller does not lead the clan', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'The clan does not exist, or the player did not ask to join it', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'The player already is a member of the clan or of another one, or was invited and accepts the invitation themselves', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostClanAdmissionController extends AbstractController
 {
     use HandleTrait;

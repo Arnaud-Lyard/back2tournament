@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Attribute\Route;
     description: 'Authenticated.',
     content: new OA\JsonContent(properties: [new OA\Property(property: 'token', type: 'string')]),
 )]
-#[OA\Response(response: 401, description: 'Invalid credentials.')]
+#[OA\Response(response: 401, description: 'Invalid credentials.', content: new OA\JsonContent(ref: '#/components/schemas/AuthenticationError'))]
 #[Security(name: null)]
 final class PostLoginController
 {

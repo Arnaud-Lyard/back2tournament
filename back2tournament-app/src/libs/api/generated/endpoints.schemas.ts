@@ -4,9 +4,20 @@
  * Back2Tournament API
  * OpenAPI spec version: 1.0.0
  */
+/**
+ * Why the API refused the request: every 400, 403, 404 and 409 answers this shape
+ */
 export interface Error {
   /** Human-readable reason for the failure */
-  error?: string
+  error: string
+}
+
+/**
+ * Why the caller could not be authenticated: the 401 the security firewall answers, for a missing or invalid JWT or API token, wrong credentials or an account that may not sign in
+ */
+export interface AuthenticationError {
+  code: number
+  message: string
 }
 
 /**
@@ -815,15 +826,15 @@ export interface SubjectRating {
  */
 export type BadRequestResponse = Error
 
-export type UnauthorizedResponse = {
-  code?: number
-  message?: string
-}
+/**
+ * Missing, invalid, expired or revoked JWT
+ */
+export type UnauthorizedResponse = AuthenticationError
 
-export type ApiTokenUnauthorizedResponse = {
-  code?: number
-  message?: string
-}
+/**
+ * Missing or invalid API token, or no token set in `BOT_API_TOKEN`
+ */
+export type ApiTokenUnauthorizedResponse = AuthenticationError
 
 /**
  * The user is known but lacks the required role

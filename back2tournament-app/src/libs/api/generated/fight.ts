@@ -209,7 +209,7 @@ export type getResultsPendingPlayersResponse403 = {
 }
 
 export type getResultsPendingPlayersResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
@@ -378,17 +378,17 @@ export type patchFightResultsResponse401 = {
 }
 
 export type patchFightResultsResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type patchFightResultsResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type patchFightResultsResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -554,12 +554,12 @@ export type postFightResponse401 = {
 }
 
 export type postFightResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postFightResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
@@ -635,17 +635,17 @@ export type postFightResultsConfirmationResponse401 = {
 }
 
 export type postFightResultsConfirmationResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postFightResultsConfirmationResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postFightResultsConfirmationResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 

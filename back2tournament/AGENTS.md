@@ -436,6 +436,12 @@ Written in English, on the controller, next to the route. Required on every endp
 - the shared error responses that apply, by ref:
   `#/components/responses/BadRequest`, `Unauthorized`, `Forbidden`, `NotFound`,
   `Conflict`, defined in `config/packages/nelmio_api_doc.yaml`
+- an error response that words its own reason keeps its description and documents
+  its body: `content: new OA\JsonContent(ref: '#/components/schemas/Error')`, the
+  `{"error": "…"}` that `DomainExceptionListener` answers, or `AuthenticationError`
+  for a 401 the firewall answers (`{"code": 401, "message": "…"}`). A response
+  without a body leaves the front's generated client typing it `void`;
+  `OpenApiErrorResponsesTest` refuses one
 
 The rule of thumb: the documented body and the `$parameters[...]` reads in `__invoke`
 must be the same set of keys, and the documented status codes must be the ones the

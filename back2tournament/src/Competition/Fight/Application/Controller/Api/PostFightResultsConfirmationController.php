@@ -21,9 +21,9 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller stands on neither side, or is the side that declared')]
-#[OA\Response(response: 404, description: 'The fight, or a result for one of its two sides, does not exist')]
-#[OA\Response(response: 409, description: 'Nothing was declared yet, or the fight is already settled')]
+#[OA\Response(response: 403, description: 'The caller stands on neither side, or is the side that declared', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'The fight, or a result for one of its two sides, does not exist', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'Nothing was declared yet, or the fight is already settled', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostFightResultsConfirmationController extends AbstractController
 {
     private EventDispatcherInterface $eventDispatcher;

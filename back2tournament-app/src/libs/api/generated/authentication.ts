@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
+  AuthenticationError,
   BadRequestResponse,
   ConflictResponse,
   GetVerifyEmail200,
@@ -59,7 +60,7 @@ export type postLoginResponse200 = {
 }
 
 export type postLoginResponse401 = {
-  data: void
+  data: AuthenticationError
   status: 401
 }
 
@@ -120,7 +121,7 @@ export type postLogoutResponse200 = {
 }
 
 export type postLogoutResponse401 = {
-  data: void
+  data: AuthenticationError
   status: 401
 }
 

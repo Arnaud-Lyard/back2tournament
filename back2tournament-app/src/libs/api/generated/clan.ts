@@ -9,6 +9,7 @@ import type {
   Clan,
   ClanDetail,
   ClanMember,
+  Error,
   GetClanList200,
   GetClanListParams,
   GetClanMine200Item,
@@ -38,17 +39,17 @@ export type deleteClanMemberResponse401 = {
 }
 
 export type deleteClanMemberResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type deleteClanMemberResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type deleteClanMemberResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -223,17 +224,17 @@ export type postClanAdmissionResponse401 = {
 }
 
 export type postClanAdmissionResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postClanAdmissionResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postClanAdmissionResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -311,12 +312,12 @@ export type postClanResponse401 = {
 }
 
 export type postClanResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postClanResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -390,12 +391,12 @@ export type postClanDissolutionResponse401 = {
 }
 
 export type postClanDissolutionResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postClanDissolutionResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
@@ -476,17 +477,17 @@ export type postClanInvitationResponse401 = {
 }
 
 export type postClanInvitationResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postClanInvitationResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postClanInvitationResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -568,12 +569,12 @@ export type postClanMemberResponse401 = {
 }
 
 export type postClanMemberResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postClanMemberResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -623,12 +624,12 @@ export type postClanRequestResponse401 = {
 }
 
 export type postClanRequestResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type postClanRequestResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 

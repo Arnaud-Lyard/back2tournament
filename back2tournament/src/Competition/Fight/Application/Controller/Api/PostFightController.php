@@ -35,8 +35,8 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller stands on neither side')]
-#[OA\Response(response: 404, description: 'A player profile or a team does not exist')]
+#[OA\Response(response: 403, description: 'The caller stands on neither side', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'A player profile or a team does not exist', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostFightController extends AbstractController
 {
     use HandleTrait;

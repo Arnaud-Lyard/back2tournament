@@ -7,6 +7,7 @@
 import type {
   BadRequestResponse,
   ConflictResponse,
+  Error,
   ForbiddenResponse,
   GetPlayerList200,
   GetPlayerListParams,
@@ -36,17 +37,17 @@ export type deletePlayerResponse401 = {
 }
 
 export type deletePlayerResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type deletePlayerResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type deletePlayerResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -97,12 +98,12 @@ export type patchPlayerResponse401 = {
 }
 
 export type patchPlayerResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type patchPlayerResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 

@@ -33,8 +33,8 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller does not lead the clan, or the password does not match')]
-#[OA\Response(response: 404, description: 'The clan does not exist, or is already dissolved')]
+#[OA\Response(response: 403, description: 'The caller does not lead the clan, or the password does not match', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'The clan does not exist, or is already dissolved', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostClanDissolutionController extends AbstractController
 {
     use HandleTrait;

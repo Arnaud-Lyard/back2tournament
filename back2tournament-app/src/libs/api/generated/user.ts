@@ -147,12 +147,12 @@ export type postAccountDeletionResponse401 = {
 }
 
 export type postAccountDeletionResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postAccountDeletionResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 

@@ -33,8 +33,8 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The profile belongs to another account')]
-#[OA\Response(response: 404, description: 'No player profile has this id')]
+#[OA\Response(response: 403, description: 'The profile belongs to another account', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'No player profile has this id', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PatchPlayerController extends AbstractController
 {
     use HandleTrait;

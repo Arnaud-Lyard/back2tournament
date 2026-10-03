@@ -6,6 +6,7 @@
  */
 import type {
   BadRequestResponse,
+  Error,
   NotFoundResponse,
   PostTeamBody,
   Team,
@@ -30,17 +31,17 @@ export type deleteTeamResponse401 = {
 }
 
 export type deleteTeamResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type deleteTeamResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
 export type deleteTeamResponse409 = {
-  data: void
+  data: Error
   status: 409
 }
 
@@ -129,12 +130,12 @@ export type postTeamResponse401 = {
 }
 
 export type postTeamResponse403 = {
-  data: void
+  data: Error
   status: 403
 }
 
 export type postTeamResponse404 = {
-  data: void
+  data: Error
   status: 404
 }
 
