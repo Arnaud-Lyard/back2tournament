@@ -34,8 +34,8 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 404, description: 'The authenticated user holds no player profile in this game')]
-#[OA\Response(response: 409, description: 'The founder already belongs to a clan, or the tag is taken in this game')]
+#[OA\Response(response: 404, description: 'The authenticated user holds no player profile in this game', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'The founder already belongs to a clan, or the tag is taken in this game', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostClanController extends AbstractController
 {
     use HandleTrait;

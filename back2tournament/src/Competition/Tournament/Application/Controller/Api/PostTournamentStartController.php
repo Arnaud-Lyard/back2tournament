@@ -22,9 +22,9 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller does not organize the tournament')]
+#[OA\Response(response: 403, description: 'The caller does not organize the tournament', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 #[OA\Response(response: 404, ref: '#/components/responses/NotFound')]
-#[OA\Response(response: 409, description: 'The tournament already started or is over, or fewer than two participants are registered')]
+#[OA\Response(response: 409, description: 'The tournament already started or is over, or fewer than two participants are registered', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostTournamentStartController extends AbstractController
 {
     use HandleTrait;

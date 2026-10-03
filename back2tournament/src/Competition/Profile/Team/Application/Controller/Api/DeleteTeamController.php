@@ -22,9 +22,9 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller does not lead the clan of the team')]
-#[OA\Response(response: 404, description: 'No team has this id')]
-#[OA\Response(response: 409, description: 'The team has competed, in a fight or a tournament: it is kept for the record')]
+#[OA\Response(response: 403, description: 'The caller does not lead the clan of the team', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'No team has this id', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'The team has competed, in a fight or a tournament: it is kept for the record', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class DeleteTeamController extends AbstractController
 {
     use HandleTrait;

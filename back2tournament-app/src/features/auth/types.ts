@@ -1,9 +1,9 @@
-import type { components } from "@/libs/api/schema"
+import type { CurrentUser } from "@/libs/api/generated/endpoints.schemas"
 import type { AuthPermission, UserRole } from "./rbac/permissions"
 
 export type { AuthPermission, UserRole } from "./rbac/permissions"
 
-export type CurrentUser = components["schemas"]["CurrentUser"]
+export type { CurrentUser }
 
 export interface PlayerProfile {
   id: string

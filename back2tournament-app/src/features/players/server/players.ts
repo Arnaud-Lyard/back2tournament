@@ -1,7 +1,8 @@
 import "server-only"
 
-import { getServerApiClient } from "@/libs/api/client"
+import { getPlayer, getPlayerList } from "@/libs/api/generated/player"
 import { loadApiResult } from "@/libs/api/load"
+import { withSession } from "@/libs/api/session"
 import { PLAYERS_PER_PAGE } from "../types"
 
 interface PlayersQuery {
@@ -14,20 +15,15 @@ export async function loadGamePlayers(
   gameId: string,
   { page = 1, search = "", limit = PLAYERS_PER_PAGE }: PlayersQuery = {}
 ) {
-  const client = await getServerApiClient()
   return loadApiResult(
-    client.GET("/api/players/{id}/games", {
-      params: {
-        path: { id: gameId },
-        query: { page, limit, ...(search ? { q: search } : {}) },
-      },
-    })
+    getPlayerList(
+      gameId,
+      { page, limit, q: search || undefined },
+      await withSession()
+    )
   )
 }
 
 export async function loadPlayer(playerId: string) {
-  const client = await getServerApiClient()
-  return loadApiResult(
-    client.GET("/api/players/{id}", { params: { path: { id: playerId } } })
-  )
+  return loadApiResult(getPlayer(playerId, await withSession()))
 }

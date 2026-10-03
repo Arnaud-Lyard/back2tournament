@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { postTeam } from "@/libs/api/generated/team"
+import { withSession } from "@/libs/api/session"
 import {
   invalidInput,
   parseRequestBody,
@@ -10,6 +11,5 @@ export async function POST(request: Request) {
   const parsed = await parseRequestBody(request, createTeamSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(client.POST("/api/user/teams/", { body: parsed.data }))
+  return relayApiResult(postTeam(parsed.data, await withSession()))
 }

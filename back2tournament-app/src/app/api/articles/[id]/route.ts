@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { patchArticle } from "@/libs/api/generated/article"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import {
   invalidInput,
@@ -18,11 +19,5 @@ export async function PATCH(request: Request, { params }: ArticleContext) {
   const parsed = await parseRequestBody(request, updateArticleSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.PATCH("/api/editor/articles/{id}", {
-      params: { path: { id } },
-      body: parsed.data,
-    })
-  )
+  return relayApiResult(patchArticle(id, parsed.data, await withSession()))
 }

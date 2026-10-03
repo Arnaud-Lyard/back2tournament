@@ -1,7 +1,14 @@
 import "server-only"
 
-import { createApiClient, getServerApiClient } from "@/libs/api/client"
+import {
+  getArticle,
+  getArticleList,
+  getEditorArticle,
+  getEditorArticleList,
+} from "@/libs/api/generated/article"
+import { getCategoryList } from "@/libs/api/generated/category"
 import { loadApiResult } from "@/libs/api/load"
+import { withSession } from "@/libs/api/session"
 import {
   ARTICLES_PER_PAGE,
   type ArticleStatusFilter,
@@ -17,8 +24,7 @@ interface ArticlesQuery {
 }
 
 export async function loadCategories() {
-  const client = await getServerApiClient()
-  return loadApiResult(client.GET("/api/categories/"))
+  return loadApiResult(getCategoryList(await withSession()))
 }
 
 export async function loadArticles({
@@ -28,33 +34,28 @@ export async function loadArticles({
   limit = ARTICLES_PER_PAGE,
   status = "published",
 }: ArticlesQuery = {}) {
-  const client = await getServerApiClient()
+  const session = await withSession()
   const query = {
     page,
     limit,
-    ...(search ? { q: search } : {}),
-    ...(category ? { category } : {}),
+    q: search || undefined,
+    category: category || undefined,
   }
   if (status === "published") {
-    return loadApiResult(client.GET("/api/articles/", { params: { query } }))
+    return loadApiResult(getArticleList(query, session))
   }
-  return loadApiResult(
-    client.GET("/api/editor/articles/", {
-      params: { query: { ...query, status } },
-    })
-  )
+  return loadApiResult(getEditorArticleList({ ...query, status }, session))
 }
 
 export async function loadArticle(
   articleId: string,
   { drafts = false }: { drafts?: boolean } = {}
 ) {
-  const client = await getServerApiClient()
-  const params = { params: { path: { id: articleId } } }
+  const session = await withSession()
   return loadApiResult(
     drafts
-      ? client.GET("/api/editor/articles/{id}", params)
-      : client.GET("/api/articles/{id}", params)
+      ? getEditorArticle(articleId, session)
+      : getArticle(articleId, session)
   )
 }
 
@@ -62,14 +63,11 @@ const SITEMAP_PAGE_SIZE = 50
 const SITEMAP_MAX_PAGES = 10
 
 export async function loadPublicArticles(): Promise<ArticleSummary[]> {
-  const client = createApiClient()
   const articles: ArticleSummary[] = []
 
   for (let page = 1; page <= SITEMAP_MAX_PAGES; page++) {
     const loaded = await loadApiResult(
-      client.GET("/api/articles/", {
-        params: { query: { page, limit: SITEMAP_PAGE_SIZE } },
-      })
+      getArticleList({ page, limit: SITEMAP_PAGE_SIZE })
     )
     if (!loaded.ok) break
 

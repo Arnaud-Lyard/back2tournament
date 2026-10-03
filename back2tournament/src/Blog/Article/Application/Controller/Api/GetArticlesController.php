@@ -60,7 +60,7 @@ use Symfony\Component\Routing\Attribute\Route;
     ),
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
-#[OA\Response(response: 404, description: 'No category has the requested slug')]
+#[OA\Response(response: 404, description: 'No category has the requested slug', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 #[Security(name: null)]
 final class GetArticlesController extends AbstractController
 {

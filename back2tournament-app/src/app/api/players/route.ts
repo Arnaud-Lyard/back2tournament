@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { postPlayer } from "@/libs/api/generated/player"
+import { withSession } from "@/libs/api/session"
 import {
   invalidInput,
   parseRequestBody,
@@ -10,8 +11,5 @@ export async function POST(request: Request) {
   const parsed = await parseRequestBody(request, createPlayerSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.POST("/api/user/players/", { body: parsed.data })
-  )
+  return relayApiResult(postPlayer(parsed.data, await withSession()))
 }

@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
     description: 'Logged out.',
     content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string', example: 'logged out')]),
 )]
-#[OA\Response(response: 401, description: 'No JWT sent.')]
+#[OA\Response(response: 401, description: 'No JWT sent.', content: new OA\JsonContent(ref: '#/components/schemas/AuthenticationError'))]
 final class PostLogoutController extends AbstractController
 {
     private EventDispatcherInterface $eventDispatcher;

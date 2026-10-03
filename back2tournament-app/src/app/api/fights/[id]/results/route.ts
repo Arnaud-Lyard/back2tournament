@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { patchFightResults } from "@/libs/api/generated/fight"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import {
   invalidInput,
@@ -18,11 +19,5 @@ export async function PATCH(request: Request, { params }: FightContext) {
   const parsed = await parseRequestBody(request, declareResultsSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.PATCH("/api/user/fights/{id}/results", {
-      params: { path: { id } },
-      body: parsed.data,
-    })
-  )
+  return relayApiResult(patchFightResults(id, parsed.data, await withSession()))
 }

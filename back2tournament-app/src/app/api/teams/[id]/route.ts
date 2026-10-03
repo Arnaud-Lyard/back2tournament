@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { deleteTeam } from "@/libs/api/generated/team"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import { relayApiResult } from "@/libs/api/route-response"
 
@@ -10,8 +11,5 @@ export async function DELETE(_request: Request, { params }: TeamContext) {
   const id = await readIdParam(params, "id")
   if (!id) return unknownResource("Unknown team")
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.DELETE("/api/user/teams/{id}", { params: { path: { id } } })
-  )
+  return relayApiResult(deleteTeam(id, await withSession()))
 }

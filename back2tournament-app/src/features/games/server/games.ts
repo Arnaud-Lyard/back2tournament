@@ -1,14 +1,14 @@
 import "server-only"
 
 import { cache } from "react"
-import { createApiClient, getServerApiClient } from "@/libs/api/client"
+import { getGameList } from "@/libs/api/generated/game"
 import { loadApiResult, type Loaded } from "@/libs/api/load"
+import { withSession } from "@/libs/api/session"
 import { findGame } from "../lib/find-game"
 import type { Game } from "../types"
 
 export const loadGames = cache(async () => {
-  const client = await getServerApiClient()
-  return loadApiResult(client.GET("/api/games/"))
+  return loadApiResult(getGameList(await withSession()))
 })
 
 export async function loadGame(gameId: string): Promise<Loaded<Game>> {
@@ -20,6 +20,6 @@ export async function loadGame(gameId: string): Promise<Loaded<Game>> {
 }
 
 export async function loadPublicGames(): Promise<Game[]> {
-  const loaded = await loadApiResult(createApiClient().GET("/api/games/"))
+  const loaded = await loadApiResult(getGameList())
   return loaded.ok ? loaded.data : []
 }

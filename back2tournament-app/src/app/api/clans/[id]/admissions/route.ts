@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { postClanAdmission } from "@/libs/api/generated/clan"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import {
   invalidInput,
@@ -18,11 +19,5 @@ export async function POST(request: Request, { params }: ClanContext) {
   const parsed = await parseRequestBody(request, admitMemberSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.POST("/api/user/clans/{id}/admissions", {
-      params: { path: { id } },
-      body: parsed.data,
-    })
-  )
+  return relayApiResult(postClanAdmission(id, parsed.data, await withSession()))
 }

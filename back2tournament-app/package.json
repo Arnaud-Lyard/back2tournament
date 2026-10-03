@@ -21,7 +21,7 @@
     "e2e:ui": "playwright test --config config/playwright.config.ts --ui",
     "playwright:install": "playwright install chromium firefox webkit",
     "playwright:install:deps": "playwright install-deps",
-    "api:types": "node scripts/generate-api-types.mjs",
+    "api:generate": "NODE_EXTRA_CA_CERTS=./.certs/caddy-local-ca.pem orval --config orval.config.ts",
     "prepare": "lefthook install || true"
   },
   "dependencies": {
@@ -36,7 +36,6 @@
     "next": "16.3.4",
     "next-intl": "^4.14.4",
     "next-themes": "^0.4.6",
-    "openapi-fetch": "^0.17.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
@@ -59,7 +58,7 @@
     "jsdom": "^30.0.1",
     "knip": "^6.35.1",
     "lefthook": "^2.1.12",
-    "openapi-typescript": "^7.13.0",
+    "orval": "^8.39.0",
     "oxfmt": "^0.67.0",
     "oxlint": "^1.82.0",
     "shadcn": "^4.21.0",

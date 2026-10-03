@@ -1,17 +1,17 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest"
+import {
+  formBody,
+  SESSION_TOKEN,
+  SYMFONY,
+  symfonyAnswers,
+} from "@tests/symfony-api"
 import { DELETE, POST } from "./route"
 
 vi.mock("server-only", () => ({}))
 
-const backendPost = vi.fn()
-const backendDelete = vi.fn()
-
-vi.mock("@/libs/api/client", () => ({
-  getServerApiClient: async () => ({
-    POST: backendPost,
-    DELETE: backendDelete,
-  }),
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => ({ value: SESSION_TOKEN }) }),
 }))
 
 function upload(image?: File) {
@@ -24,38 +24,46 @@ function upload(image?: File) {
 }
 
 afterEach(() => {
-  backendPost.mockReset()
-  backendDelete.mockReset()
+  vi.unstubAllGlobals()
 })
 
 describe("POST /api/users/me/avatar", () => {
   it("forwards the picture of the signed-in user, named by their token alone", async () => {
-    backendPost.mockResolvedValue({ data: {}, response: new Response(null) })
+    const requests = symfonyAnswers(200)
 
     await POST(upload(new File(["png"], "me.png", { type: "image/png" })))
 
-    const [path, options] = backendPost.mock.calls[0]
-    expect(path).toBe("/api/user/me/avatar")
-    expect(options.params).toBeUndefined()
-    const form: FormData = options.bodySerializer(options.body)
-    expect((form.get("image") as File).name).toBe("me.png")
+    expect(requests[0]).toMatchObject({
+      url: `${SYMFONY}/api/user/me/avatar`,
+      method: "POST",
+      authorization: `Bearer ${SESSION_TOKEN}`,
+    })
+    const image = formBody(requests[0]).get("image") as File
+    expect(image.name).toBe("me.png")
+    expect(await image.text()).toBe("png")
   })
 
   it("refuses a form without a picture, without asking the backend", async () => {
+    const requests = symfonyAnswers(200)
+
     const response = await POST(upload())
 
     expect(response.status).toBe(400)
-    expect(backendPost).not.toHaveBeenCalled()
+    expect(requests).toHaveLength(0)
   })
 })
 
 describe("DELETE /api/users/me/avatar", () => {
   it("asks the backend to take the picture away", async () => {
-    backendDelete.mockResolvedValue({ data: {}, response: new Response(null) })
+    const requests = symfonyAnswers(200)
 
     const response = await DELETE()
 
-    expect(backendDelete).toHaveBeenCalledWith("/api/user/me/avatar")
+    expect(requests[0]).toMatchObject({
+      url: `${SYMFONY}/api/user/me/avatar`,
+      method: "DELETE",
+      authorization: `Bearer ${SESSION_TOKEN}`,
+    })
     expect(response.status).toBe(200)
   })
 })

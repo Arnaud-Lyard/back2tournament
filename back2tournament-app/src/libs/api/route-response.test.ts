@@ -6,7 +6,7 @@ vi.mock("server-only", () => ({}))
 describe("relayApiResult", () => {
   it("relays the payload of a successful call", async () => {
     const response = await relayApiResult(
-      Promise.resolve({ data: { id: 1 }, response: new Response(null) })
+      Promise.resolve({ data: { id: 1 }, status: 200 })
     )
 
     expect(response.status).toBe(200)
@@ -16,8 +16,8 @@ describe("relayApiResult", () => {
   it("relays the backend status and message of a refusal", async () => {
     const response = await relayApiResult(
       Promise.resolve({
-        error: { error: "you do not take part in this fight" },
-        response: new Response(null, { status: 403 }),
+        data: { error: "you do not take part in this fight" },
+        status: 403,
       })
     )
 
@@ -30,8 +30,8 @@ describe("relayApiResult", () => {
   it("tags a failure the UI words on its own with a code", async () => {
     const response = await relayApiResult(
       Promise.resolve({
-        error: { error: "username already used" },
-        response: new Response(null, { status: 409 }),
+        data: { error: "username already used" },
+        status: 409,
       })
     )
 
@@ -63,8 +63,8 @@ describe("relayApiResult", () => {
   ])("tags the refused deletion of a profile: %s", async (message, code) => {
     const response = await relayApiResult(
       Promise.resolve({
-        error: { error: message },
-        response: new Response(null, { status: 409 }),
+        data: { error: message },
+        status: 409,
       })
     )
 
@@ -84,8 +84,8 @@ describe("relayApiResult", () => {
     async (status, message, code) => {
       const response = await relayApiResult(
         Promise.resolve({
-          error: { error: message },
-          response: new Response(null, { status }),
+          data: { error: message },
+          status,
         })
       )
 
@@ -98,8 +98,8 @@ describe("relayApiResult", () => {
     const message = "this team fields the profile of a deleted account"
     const response = await relayApiResult(
       Promise.resolve({
-        error: { error: message },
-        response: new Response(null, { status: 409 }),
+        data: { error: message },
+        status: 409,
       })
     )
 
@@ -112,8 +112,8 @@ describe("relayApiResult", () => {
   it("still reports an error whose body was empty", async () => {
     const response = await relayApiResult(
       Promise.resolve({
-        error: undefined,
-        response: new Response(null, { status: 404 }),
+        data: undefined,
+        status: 404,
       })
     )
 

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
-import { getServerApiClient } from "@/libs/api/client"
+import { postAccountDeletion } from "@/libs/api/generated/user"
+import { withSession } from "@/libs/api/session"
 import {
   invalidInput,
   parseRequestBody,
@@ -12,9 +13,8 @@ export async function POST(request: Request) {
   const parsed = await parseRequestBody(request, passwordConfirmationSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
   const response = await relayApiResult(
-    client.POST("/api/user/me/deletion", { body: parsed.data })
+    postAccountDeletion(parsed.data, await withSession())
   )
 
   if (response.ok) {

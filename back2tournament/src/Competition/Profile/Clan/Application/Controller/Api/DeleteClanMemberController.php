@@ -23,9 +23,9 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller is neither this player nor the clan leader')]
-#[OA\Response(response: 404, description: 'The clan does not exist, or the player has no place in it')]
-#[OA\Response(response: 409, description: 'The leader cannot leave, and a member playing in a team of the clan stays until that team is disbanded')]
+#[OA\Response(response: 403, description: 'The caller is neither this player nor the clan leader', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'The clan does not exist, or the player has no place in it', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'The leader cannot leave, and a member playing in a team of the clan stays until that team is disbanded', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class DeleteClanMemberController extends AbstractController
 {
     use HandleTrait;

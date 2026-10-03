@@ -36,8 +36,8 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The password does not match')]
-#[OA\Response(response: 409, description: 'The account still holds something others depend on: a clan it leads, to dissolve first, or a tournament it organizes still open for registration, to start or cancel first')]
+#[OA\Response(response: 403, description: 'The password does not match', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 409, description: 'The account still holds something others depend on: a clan it leads, to dissolve first, or a tournament it organizes still open for registration, to start or cancel first', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostAccountDeletionController extends AbstractController
 {
     use HandleTrait;

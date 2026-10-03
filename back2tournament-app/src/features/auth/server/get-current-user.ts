@@ -2,8 +2,9 @@ import "server-only"
 
 import { cache } from "react"
 import { cookies } from "next/headers"
-import { createApiClient } from "@/libs/api/client"
+import { getUserMe } from "@/libs/api/generated/user"
 import { loadApiResult } from "@/libs/api/load"
+import { bearer } from "@/libs/api/session"
 import { AUTH_COOKIE_NAME } from "../lib/cookie"
 import { decodeSymfonyJwt, isJwtExpired } from "../lib/jwt"
 import { authUserFromJwt, toAuthUser } from "../lib/to-auth-user"
@@ -18,7 +19,7 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   const payload = decodeSymfonyJwt(token)
   if (!payload?.username) return null
 
-  const me = await loadApiResult(createApiClient(token).GET("/api/user/me"))
+  const me = await loadApiResult(getUserMe(bearer(token)))
   if (me.ok) return toAuthUser(me.data)
 
   if (me.status === 401) return null

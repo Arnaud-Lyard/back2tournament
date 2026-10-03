@@ -40,8 +40,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 403, description: 'The caller does not lead the clan')]
-#[OA\Response(response: 404, description: 'The clan does not exist')]
+#[OA\Response(response: 403, description: 'The caller does not lead the clan', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
+#[OA\Response(response: 404, description: 'The clan does not exist', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostTeamController extends AbstractController
 {
     private EventDispatcherInterface $eventDispatcher;

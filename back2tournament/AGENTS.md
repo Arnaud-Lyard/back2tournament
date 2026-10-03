@@ -257,7 +257,7 @@ No comments: names, types and tests say what the code does. What a tool reads st
   `#syntax=` line and the makefile's `##` help.
 
 Generated files keep theirs: `config/reference.php`, and the front's
-`src/libs/api/schema.d.ts`, whose doc comments are the OpenAPI descriptions.
+`src/libs/api/generated/`, whose doc comments are the OpenAPI descriptions.
 
 ## Commit conventions
 
@@ -436,13 +436,19 @@ Written in English, on the controller, next to the route. Required on every endp
 - the shared error responses that apply, by ref:
   `#/components/responses/BadRequest`, `Unauthorized`, `Forbidden`, `NotFound`,
   `Conflict`, defined in `config/packages/nelmio_api_doc.yaml`
+- an error response that words its own reason keeps its description and documents
+  its body: `content: new OA\JsonContent(ref: '#/components/schemas/Error')`, the
+  `{"error": "…"}` that `DomainExceptionListener` answers, or `AuthenticationError`
+  for a 401 the firewall answers (`{"code": 401, "message": "…"}`). A response
+  without a body leaves the front's generated client typing it `void`;
+  `OpenApiErrorResponsesTest` refuses one
 
 The rule of thumb: the documented body and the `$parameters[...]` reads in `__invoke`
 must be the same set of keys, and the documented status codes must be the ones the
 handler's exceptions actually produce.
 
 The documentation is served in development only: `/api/doc` (Swagger UI) and
-`/api/doc.json`, which the front's `npm run api:types` reads. Production has neither
+`/api/doc.json`, which the front's `npm run api:generate` reads. Production has neither
 route, so it answers 404 there; `bin/console nelmio:apidoc:dump` prints the document
 in any environment.
 

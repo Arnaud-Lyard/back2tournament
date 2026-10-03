@@ -1,8 +1,9 @@
-import type { components } from "@/libs/api/schema"
+import type {
+  RankedSubject,
+  SubjectRating,
+} from "@/libs/api/generated/endpoints.schemas"
 
-export type RankedSubject = components["schemas"]["RankedSubject"]
-
-export type SubjectRating = components["schemas"]["SubjectRating"]
+export type { RankedSubject, SubjectRating }
 
 export type RankingView = "players" | "clans"
 

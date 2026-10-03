@@ -1,22 +1,17 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { deleteUserAvatar, postUserAvatar } from "@/libs/api/generated/user"
+import { withSession } from "@/libs/api/session"
 import { readImageUpload } from "@/libs/api/route-image"
 import { relayApiResult } from "@/libs/api/route-response"
-import { toImageForm } from "@/features/images/lib/image-file"
 
 export async function POST(request: Request) {
   const upload = await readImageUpload(request)
   if ("refusal" in upload) return upload.refusal
 
-  const client = await getServerApiClient()
   return relayApiResult(
-    client.POST("/api/user/me/avatar", {
-      body: { image: upload.image },
-      bodySerializer: toImageForm,
-    })
+    postUserAvatar({ image: upload.image }, await withSession())
   )
 }
 
 export async function DELETE() {
-  const client = await getServerApiClient()
-  return relayApiResult(client.DELETE("/api/user/me/avatar"))
+  return relayApiResult(deleteUserAvatar(await withSession()))
 }

@@ -1,4 +1,5 @@
-import { getServerApiClient } from "@/libs/api/client"
+import { deleteClanMember } from "@/libs/api/generated/clan"
+import { withSession } from "@/libs/api/session"
 import { readIdParam, unknownResource } from "@/libs/api/route-params"
 import { relayApiResult } from "@/libs/api/route-response"
 
@@ -11,10 +12,5 @@ export async function DELETE(_request: Request, { params }: MemberContext) {
   const playerId = await readIdParam(params, "playerId")
   if (!id || !playerId) return unknownResource("Unknown clan membership")
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.DELETE("/api/user/clans/{id}/members/{playerid}", {
-      params: { path: { id, playerid: playerId } },
-    })
-  )
+  return relayApiResult(deleteClanMember(id, playerId, await withSession()))
 }

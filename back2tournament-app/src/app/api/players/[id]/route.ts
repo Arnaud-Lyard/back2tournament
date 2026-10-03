@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import { getServerApiClient } from "@/libs/api/client"
+import { deletePlayer, patchPlayer } from "@/libs/api/generated/player"
+import { withSession } from "@/libs/api/session"
 import {
   invalidInput,
   parseRequestBody,
@@ -19,23 +20,14 @@ export async function PATCH(request: Request, { params }: PlayerContext) {
   const parsed = await parseRequestBody(request, updatePlayerSchema)
   if (!parsed.success) return invalidInput(parsed.error)
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.PATCH("/api/user/players/{id}", {
-      params: { path: { id } },
-      body: parsed.data,
-    })
-  )
+  return relayApiResult(patchPlayer(id, parsed.data, await withSession()))
 }
 
 export async function DELETE(_request: Request, { params }: PlayerContext) {
   const id = await readPlayerId(params)
   if (!id) return unknownPlayer()
 
-  const client = await getServerApiClient()
-  return relayApiResult(
-    client.DELETE("/api/user/players/{id}", { params: { path: { id } } })
-  )
+  return relayApiResult(deletePlayer(id, await withSession()))
 }
 
 async function readPlayerId(

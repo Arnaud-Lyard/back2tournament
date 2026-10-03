@@ -36,7 +36,7 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 #[OA\Response(response: 400, ref: '#/components/responses/BadRequest')]
 #[OA\Response(response: 401, ref: '#/components/responses/Unauthorized')]
-#[OA\Response(response: 404, description: 'The game does not exist')]
+#[OA\Response(response: 404, description: 'The game does not exist', content: new OA\JsonContent(ref: '#/components/schemas/Error'))]
 final class PostTournamentController extends AbstractController
 {
     use HandleTrait;

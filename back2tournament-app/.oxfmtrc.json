@@ -16,7 +16,6 @@
     "node_modules",
     "package-lock.json",
     "public",
-    "src/libs/api/schema.d.ts",
     ".agents"
   ]
 }
